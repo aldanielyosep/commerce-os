@@ -1,4 +1,3 @@
-```md id="c5z7xp"
 # Summary
 
 Describe the purpose of this PR.
@@ -87,4 +86,3 @@ Special deployment considerations:
 - [ ] No sensitive data added
 - [ ] Documentation updated
 - [ ] Migration reviewed
-```
