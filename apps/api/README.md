@@ -148,6 +148,21 @@ bin/jobs
 bundle exec rspec
 ```
 
+Generate coverage reports locally:
+
+```bash
+RAILS_ENV=test COVERAGE=true bundle exec rspec
+```
+
+Coverage outputs:
+
+```text
+coverage/index.html
+coverage/lcov.info
+```
+
+In CI, coverage is validated with a 90% suite/file threshold and a PR comment is posted from LCOV results.
+
 ---
 
 # Linting
