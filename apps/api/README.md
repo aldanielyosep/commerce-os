@@ -1,24 +1,258 @@
-# README
+# commerce-os API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Backend API for the `commerce-os` monorepo.
 
-Things you may want to cover:
+Built with:
 
-* Ruby version
+* Ruby on Rails 8
+* PostgreSQL
+* Solid Queue
+* Solid Cache
+* Solid Cable
 
-* System dependencies
+---
 
-* Configuration
+# Tech Stack
 
-* Database creation
+## Backend
 
-* Database initialization
+* Ruby on Rails 8 API
 
-* How to run the test suite
+## Database
 
-* Services (job queues, cache servers, search engines, etc.)
+* PostgreSQL
 
-* Deployment instructions
+## Background Jobs
 
-* ...
+* Solid Queue
+
+## Cache
+
+* Solid Cache
+
+## Realtime
+
+* Solid Cable
+
+## Authentication
+
+* Devise
+* devise-jwt
+
+## Authorization
+
+* Pundit
+
+## Serialization
+
+* Blueprinter
+
+## API Documentation
+
+* Rswag
+
+---
+
+# Requirements
+
+* Ruby 4.x
+* PostgreSQL 15+
+* Node.js
+* pnpm
+* Docker (optional)
+
+---
+
+# Setup
+
+## Install dependencies
+
+```bash id="h9x2vl"
+bundle install
+```
+
+---
+
+# Environment Variables
+
+Create:
+
+```text id="n4m7pw"
+.env
+```
+
+Example:
+
+```env id="r6q1jk"
+DATABASE_URL=postgresql://localhost/commerce_os_development
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=
+AWS_BUCKET=
+
+DEVISE_JWT_SECRET_KEY=
+```
+
+---
+
+# Database Setup
+
+## Create database
+
+```bash id="p3z8wt"
+bin/rails db:create
+```
+
+---
+
+## Run migrations
+
+```bash id="k5v1rx"
+bin/rails db:migrate
+```
+
+---
+
+# Running the Application
+
+## Start Rails server
+
+```bash id="d8n2qk"
+bin/rails server
+```
+
+Application runs at:
+
+```text id="f7m4zs"
+http://localhost:3000
+```
+
+---
+
+# Running Background Jobs
+
+Using Solid Queue.
+
+Start worker:
+
+```bash id="m2q7xt"
+bin/jobs
+```
+
+---
+
+# Running Tests
+
+```bash id="j4v8pc"
+bundle exec rspec
+```
+
+Generate coverage reports locally:
+
+```bash
+RAILS_ENV=test COVERAGE=true bundle exec rspec
+```
+
+Coverage outputs:
+
+```text
+coverage/index.html
+coverage/lcov.info
+```
+
+CI enforces a minimum of 90% suite coverage and 90% per-file coverage.
+
+In CI, coverage is validated against those thresholds and a PR comment is posted from LCOV results.
+
+---
+
+# Linting
+
+```bash id="t1k6wn"
+bundle exec rubocop
+```
+
+---
+
+# API Documentation
+
+Generate OpenAPI docs with rswag:
+
+```bash
+RAILS_ENV=test bundle exec rake rswag:specs:swaggerize
+```
+
+Generated file:
+
+```text
+swagger/v1/swagger.json
+```
+
+Start the API server and open Swagger UI:
+
+```bash
+bin/rails server
+```
+
+```text
+http://localhost:3000/api-docs
+```
+
+Routes used by rswag:
+
+```text id="u9m3vr"
+/api-docs
+```
+
+---
+
+# Core Gems
+
+## Authentication
+
+* devise
+* devise-jwt
+
+## Authorization
+
+* pundit
+
+## Finance
+
+* money-rails
+
+## Auditing
+
+* audited
+
+## Soft Delete
+
+* discard
+
+## File Storage
+
+* aws-sdk-s3
+
+## Spreadsheet Import
+
+* roo
+
+---
+
+# Architecture Notes
+
+This application follows:
+
+* API-first architecture
+* service object pattern
+* modular business domains
+* finance-first design
+
+The application intentionally avoids:
+
+* microservices
+* distributed architecture
+* unnecessary infrastructure complexity
+
+---
