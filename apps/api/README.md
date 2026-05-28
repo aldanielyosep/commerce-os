@@ -161,7 +161,9 @@ coverage/index.html
 coverage/lcov.info
 ```
 
-In CI, coverage is validated with a 90% suite/file threshold and a PR comment is posted from LCOV results.
+CI enforces a minimum of 90% suite coverage and 90% per-file coverage.
+
+In CI, coverage is validated against those thresholds and a PR comment is posted from LCOV results.
 
 ---
 

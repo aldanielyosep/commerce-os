@@ -77,6 +77,7 @@ Repository-wide standards:
 - add or update tests for behavior changes
 - keep CI green before merge
 - update module-level README files when setup or workflows change
+- follow module-specific CI thresholds documented in each module README, such as API coverage minimums
 
 Monorepo standards:
 

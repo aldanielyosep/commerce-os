@@ -15,7 +15,7 @@ jobs:
   scan_ruby:
     runs-on: ubuntu-latest
     env:
-      BUNDLE_GEMFILE: apps/api/Gemfile
+      BUNDLE_GEMFILE: ${{ github.workspace }}/apps/api/Gemfile
 
     steps:
       - name: Checkout code
@@ -25,6 +25,10 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+
+      - name: Install API gems
+        working-directory: apps/api
+        run: bundle install
 
       - name: Scan for common Rails security vulnerabilities using static analysis
         working-directory: apps/api
@@ -37,7 +41,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     env:
-      BUNDLE_GEMFILE: apps/api/Gemfile
+      BUNDLE_GEMFILE: ${{ github.workspace }}/apps/api/Gemfile
       RUBOCOP_CACHE_ROOT: apps/api/tmp/rubocop
     steps:
       - name: Checkout code
@@ -47,6 +51,10 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+
+      - name: Install API gems
+        working-directory: apps/api
+        run: bundle install
 
       - name: Prepare RuboCop cache
         uses: actions/cache@v4
@@ -80,7 +88,7 @@ jobs:
         ports:
           - 5432:5432
     env:
-      BUNDLE_GEMFILE: apps/api/Gemfile
+      BUNDLE_GEMFILE: ${{ github.workspace }}/apps/api/Gemfile
       RAILS_ENV: test
       DB_PGSQL_USERNAME: postgres
       DB_PGSQL_PASSWORD: postgres
@@ -94,6 +102,10 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+
+      - name: Install API gems
+        working-directory: apps/api
+        run: bundle install
 
       - name: Prepare database
         working-directory: apps/api
