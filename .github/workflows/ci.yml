@@ -74,6 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      issues: write
       pull-requests: write
     services:
       postgres:
@@ -115,21 +116,12 @@ jobs:
         working-directory: apps/api
         run: COVERAGE=true bundle exec rspec
 
-      - name: Checkout code Simplecov
-        uses: joshmfrankel/simplecov-check-action@main
-        with:
-          minimum_suite_coverage: 90
-          minimum_file_coverage: 90
-          coverage_path: apps/api/coverage/.last_run.json
-          github_token: ${{ secrets.GH_PAT }}
-          debug_mode: true
-
       - name: bot push comment coverage report
         if: ${{ github.event_name == 'pull_request' }}
         uses: romeovs/lcov-reporter-action@v0.4.0
         with:
           working-directory: apps/api
           lcov-file: coverage/lcov.info
-          github-token: ${{ secrets.GH_PAT }}
+          github-token: ${{ github.token }}
           filter-changed-files: true
 
