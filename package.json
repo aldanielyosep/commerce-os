@@ -1,0 +1,26 @@
+{
+  "name": "commerce-os",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Commerce Operating System monorepo",
+  "packageManager": "pnpm@10.11.1",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "release": "semantic-release",
+    "commitlint": "commitlint --edit"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/github": "^11.0.6",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "husky": "^9.1.7",
+    "semantic-release": "^24.2.5"
+  }
+}
