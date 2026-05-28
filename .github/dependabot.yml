@@ -5,8 +5,31 @@ updates:
   schedule:
     interval: weekly
   open-pull-requests-limit: 10
+  labels:
+    - "dependencies"
+    - "ruby"
+    - "bundler"
+    - "api"
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 10
+  labels:
+    - "dependencies"
+    - "javascript"
+    - "pnpm"
+  groups:
+    dev-tools:
+      patterns:
+        - "semantic-release"
+        - "husky"
+        - "commitlint*"
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
     interval: weekly
   open-pull-requests-limit: 10
+  labels:
+    - "dependencies"
+    - "github-actions"
