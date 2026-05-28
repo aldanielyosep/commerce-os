@@ -1,0 +1,28 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Commerce OS API",
+    "version": "v1",
+    "description": "OpenAPI schema for the Commerce OS API"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/up": {
+      "get": {
+        "summary": "Checks API health",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "healthy"
+          }
+        }
+      }
+    }
+  }
+}

@@ -160,7 +160,29 @@ bundle exec rubocop
 
 # API Documentation
 
-Rswag/OpenAPI documentation:
+Generate OpenAPI docs with rswag:
+
+```bash
+RAILS_ENV=test bundle exec rake rswag:specs:swaggerize
+```
+
+Generated file:
+
+```text
+swagger/v1/swagger.json
+```
+
+Start the API server and open Swagger UI:
+
+```bash
+bin/rails server
+```
+
+```text
+http://localhost:3000/api-docs
+```
+
+Routes used by rswag:
 
 ```text id="u9m3vr"
 /api-docs
