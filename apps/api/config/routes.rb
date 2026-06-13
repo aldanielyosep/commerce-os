@@ -1,5 +1,21 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users,
+             path: "api/v1/users",
+             path_names: {
+               sign_in: "sign_in",
+               sign_out: "sign_out"
+             },
+             defaults: { format: :json },
+             skip: [ :registrations ],
+             controllers: {
+               sessions: "api/v1/users/sessions"
+             }
+
+  namespace :api do
+    namespace :v1 do
+    end
+  end
+
   mount Rswag::Ui::Engine => "/api-docs"
   mount Rswag::Api::Engine => "/api-docs"
 

@@ -92,6 +92,7 @@ AWS_REGION=
 AWS_BUCKET=
 
 DEVISE_JWT_SECRET_KEY=
+CORS_ORIGINS=http://localhost:5173
 ```
 
 ---
@@ -263,6 +264,7 @@ The application intentionally avoids:
 ## Current Phase Status
 
 Phase A (domain foundation) is complete.
+Phase B (security and API base) is complete.
 
 Implemented in this phase:
 
@@ -270,6 +272,9 @@ Implemented in this phase:
 * User management fields for role/status and employee linkage
 * Audited change tracking table and model audit hooks
 * Active Storage tables and attachment-based document model
+* JWT authentication baseline with Devise (`/api/v1/users/sign_in`, `/api/v1/users/sign_out`)
+* Pundit policy matrix scaffolding for all Phase A domain models
+* API v1 base controller with shared authentication and authorization concerns
 
 ## Document Handling
 
@@ -289,5 +294,15 @@ Why:
 
 * stronger international number validation than regex-only checks
 * consistent normalization before persistence
+
+## Security Baseline
+
+Authentication and authorization baseline for API v1:
+
+* JWT dispatch on `POST /api/v1/users/sign_in`
+* JWT revocation on `DELETE /api/v1/users/sign_out`
+* User revocation strategy: Devise JTI matcher (`users.jti`)
+* Pundit policy classes in place for Employee, Department, Assignment, Salary, Position, Document, User, and Audit access
+* CORS enabled with `Authorization` response header exposure
 
 ---
