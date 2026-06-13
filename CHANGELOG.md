@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/aldanielyosep/commerce-os/compare/v1.3.0...v1.4.0) (2026-06-13)
+
+
+### Features
+
+* **api employee:** APIs departments CRUD, employees CRUD, and department assignment endpoints ([30befc8](https://github.com/aldanielyosep/commerce-os/commit/30befc84cec221926087e942e5f7aa4810b4fdf4))
+
 # [1.3.0](https://github.com/aldanielyosep/commerce-os/compare/v1.2.0...v1.3.0) (2026-06-13)
 
 
