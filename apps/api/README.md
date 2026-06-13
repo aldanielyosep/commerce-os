@@ -96,6 +96,8 @@ AWS_BUCKET=
 DEVISE_JWT_SECRET_KEY=
 CORS_ORIGINS=http://localhost:5173
 EMPLOYEE_ID_PREFIX=B
+RSWAG_USERNAME=
+RSWAG_PASSWORD=
 ```
 
 ---
@@ -215,6 +217,8 @@ Routes used by rswag:
 ```text id="u9m3vr"
 /api-docs
 ```
+
+If `RSWAG_USERNAME` and `RSWAG_PASSWORD` are set, `/api-docs` is protected with HTTP Basic Auth.
 
 ---
 
