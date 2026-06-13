@@ -184,6 +184,11 @@ Generate OpenAPI docs with rswag:
 RAILS_ENV=test bundle exec rake rswag:specs:swaggerize
 ```
 
+Important:
+
+* Only request specs that use rswag DSL (require "swagger_helper" and define path/response blocks) are exported into swagger JSON.
+* If an endpoint is missing from swagger output, add or update its rswag request spec first, then rerun swaggerize.
+
 Generated file:
 
 ```text

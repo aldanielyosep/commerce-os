@@ -59,6 +59,7 @@ Style/GlobalStdStream:
 
 Metrics/BlockLength:
   Exclude:
+    - "config/initializers/devise.rb"
     - "config/routes.rb"
     - "spec/**/*.rb"
 

@@ -22,7 +22,7 @@ class EmployeeDocument < ApplicationRecord
        }
 
   belongs_to :employee
-  belongs_to :uploaded_by, class_name: "User"
+  belongs_to :uploaded_by, class_name: "User", inverse_of: :uploaded_documents
 
   validates :document_type, presence: true
   validate :file_attached

@@ -14,7 +14,11 @@ class User < ApplicationRecord
   enum :status, { active: 0, disabled: 1 }, default: :active
 
   belongs_to :employee, optional: true
-  has_many :uploaded_documents, class_name: "EmployeeDocument", foreign_key: :uploaded_by_id, dependent: :nullify
+  has_many :uploaded_documents,
+           class_name: "EmployeeDocument",
+           foreign_key: :uploaded_by_id,
+           inverse_of: :uploaded_by,
+           dependent: :nullify
 
   validates :username, uniqueness: true, allow_nil: true
 

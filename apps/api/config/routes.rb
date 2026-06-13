@@ -11,11 +11,6 @@ Rails.application.routes.draw do
                sessions: "api/v1/users/sessions"
              }
 
-  namespace :api do
-    namespace :v1 do
-    end
-  end
-
   mount Rswag::Ui::Engine => "/api-docs"
   mount Rswag::Api::Engine => "/api-docs"
 
