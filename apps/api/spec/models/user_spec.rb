@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe User, type: :model do
+RSpec.describe User do
   let(:user) { build(:user) }
 
   it "is valid with valid attributes" do
@@ -18,7 +18,7 @@ RSpec.describe User, type: :model do
   end
 
   it "uses JTIMatcher JWT revocation strategy" do
-    expect(User.included_modules).to include(Devise::JWT::RevocationStrategies::JTIMatcher)
+    expect(described_class.included_modules).to include(Devise::JWT::RevocationStrategies::JTIMatcher)
   end
 
   it "generates jti for persisted users" do

@@ -1,5 +1,6 @@
 class EmployeeDocument < ApplicationRecord
   include Discard::Model
+
   has_one_attached :file
 
   ALLOWED_CONTENT_TYPES = [

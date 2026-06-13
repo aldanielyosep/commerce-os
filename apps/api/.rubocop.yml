@@ -23,6 +23,7 @@ AllCops:
 
     - "db/schema.rb"
     - "db/*_schema.rb"
+    - "db/migrate/**/*"
 
     - "spec/schema.rb"
 

@@ -9,7 +9,7 @@ class CreateEmployeeDepartments < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :employee_departments, [:employee_id, :department_id], unique: true
+    add_index :employee_departments, %i[employee_id department_id], unique: true
     add_index :employee_departments, :discarded_at
   end
 end

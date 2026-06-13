@@ -12,7 +12,7 @@ class CreateSalaryRecords < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :salary_records, [:employee_id, :effective_date], unique: true
+    add_index :salary_records, %i[employee_id effective_date], unique: true
     add_index :salary_records, :end_date
   end
 end
