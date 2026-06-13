@@ -1,5 +1,8 @@
 class Employee < ApplicationRecord
   include Discard::Model
+  include HumanAttribution
+
+  EMPLOYEE_ID_MIN_DIGITS = 4
 
   enum :gender, { male: 0, female: 1 }
   enum :status, { active: 0, probation: 1, resigned: 2, terminated: 3, retired: 4 }, default: :active
@@ -10,6 +13,8 @@ class Employee < ApplicationRecord
   has_many :salary_records, dependent: :destroy
   has_many :employee_documents, dependent: :destroy
   has_one :user, dependent: :nullify
+
+  before_validation :assign_employee_id, on: :create
 
   phony_normalize :phone_number, default_country_code: "ID"
 
@@ -27,4 +32,21 @@ class Employee < ApplicationRecord
   validates :postal_code, presence: true
 
   audited
+
+  private
+
+  def assign_employee_id
+    return if employee_id.present?
+
+    prefix = ENV.fetch("EMPLOYEE_ID_PREFIX", "B").strip.upcase
+    prefix = "B" if prefix.blank?
+
+    next_number = next_employee_id_sequence_value
+    self.employee_id = "#{prefix}#{next_number.to_s.rjust(EMPLOYEE_ID_MIN_DIGITS, '0')}"
+  end
+
+  def next_employee_id_sequence_value
+    self.class.connection.execute("CREATE SEQUENCE IF NOT EXISTS employee_id_seq START 1 INCREMENT 1")
+    self.class.connection.select_value("SELECT nextval('employee_id_seq')").to_i
+  end
 end

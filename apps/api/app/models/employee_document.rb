@@ -1,5 +1,6 @@
 class EmployeeDocument < ApplicationRecord
   include Discard::Model
+  include HumanAttribution
 
   has_one_attached :file
 

@@ -1,4 +1,6 @@
 class PositionHistory < ApplicationRecord
+  include HumanAttribution
+
   belongs_to :employee
   belongs_to :department, optional: true
 

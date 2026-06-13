@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_13_090010) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_13_110012) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -67,38 +67,50 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_090010) do
   create_table "departments", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
+    t.bigint "created_by_id"
     t.datetime "discarded_at"
     t.string "name", null: false
     t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
     t.index ["code"], name: "index_departments_on_code", unique: true
+    t.index ["created_by_id"], name: "index_departments_on_created_by_id"
     t.index ["discarded_at"], name: "index_departments_on_discarded_at"
+    t.index ["updated_by_id"], name: "index_departments_on_updated_by_id"
   end
 
   create_table "employee_departments", force: :cascade do |t|
     t.date "assigned_date", null: false
     t.datetime "created_at", null: false
+    t.bigint "created_by_id"
     t.bigint "department_id", null: false
     t.datetime "discarded_at"
     t.bigint "employee_id", null: false
     t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["created_by_id"], name: "index_employee_departments_on_created_by_id"
     t.index ["department_id"], name: "index_employee_departments_on_department_id"
     t.index ["discarded_at"], name: "index_employee_departments_on_discarded_at"
     t.index ["employee_id", "department_id"], name: "index_employee_departments_on_employee_id_and_department_id", unique: true
     t.index ["employee_id"], name: "index_employee_departments_on_employee_id"
+    t.index ["updated_by_id"], name: "index_employee_departments_on_updated_by_id"
   end
 
   create_table "employee_documents", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.bigint "created_by_id"
     t.datetime "discarded_at"
     t.integer "document_type", null: false
     t.bigint "employee_id", null: false
     t.date "expiry_date"
     t.text "notes"
     t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
     t.bigint "uploaded_by_id", null: false
+    t.index ["created_by_id"], name: "index_employee_documents_on_created_by_id"
     t.index ["discarded_at"], name: "index_employee_documents_on_discarded_at"
     t.index ["document_type"], name: "index_employee_documents_on_document_type"
     t.index ["employee_id"], name: "index_employee_documents_on_employee_id"
+    t.index ["updated_by_id"], name: "index_employee_documents_on_updated_by_id"
     t.index ["uploaded_by_id"], name: "index_employee_documents_on_uploaded_by_id"
   end
 
@@ -107,6 +119,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_090010) do
     t.date "birth_date", null: false
     t.string "city", null: false
     t.datetime "created_at", null: false
+    t.bigint "created_by_id"
     t.datetime "discarded_at"
     t.string "email", null: false
     t.string "employee_id", null: false
@@ -119,24 +132,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_090010) do
     t.integer "status", default: 0, null: false
     t.date "termination_date"
     t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["created_by_id"], name: "index_employees_on_created_by_id"
     t.index ["discarded_at"], name: "index_employees_on_discarded_at"
     t.index ["email"], name: "index_employees_on_email", unique: true
     t.index ["employee_id"], name: "index_employees_on_employee_id", unique: true
     t.index ["identity_number"], name: "index_employees_on_identity_number", unique: true
     t.index ["status"], name: "index_employees_on_status"
+    t.index ["updated_by_id"], name: "index_employees_on_updated_by_id"
   end
 
   create_table "position_histories", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.bigint "created_by_id"
     t.bigint "department_id"
     t.date "effective_date", null: false
     t.bigint "employee_id", null: false
     t.text "notes"
     t.string "position", null: false
     t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["created_by_id"], name: "index_position_histories_on_created_by_id"
     t.index ["department_id"], name: "index_position_histories_on_department_id"
     t.index ["effective_date"], name: "index_position_histories_on_effective_date"
     t.index ["employee_id"], name: "index_position_histories_on_employee_id"
+    t.index ["updated_by_id"], name: "index_position_histories_on_updated_by_id"
   end
 
   create_table "salary_records", force: :cascade do |t|
@@ -144,14 +164,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_090010) do
     t.integer "basic_salary_cents", null: false
     t.integer "bonus_cents", default: 0, null: false
     t.datetime "created_at", null: false
+    t.bigint "created_by_id"
     t.date "effective_date", null: false
     t.bigint "employee_id", null: false
     t.date "end_date"
     t.text "notes"
     t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["created_by_id"], name: "index_salary_records_on_created_by_id"
     t.index ["employee_id", "effective_date"], name: "index_salary_records_on_employee_id_and_effective_date", unique: true
     t.index ["employee_id"], name: "index_salary_records_on_employee_id"
     t.index ["end_date"], name: "index_salary_records_on_end_date"
+    t.index ["updated_by_id"], name: "index_salary_records_on_updated_by_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -178,12 +202,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_090010) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "departments", "users", column: "created_by_id"
+  add_foreign_key "departments", "users", column: "updated_by_id"
   add_foreign_key "employee_departments", "departments"
   add_foreign_key "employee_departments", "employees"
+  add_foreign_key "employee_departments", "users", column: "created_by_id"
+  add_foreign_key "employee_departments", "users", column: "updated_by_id"
   add_foreign_key "employee_documents", "employees"
+  add_foreign_key "employee_documents", "users", column: "created_by_id"
+  add_foreign_key "employee_documents", "users", column: "updated_by_id"
   add_foreign_key "employee_documents", "users", column: "uploaded_by_id"
+  add_foreign_key "employees", "users", column: "created_by_id"
+  add_foreign_key "employees", "users", column: "updated_by_id"
   add_foreign_key "position_histories", "departments"
   add_foreign_key "position_histories", "employees"
+  add_foreign_key "position_histories", "users", column: "created_by_id"
+  add_foreign_key "position_histories", "users", column: "updated_by_id"
   add_foreign_key "salary_records", "employees"
+  add_foreign_key "salary_records", "users", column: "created_by_id"
+  add_foreign_key "salary_records", "users", column: "updated_by_id"
   add_foreign_key "users", "employees"
 end

@@ -1,5 +1,6 @@
 class EmployeeDepartment < ApplicationRecord
   include Discard::Model
+  include HumanAttribution
 
   belongs_to :employee
   belongs_to :department

@@ -11,6 +11,20 @@ Rails.application.routes.draw do
                sessions: "api/v1/users/sessions"
              }
 
+  namespace :api do
+    namespace :v1 do
+      resources :departments
+
+      resources :employees do
+        member do
+          patch :terminate
+        end
+
+        resources :employee_departments, only: %i[index create destroy]
+      end
+    end
+  end
+
   mount Rswag::Ui::Engine => "/api-docs"
   mount Rswag::Api::Engine => "/api-docs"
 

@@ -1,0 +1,120 @@
+module Api
+  module V1
+    class EmployeesController < BaseController
+      before_action :set_employee, only: %i[show update destroy terminate]
+
+      def index
+        authorize Employee
+
+        employees = filtered_employees
+        render_success(EmployeeBlueprint.render_as_hash(employees))
+      end
+
+      def show
+        authorize @employee
+
+        render_success(EmployeeBlueprint.render_as_hash(@employee))
+      end
+
+      def create
+        authorize Employee
+
+        employee = Employee.new(employee_params)
+
+        if employee.save
+          render_success(EmployeeBlueprint.render_as_hash(employee), status: :created)
+        else
+          render_error("Unable to save employee", errors: employee.errors.full_messages)
+        end
+      end
+
+      def update
+        authorize @employee
+
+        if @employee.update(employee_params)
+          render_success(EmployeeBlueprint.render_as_hash(@employee))
+        else
+          render_error("Unable to update employee", errors: @employee.errors.full_messages)
+        end
+      end
+
+      def destroy
+        authorize @employee
+
+        @employee.discard!
+        render_success({ id: @employee.id, discarded: true })
+      end
+
+      def terminate
+        authorize @employee, :terminate?
+
+        if @employee.update(status: :terminated, termination_date: Date.current)
+          render_success(EmployeeBlueprint.render_as_hash(@employee))
+        else
+          render_error("Unable to terminate employee", errors: @employee.errors.full_messages)
+        end
+      end
+
+      private
+
+      def set_employee
+        @employee = scoped_records(Employee.kept).find(params.expect(:id))
+      end
+
+      def filtered_employees
+        scope = scoped_records(Employee.kept.includes(:departments))
+
+        scope = filter_by_status(scope)
+        scope = filter_by_department(scope)
+        scope = filter_by_query(scope)
+        scope.distinct.order(:full_name)
+      end
+
+      def filter_by_status(scope)
+        status = params.fetch(:status, nil)
+        return scope unless status.present? && Employee.statuses.key?(status)
+
+        scope.where(status: Employee.statuses.fetch(status))
+      end
+
+      def filter_by_department(scope)
+        department_id = params.fetch(:department_id, nil)
+        return scope if department_id.blank?
+
+        scope.joins(:employee_departments).where(
+          employee_departments: {
+            department_id: department_id
+          }
+        )
+      end
+
+      def filter_by_query(scope)
+        query_term = params.fetch(:q, nil)
+        return scope if query_term.blank?
+
+        query = "%#{query_term.strip}%"
+        scope.where(
+          "employees.employee_id ILIKE :query OR employees.full_name ILIKE :query OR employees.email ILIKE :query",
+          query: query
+        )
+      end
+
+      def employee_params
+        params.expect(
+          employee: %i[
+            full_name
+            gender
+            birth_date
+            join_date
+            identity_number
+            phone_number
+            email
+            address
+            city
+            postal_code
+          ]
+        )
+      end
+    end
+  end
+end

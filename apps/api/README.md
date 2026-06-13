@@ -39,6 +39,8 @@ Built with:
 * Devise
 * devise-jwt
 
+All protected API requests must send the JWT in the `Authorization` header using the `Bearer <token>` format. The same header is used in rswag request specs and by the future frontend API client.
+
 ## Authorization
 
 * Pundit
@@ -93,6 +95,7 @@ AWS_BUCKET=
 
 DEVISE_JWT_SECRET_KEY=
 CORS_ORIGINS=http://localhost:5173
+EMPLOYEE_ID_PREFIX=B
 ```
 
 ---
@@ -188,6 +191,8 @@ Important:
 
 * Only request specs that use rswag DSL (require "swagger_helper" and define path/response blocks) are exported into swagger JSON.
 * If an endpoint is missing from swagger output, add or update its rswag request spec first, then rerun swaggerize.
+
+Current Phase C API coverage includes departments CRUD, employees CRUD/list/filter/terminate, and nested employee department assignment endpoints.
 
 Generated file:
 
