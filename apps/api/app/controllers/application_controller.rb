@@ -2,6 +2,9 @@ class ApplicationController < ActionController::API
   include Pundit::Authorization
   include Pagy::Method
 
+  before_action :set_current_request_user
+  after_action :clear_current_request_user
+
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from Pundit::NotAuthorizedError, with: :render_forbidden
   rescue_from Warden::NotAuthenticated, with: :render_unauthorized
@@ -38,5 +41,13 @@ class ApplicationController < ActionController::API
 
   def pundit_user
     current_user
+  end
+
+  def set_current_request_user
+    CurrentRequest.user = current_user if respond_to?(:current_user)
+  end
+
+  def clear_current_request_user
+    CurrentRequest.reset
   end
 end

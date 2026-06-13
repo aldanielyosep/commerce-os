@@ -1,4 +1,6 @@
 class SalaryRecord < ApplicationRecord
+  include HumanAttribution
+
   belongs_to :employee
 
   monetize :basic_salary_cents, with_currency: :idr

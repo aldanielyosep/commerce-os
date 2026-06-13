@@ -1,6 +1,5 @@
 FactoryBot.define do
   factory :employee do
-    sequence(:employee_id) { |n| "EMP#{1000 + n}" }
     full_name { "John Doe" }
     gender { :male }
     birth_date { Date.new(1990, 1, 1) }

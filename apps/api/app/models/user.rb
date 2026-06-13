@@ -19,6 +19,66 @@ class User < ApplicationRecord
            foreign_key: :uploaded_by_id,
            inverse_of: :uploaded_by,
            dependent: :nullify
+  has_many :created_employees,
+           class_name: "Employee",
+           foreign_key: :created_by_id,
+           inverse_of: :created_by,
+           dependent: :nullify
+  has_many :updated_employees,
+           class_name: "Employee",
+           foreign_key: :updated_by_id,
+           inverse_of: :updated_by,
+           dependent: :nullify
+  has_many :created_departments,
+           class_name: "Department",
+           foreign_key: :created_by_id,
+           inverse_of: :created_by,
+           dependent: :nullify
+  has_many :updated_departments,
+           class_name: "Department",
+           foreign_key: :updated_by_id,
+           inverse_of: :updated_by,
+           dependent: :nullify
+  has_many :created_employee_departments,
+           class_name: "EmployeeDepartment",
+           foreign_key: :created_by_id,
+           inverse_of: :created_by,
+           dependent: :nullify
+  has_many :updated_employee_departments,
+           class_name: "EmployeeDepartment",
+           foreign_key: :updated_by_id,
+           inverse_of: :updated_by,
+           dependent: :nullify
+  has_many :created_employee_documents,
+           class_name: "EmployeeDocument",
+           foreign_key: :created_by_id,
+           inverse_of: :created_by,
+           dependent: :nullify
+  has_many :updated_employee_documents,
+           class_name: "EmployeeDocument",
+           foreign_key: :updated_by_id,
+           inverse_of: :updated_by,
+           dependent: :nullify
+  has_many :created_position_histories,
+           class_name: "PositionHistory",
+           foreign_key: :created_by_id,
+           inverse_of: :created_by,
+           dependent: :nullify
+  has_many :updated_position_histories,
+           class_name: "PositionHistory",
+           foreign_key: :updated_by_id,
+           inverse_of: :updated_by,
+           dependent: :nullify
+  has_many :created_salary_records,
+           class_name: "SalaryRecord",
+           foreign_key: :created_by_id,
+           inverse_of: :created_by,
+           dependent: :nullify
+  has_many :updated_salary_records,
+           class_name: "SalaryRecord",
+           foreign_key: :updated_by_id,
+           inverse_of: :updated_by,
+           dependent: :nullify
 
   validates :username, uniqueness: true, allow_nil: true
 

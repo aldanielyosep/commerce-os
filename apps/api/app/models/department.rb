@@ -1,5 +1,6 @@
 class Department < ApplicationRecord
   include Discard::Model
+  include HumanAttribution
 
   has_many :employee_departments, dependent: :destroy
   has_many :employees, through: :employee_departments
