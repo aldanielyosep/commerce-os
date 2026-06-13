@@ -1,9 +1,9 @@
 class SalaryRecord < ApplicationRecord
   belongs_to :employee
 
-  monetize :basic_salary_cents
-  monetize :allowance_cents
-  monetize :bonus_cents
+  monetize :basic_salary_cents, with_currency: :idr
+  monetize :allowance_cents, with_currency: :idr
+  monetize :bonus_cents, with_currency: :idr
 
   validates :basic_salary_cents, numericality: { greater_than: 0 }
   validates :allowance_cents, numericality: { greater_than_or_equal_to: 0 }

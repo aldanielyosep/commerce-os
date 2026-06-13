@@ -35,7 +35,7 @@ class UserPolicy < ApplicationPolicy
     super_admin?
   end
 
-  class Scope < Scope
+  class Scope < ApplicationPolicy::Scope
     def resolve
       return scope.none unless user&.super_admin?
 
