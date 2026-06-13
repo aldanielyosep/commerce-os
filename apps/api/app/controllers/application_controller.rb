@@ -4,6 +4,7 @@ class ApplicationController < ActionController::API
 
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from Pundit::NotAuthorizedError, with: :render_forbidden
+  rescue_from Warden::NotAuthenticated, with: :render_unauthorized
 
   private
 
@@ -31,7 +32,11 @@ class ApplicationController < ActionController::API
     render_error("You are not authorized to perform this action", status: :forbidden)
   end
 
-  def current_user
-    @current_user ||= current_api_v1_user
+  def render_unauthorized
+    render_error("Authentication required", status: :unauthorized)
+  end
+
+  def pundit_user
+    current_user
   end
 end

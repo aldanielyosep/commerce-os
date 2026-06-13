@@ -78,4 +78,6 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for commit conventions, pull request ex
 
 API setup, Swagger generation, and coverage workflow are documented in [apps/api/README.md](./apps/api/README.md).
 
+Phase 1 backend technical decisions (domain foundation status, Active Storage document handling, and phone validation strategy) are also maintained in [apps/api/README.md](./apps/api/README.md).
+
 ---

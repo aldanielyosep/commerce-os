@@ -23,6 +23,7 @@ AllCops:
 
     - "db/schema.rb"
     - "db/*_schema.rb"
+    - "db/migrate/**/*"
 
     - "spec/schema.rb"
 
@@ -58,6 +59,7 @@ Style/GlobalStdStream:
 
 Metrics/BlockLength:
   Exclude:
+    - "config/initializers/devise.rb"
     - "config/routes.rb"
     - "spec/**/*.rb"
 
