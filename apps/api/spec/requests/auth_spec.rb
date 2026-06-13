@@ -23,10 +23,19 @@ RSpec.describe "Authentication" do
       }
 
       response "200", "signed in" do
+        let!(:user) do
+          create(
+            :user,
+            email: "admin@example.com",
+            password: "Password123!",
+            password_confirmation: "Password123!"
+          )
+        end
+
         let(:credentials) do
           {
             user: {
-              email: "admin@example.com",
+              email: user.email,
               password: "Password123!"
             }
           }
@@ -57,6 +66,15 @@ RSpec.describe "Authentication" do
       security [ { bearerAuth: [] } ]
 
       response "200", "signed out" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) do
+          token, = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil)
+          "Bearer #{token}"
+        end
+        # rubocop:enable RSpec/VariableName
+
         run_test!
       end
     end

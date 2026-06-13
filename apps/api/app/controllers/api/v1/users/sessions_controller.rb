@@ -19,7 +19,7 @@ module Api
           }, status: :ok
         end
 
-        def respond_to_on_destroy
+        def respond_to_on_destroy(_opts = {})
           render json: { success: true, message: "Signed out successfully" }, status: :ok
         end
       end

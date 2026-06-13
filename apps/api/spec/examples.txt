@@ -1,13 +1,20 @@
 example_id                                     | status | run_time        |
 ---------------------------------------------- | ------ | --------------- |
-./spec/models/user_spec.rb[1:1]                | passed | 0.00411 seconds |
-./spec/models/user_spec.rb[1:2]                | passed | 0.0042 seconds  |
-./spec/models/user_spec.rb[1:3]                | passed | 0.18926 seconds |
-./spec/models/user_spec.rb[1:4]                | passed | 0.00181 seconds |
-./spec/models/user_spec.rb[1:5]                | passed | 0.02148 seconds |
-./spec/policies/employee_policy_spec.rb[1:1:1] | passed | 0.00308 seconds |
-./spec/policies/employee_policy_spec.rb[1:2:1] | passed | 0.00272 seconds |
-./spec/policies/employee_policy_spec.rb[1:3:1] | passed | 0.01348 seconds |
-./spec/policies/user_policy_spec.rb[1:1:1]     | passed | 0.00449 seconds |
-./spec/policies/user_policy_spec.rb[1:2:1]     | passed | 0.00499 seconds |
-./spec/requests/health_spec.rb[1:1:1:1:1]      | passed | 0.02816 seconds |
+./spec/models/user_spec.rb[1:1]                | passed | 0.00356 seconds |
+./spec/models/user_spec.rb[1:2]                | passed | 0.00383 seconds |
+./spec/models/user_spec.rb[1:3]                | passed | 0.00374 seconds |
+./spec/models/user_spec.rb[1:4]                | passed | 0.00194 seconds |
+./spec/models/user_spec.rb[1:5]                | passed | 0.00708 seconds |
+./spec/policies/employee_policy_spec.rb[1:1:1] | passed | 0.00315 seconds |
+./spec/policies/employee_policy_spec.rb[1:1:2] | passed | 0.00282 seconds |
+./spec/policies/employee_policy_spec.rb[1:2:1] | passed | 0.00303 seconds |
+./spec/policies/employee_policy_spec.rb[1:2:2] | passed | 0.18326 seconds |
+./spec/policies/employee_policy_spec.rb[1:3:1] | passed | 0.02986 seconds |
+./spec/policies/user_policy_spec.rb[1:1:1]     | passed | 0.00482 seconds |
+./spec/policies/user_policy_spec.rb[1:1:2]     | passed | 0.00448 seconds |
+./spec/policies/user_policy_spec.rb[1:2:1]     | passed | 0.00484 seconds |
+./spec/policies/user_policy_spec.rb[1:2:2]     | passed | 0.00434 seconds |
+./spec/requests/auth_spec.rb[1:1:1:1:1]        | passed | 0.01033 seconds |
+./spec/requests/auth_spec.rb[1:1:1:2:1]        | passed | 0.0047 seconds  |
+./spec/requests/auth_spec.rb[1:2:1:1:1]        | passed | 0.03985 seconds |
+./spec/requests/health_spec.rb[1:1:1:1:1]      | passed | 0.02517 seconds |
