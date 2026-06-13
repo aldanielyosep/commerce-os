@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/aldanielyosep/commerce-os/compare/v1.4.0...v1.5.0) (2026-06-13)
+
+
+### Features
+
+* **docs:** add auth on swagger api ([ed2ffe5](https://github.com/aldanielyosep/commerce-os/commit/ed2ffe578e43fc5764fc948b6fe169a39355b54c))
+
 # [1.4.0](https://github.com/aldanielyosep/commerce-os/compare/v1.3.0...v1.4.0) (2026-06-13)
 
 
