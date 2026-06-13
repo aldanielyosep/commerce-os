@@ -232,6 +232,7 @@ Routes used by rswag:
 
 ## File Storage
 
+* Active Storage
 * aws-sdk-s3
 
 ## Spreadsheet Import
@@ -254,5 +255,39 @@ The application intentionally avoids:
 * microservices
 * distributed architecture
 * unnecessary infrastructure complexity
+
+---
+
+# Phase 1 Notes
+
+## Current Phase Status
+
+Phase A (domain foundation) is complete.
+
+Implemented in this phase:
+
+* Core HR domain schema and models (employees, departments, assignments, position history, salary records, employee documents)
+* User management fields for role/status and employee linkage
+* Audited change tracking table and model audit hooks
+* Active Storage tables and attachment-based document model
+
+## Document Handling
+
+Employee documents now use Active Storage attachment (`has_one_attached :file`) instead of storing direct file path metadata columns.
+
+Why:
+
+* standardized Rails upload abstraction
+* easier signed URL generation
+* cleaner S3/local service switching by environment
+
+## Phone Number Validation
+
+Employee phone validation uses `phony_rails` for normalization and plausibility checking.
+
+Why:
+
+* stronger international number validation than regex-only checks
+* consistent normalization before persistence
 
 ---

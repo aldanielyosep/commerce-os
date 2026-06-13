@@ -29,6 +29,7 @@ gem "money-rails"
 gem "audited"
 gem "discard"
 gem "aws-sdk-s3", require: false
+gem "phony_rails"
 gem "roo"
 gem "dotenv-rails"
 gem "rswag"
