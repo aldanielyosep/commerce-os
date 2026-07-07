@@ -14,6 +14,15 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :departments
+      resources :users do
+        member do
+          patch :enable
+          patch :disable
+          patch :change_role
+          post :reset_password
+        end
+      end
+      resources :audits, only: %i[index show]
 
       resources :employees do
         member do
