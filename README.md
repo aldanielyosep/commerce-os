@@ -7,8 +7,7 @@ Commerce Operating System monorepo for ecommerce operations, finance, settlement
 ## Monorepo Structure
 
 - `apps/api` - Rails API service
-- `apps/web` - Internal web MVP application (Phase G)
-- `apps/admin` - Admin application planned for this monorepo
+- `apps/admin-web` - Internal web MVP application (Phase G)
 - `apps/storefront` - Storefront application planned for this monorepo
 - `packages/*` - Shared libraries and cross-module utilities
 

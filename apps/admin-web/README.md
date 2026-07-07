@@ -36,11 +36,11 @@ From repo root:
 
 ```bash
 pnpm install
-pnpm --filter @commerce-os/web dev
+pnpm --filter @commerce-os/admin-web dev
 ```
 
 Build:
 
 ```bash
-pnpm --filter @commerce-os/web build
+pnpm --filter @commerce-os/admin-web build
 ```

@@ -36,7 +36,7 @@ importers:
         specifier: ^25.0.5
         version: 25.0.5(typescript@6.0.3)
 
-  apps/web:
+  apps/admin-web:
     dependencies:
       react:
         specifier: ^18.3.1
