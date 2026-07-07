@@ -3,7 +3,8 @@ require "stringio"
 FactoryBot.define do
   factory :employee_document do
     employee
-    association :uploaded_by, factory: :user
+    uploaded_by { association :user }
+
     document_type { :other }
     expiry_date { nil }
     notes { "Employment document" }

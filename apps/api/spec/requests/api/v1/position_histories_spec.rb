@@ -15,10 +15,12 @@ RSpec.describe "Position Histories" do
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
         let!(:department) { create(:department, code: "ENG", name: "Engineering") }
         let!(:latest_history) do
-          create(:position_history, employee: employee, department: department, position: "Lead", effective_date: Date.current)
+          create(:position_history, employee: employee, department: department, position: "Lead",
+                                    effective_date: Date.current)
         end
         let!(:older_history) do
-          create(:position_history, employee: employee, department: department, position: "Staff", effective_date: Date.current - 1.month)
+          create(:position_history, employee: employee, department: department, position: "Staff",
+                                    effective_date: Date.current - 1.month)
         end
         let(:employee_id) { employee.id }
 

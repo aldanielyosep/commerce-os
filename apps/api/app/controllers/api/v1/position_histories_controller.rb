@@ -15,7 +15,9 @@ module Api
         authorize PositionHistory
 
         history = @employee.position_histories.new(position_history_params)
-        history.department = find_department(position_history_params[:department_id]) if position_history_params[:department_id].present?
+        if position_history_params[:department_id].present?
+          history.department = find_department(position_history_params[:department_id])
+        end
 
         if history.save
           render_success(PositionHistoryBlueprint.render_as_hash(history), status: :created)
@@ -28,7 +30,10 @@ module Api
         authorize @position_history
 
         attrs = position_history_params.except(:department_id)
-        attrs[:department] = find_department(position_history_params[:department_id]) if position_history_params.key?(:department_id)
+        if position_history_params.key?(:department_id)
+          attrs[:department] =
+            find_department(position_history_params[:department_id])
+        end
 
         if @position_history.update(attrs)
           render_success(PositionHistoryBlueprint.render_as_hash(@position_history))

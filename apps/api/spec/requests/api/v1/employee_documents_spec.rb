@@ -1,4 +1,4 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:disable RSpec/MultipleMemoizedHelpers
 require "swagger_helper"
 
 RSpec.describe "Employee Documents" do
@@ -13,7 +13,9 @@ RSpec.describe "Employee Documents" do
       response "200", "documents listed" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
-        let!(:document) { create(:employee_document, employee: employee, uploaded_by: user, document_type: :national_id) }
+        let!(:document) do
+          create(:employee_document, employee: employee, uploaded_by: user, document_type: :national_id)
+        end
         let(:employee_id) { employee.id }
 
         # rubocop:disable RSpec/VariableName
@@ -40,15 +42,17 @@ RSpec.describe "Employee Documents" do
       parameter name: "employee_document[file]", in: :formData, type: :file
 
       response "201", "document uploaded" do
+        # rubocop:disable RSpec/VariableName
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
         let(:employee_id) { employee.id }
-        let(:"employee_document[document_type]") { "passport" }
-        let(:"employee_document[expiry_date]") { nil }
-        let(:"employee_document[notes]") { "Passport copy" }
-        let(:"employee_document[file]") do
+        let(:'employee_document[document_type]') { "passport" }
+        let(:'employee_document[expiry_date]') { nil }
+        let(:'employee_document[notes]') { "Passport copy" }
+        let(:'employee_document[file]') do
           Rack::Test::UploadedFile.new(StringIO.new("passport"), "application/pdf", original_filename: "passport.pdf")
         end
+        # rubocop:enable RSpec/VariableName
 
         # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
@@ -104,7 +108,9 @@ RSpec.describe "Employee Documents" do
       response "200", "document archived" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
-        let!(:document) { create(:employee_document, employee: employee, uploaded_by: user, document_type: :employment_contract) }
+        let!(:document) do
+          create(:employee_document, employee: employee, uploaded_by: user, document_type: :employment_contract)
+        end
         let(:employee_id) { employee.id }
         let(:id) { document.id }
 
@@ -122,4 +128,4 @@ RSpec.describe "Employee Documents" do
   end
 end
 
-# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:enable RSpec/MultipleMemoizedHelpers

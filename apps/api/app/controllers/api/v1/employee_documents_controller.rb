@@ -29,9 +29,7 @@ module Api
       def download
         authorize @employee_document, :download?
 
-        unless @employee_document.file.attached?
-          return render_error("Document file is missing", status: :not_found)
-        end
+        return render_error("Document file is missing", status: :not_found) unless @employee_document.file.attached?
 
         expires_at = Time.current + SIGNED_URL_TTL
         set_active_storage_url_options
