@@ -13,7 +13,9 @@ RSpec.describe "Audits" do
       parameter name: :user_id, in: :query, type: :string, required: false
 
       response "200", "audits listed" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:employee) { create(:employee) }
         let!(:audit_one) do
           Audited::Audit.create!(
@@ -22,7 +24,7 @@ RSpec.describe "Audits" do
             auditable_id: employee.id,
             user_id: super_admin.id,
             user_type: "User",
-            audited_changes: { full_name: [ "Before", "After" ] }
+            audited_changes: { full_name: %w[Before After] }
           )
         end
         let!(:audit_two) do
@@ -47,7 +49,9 @@ RSpec.describe "Audits" do
       end
 
       response "200", "audits filtered by auditable entity" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:employee) { create(:employee) }
         let!(:matching_audit) do
           Audited::Audit.create!(
@@ -56,7 +60,7 @@ RSpec.describe "Audits" do
             auditable_id: employee.id,
             user_id: super_admin.id,
             user_type: "User",
-            audited_changes: { city: [ "A", "B" ] }
+            audited_changes: { city: %w[A B] }
           )
         end
         let!(:non_matching_audit) do
@@ -66,7 +70,7 @@ RSpec.describe "Audits" do
             auditable_id: employee.id,
             user_id: super_admin.id,
             user_type: "User",
-            audited_changes: { name: [ "X", "Y" ] }
+            audited_changes: { name: %w[X Y] }
           )
         end
         let(:auditable_type) { "Employee" }
@@ -78,13 +82,17 @@ RSpec.describe "Audits" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(body["data"].map { |audit| audit["id"] }).to include(matching_audit.id)
-          expect(body["data"].map { |audit| audit["id"] }).not_to include(non_matching_audit.id)
+          ids = body["data"].pluck("id")
+
+          expect(ids).to include(matching_audit.id)
+          expect(ids).not_to include(non_matching_audit.id)
         end
       end
 
       response "200", "audits filtered by actor user" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:other_user) { create(:user) }
         let!(:matching_audit) do
           Audited::Audit.create!(
@@ -93,7 +101,7 @@ RSpec.describe "Audits" do
             auditable_id: other_user.id,
             user_id: super_admin.id,
             user_type: "User",
-            audited_changes: { status: [ "active", "disabled" ] }
+            audited_changes: { status: %w[active disabled] }
           )
         end
         let!(:non_matching_audit) do
@@ -103,7 +111,7 @@ RSpec.describe "Audits" do
             auditable_id: super_admin.id,
             user_id: other_user.id,
             user_type: "User",
-            audited_changes: { status: [ "disabled", "active" ] }
+            audited_changes: { status: %w[disabled active] }
           )
         end
         let(:user_id) { super_admin.id }
@@ -114,8 +122,10 @@ RSpec.describe "Audits" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(body["data"].map { |audit| audit["id"] }).to include(matching_audit.id)
-          expect(body["data"].map { |audit| audit["id"] }).not_to include(non_matching_audit.id)
+          ids = body["data"].pluck("id")
+
+          expect(ids).to include(matching_audit.id)
+          expect(ids).not_to include(non_matching_audit.id)
         end
       end
 
@@ -140,7 +150,9 @@ RSpec.describe "Audits" do
       security [ { bearerAuth: [] } ]
 
       response "200", "audit shown" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:audit_record) do
           Audited::Audit.create!(
             action: "create",

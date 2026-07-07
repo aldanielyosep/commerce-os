@@ -1,4 +1,4 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:disable RSpec/MultipleMemoizedHelpers
 require "swagger_helper"
 
 RSpec.describe "Users" do
@@ -9,7 +9,9 @@ RSpec.describe "Users" do
       security [ { bearerAuth: [] } ]
 
       response "200", "users listed" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:admin_user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
 
         # rubocop:disable RSpec/VariableName
@@ -18,7 +20,9 @@ RSpec.describe "Users" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(body["data"].map { |record| record["id"] }).to include(super_admin.id, admin_user.id)
+          ids = body["data"].pluck("id")
+
+          expect(ids).to include(super_admin.id, admin_user.id)
         end
       end
 
@@ -59,7 +63,9 @@ RSpec.describe "Users" do
       }
 
       response "201", "user created" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let(:user) do
           {
             user: {
@@ -84,7 +90,9 @@ RSpec.describe "Users" do
       end
 
       response "422", "super admin creation blocked" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let(:user) do
           {
             user: {
@@ -119,7 +127,9 @@ RSpec.describe "Users" do
       security [ { bearerAuth: [] } ]
 
       response "200", "user shown" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:target_user) { create(:user, email: "target.user@example.com") }
         let(:id) { target_user.id }
 
@@ -154,7 +164,9 @@ RSpec.describe "Users" do
       }
 
       response "200", "user updated" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:target_user) { create(:user, username: "before_update") }
         let(:id) { target_user.id }
         let(:user) { { user: { username: "after_update" } } }
@@ -176,7 +188,9 @@ RSpec.describe "Users" do
       security [ { bearerAuth: [] } ]
 
       response "200", "user deleted" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:target_user) { create(:user, email: "delete.user@example.com") }
         let(:id) { target_user.id }
 
@@ -201,7 +215,9 @@ RSpec.describe "Users" do
       security [ { bearerAuth: [] } ]
 
       response "200", "user disabled" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:target_user) { create(:user, status: :active) }
         let(:id) { target_user.id }
 
@@ -226,7 +242,9 @@ RSpec.describe "Users" do
       security [ { bearerAuth: [] } ]
 
       response "200", "user enabled" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:target_user) { create(:user, status: :disabled) }
         let(:id) { target_user.id }
 
@@ -266,7 +284,9 @@ RSpec.describe "Users" do
       }
 
       response "200", "role changed" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:target_user) { create(:user, role: :admin) }
         let(:id) { target_user.id }
         let(:user) { { user: { role: "admin" } } }
@@ -282,7 +302,9 @@ RSpec.describe "Users" do
       end
 
       response "422", "super admin promotion blocked" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:target_user) { create(:user, role: :admin) }
         let(:id) { target_user.id }
         let(:user) { { user: { role: "super_admin" } } }
@@ -308,7 +330,9 @@ RSpec.describe "Users" do
       security [ { bearerAuth: [] } ]
 
       response "200", "password reset initiated" do
-        let!(:super_admin) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
         let!(:target_user) { create(:user, email: "reset.user@example.com") }
         let(:id) { target_user.id }
 
@@ -325,4 +349,4 @@ RSpec.describe "Users" do
   end
 end
 
-# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:enable RSpec/MultipleMemoizedHelpers

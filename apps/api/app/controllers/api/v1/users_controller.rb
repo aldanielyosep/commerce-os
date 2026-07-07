@@ -19,7 +19,10 @@ module Api
       def create
         authorize User
 
-        return render_error("Unable to create user", errors: [ "Creating super admin users is not allowed" ]) if create_params[:role] == "super_admin"
+        if create_params[:role] == "super_admin"
+          return render_error("Unable to create user",
+                              errors: [ "Creating super admin users is not allowed" ])
+        end
 
         user = User.new(create_params)
 
@@ -43,7 +46,10 @@ module Api
       def destroy
         authorize @user
 
-        return render_error("Unable to delete user", errors: [ "You cannot delete your own account" ]) if @user == current_user
+        if @user == current_user
+          return render_error("Unable to delete user",
+                              errors: [ "You cannot delete your own account" ])
+        end
 
         @user.destroy!
         render_success({ id: @user.id, deleted: true })
@@ -62,7 +68,10 @@ module Api
       def disable
         authorize @user, :disable?
 
-        return render_error("Unable to disable user", errors: [ "You cannot disable your own account" ]) if @user == current_user
+        if @user == current_user
+          return render_error("Unable to disable user",
+                              errors: [ "You cannot disable your own account" ])
+        end
 
         if @user.update(status: :disabled)
           render_success(UserBlueprint.render_as_hash(@user))
