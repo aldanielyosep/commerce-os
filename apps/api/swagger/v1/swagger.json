@@ -284,6 +284,132 @@
         }
       }
     },
+    "/api/v1/employees/{employee_id}/employee_documents": {
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "List employee documents",
+        "tags": [
+          "Employee Documents"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "documents listed"
+          }
+        }
+      },
+      "post": {
+        "summary": "Upload employee document",
+        "tags": [
+          "Employee Documents"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "document uploaded"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/employees/{employee_id}/employee_documents/{id}/download": {
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get signed download URL",
+        "tags": [
+          "Employee Documents"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "signed URL returned"
+          }
+        }
+      }
+    },
+    "/api/v1/employees/{employee_id}/employee_documents/{id}/archive": {
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Archive employee document",
+        "tags": [
+          "Employee Documents"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "document archived"
+          }
+        }
+      }
+    },
     "/api/v1/employees": {
       "get": {
         "summary": "List employees",
@@ -534,6 +660,327 @@
           },
           "422": {
             "description": "employee termination invalid"
+          }
+        }
+      }
+    },
+    "/api/v1/employees/{employee_id}/position_histories": {
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "List position timeline",
+        "tags": [
+          "Position Histories"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "position histories listed"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create position timeline entry",
+        "tags": [
+          "Position Histories"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "position history created"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "position_history": {
+                    "type": "object",
+                    "properties": {
+                      "position": {
+                        "type": "string"
+                      },
+                      "department_id": {
+                        "type": "integer"
+                      },
+                      "effective_date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "notes": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "position",
+                      "effective_date"
+                    ]
+                  }
+                },
+                "required": [
+                  "position_history"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/employees/{employee_id}/position_histories/{id}": {
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Update position timeline entry",
+        "tags": [
+          "Position Histories"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "position history updated"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "position_history": {
+                    "type": "object",
+                    "properties": {
+                      "position": {
+                        "type": "string"
+                      },
+                      "department_id": {
+                        "type": "integer"
+                      },
+                      "effective_date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "notes": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "position_history"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/employees/{employee_id}/salary_records": {
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "List salary timeline",
+        "tags": [
+          "Salary Records"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "salary records listed"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create salary timeline entry",
+        "tags": [
+          "Salary Records"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "salary record created"
+          },
+          "422": {
+            "description": "salary overlap rejected"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "salary_record": {
+                    "type": "object",
+                    "properties": {
+                      "basic_salary_cents": {
+                        "type": "integer"
+                      },
+                      "allowance_cents": {
+                        "type": "integer"
+                      },
+                      "bonus_cents": {
+                        "type": "integer"
+                      },
+                      "effective_date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                      },
+                      "notes": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "basic_salary_cents",
+                      "allowance_cents",
+                      "bonus_cents",
+                      "effective_date"
+                    ]
+                  }
+                },
+                "required": [
+                  "salary_record"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/employees/{employee_id}/salary_records/{id}": {
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Update salary timeline entry",
+        "tags": [
+          "Salary Records"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "salary record updated"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "salary_record": {
+                    "type": "object",
+                    "properties": {
+                      "basic_salary_cents": {
+                        "type": "integer"
+                      },
+                      "allowance_cents": {
+                        "type": "integer"
+                      },
+                      "bonus_cents": {
+                        "type": "integer"
+                      },
+                      "effective_date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                      },
+                      "notes": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "salary_record"
+                ]
+              }
+            }
           }
         }
       }

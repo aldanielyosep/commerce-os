@@ -21,6 +21,14 @@ Rails.application.routes.draw do
         end
 
         resources :employee_departments, only: %i[index create destroy]
+        resources :position_histories, only: %i[index create update]
+        resources :salary_records, only: %i[index create update]
+        resources :employee_documents, only: %i[index create] do
+          member do
+            get :download
+            patch :archive
+          end
+        end
       end
     end
   end

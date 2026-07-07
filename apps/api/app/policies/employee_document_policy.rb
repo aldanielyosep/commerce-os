@@ -18,4 +18,12 @@ class EmployeeDocumentPolicy < ApplicationPolicy
   def destroy?
     admin_or_super_admin?
   end
+
+  def download?
+    show?
+  end
+
+  def archive?
+    destroy?
+  end
 end
