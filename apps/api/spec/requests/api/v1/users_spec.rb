@@ -115,6 +115,35 @@ RSpec.describe "Users" do
           expect(body["success"]).to be(false)
         end
       end
+
+      response "422", "user invalid" do
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:existing_user) { create(:user, email: "duplicate.user@example.com") }
+        let(:user) do
+          {
+            user: {
+              email: existing_user.email,
+              username: "duplicateuser",
+              password: "Password123!",
+              password_confirmation: "Password123!",
+              role: "admin",
+              status: "active"
+            }
+          }
+        end
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(super_admin) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(body["success"]).to be(false)
+          expect(body["message"]).to eq("Unable to create user")
+        end
+      end
     end
   end
 
@@ -180,6 +209,26 @@ RSpec.describe "Users" do
           expect(body["data"]["username"]).to eq("after_update")
         end
       end
+
+      response "422", "user update invalid" do
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:target_user) { create(:user, username: "before_update") }
+        let!(:existing_user) { create(:user, username: "already_taken") }
+        let(:id) { target_user.id }
+        let(:user) { { user: { username: existing_user.username } } }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(super_admin) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(body["success"]).to be(false)
+          expect(body["message"]).to eq("Unable to update user")
+        end
+      end
     end
 
     delete "Delete user" do
@@ -201,6 +250,23 @@ RSpec.describe "Users" do
         run_test! do |response|
           body = JSON.parse(response.body)
           expect(body["data"]["deleted"]).to be(true)
+        end
+      end
+
+      response "422", "self delete blocked" do
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let(:id) { super_admin.id }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(super_admin) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(body["success"]).to be(false)
+          expect(body["message"]).to eq("Unable to delete user")
         end
       end
     end
@@ -230,6 +296,47 @@ RSpec.describe "Users" do
           expect(body["data"]["status"]).to eq("disabled")
         end
       end
+
+      response "422", "self disable blocked" do
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let(:id) { super_admin.id }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(super_admin) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(body["success"]).to be(false)
+          expect(body["message"]).to eq("Unable to disable user")
+        end
+      end
+
+      response "422", "disable failed" do
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:target_user) { create(:user, status: :active) }
+        let(:id) { target_user.id }
+
+        before do
+          # rubocop:disable RSpec/AnyInstance
+          allow_any_instance_of(User).to receive(:update).and_return(false)
+          # rubocop:enable RSpec/AnyInstance
+        end
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(super_admin) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(body["success"]).to be(false)
+          expect(body["message"]).to eq("Unable to disable user")
+        end
+      end
     end
   end
 
@@ -255,6 +362,30 @@ RSpec.describe "Users" do
         run_test! do |response|
           body = JSON.parse(response.body)
           expect(body["data"]["status"]).to eq("active")
+        end
+      end
+
+      response "422", "enable failed" do
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:target_user) { create(:user, status: :disabled) }
+        let(:id) { target_user.id }
+
+        before do
+          # rubocop:disable RSpec/AnyInstance
+          allow_any_instance_of(User).to receive(:update).and_return(false)
+          # rubocop:enable RSpec/AnyInstance
+        end
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(super_admin) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(body["success"]).to be(false)
+          expect(body["message"]).to eq("Unable to enable user")
         end
       end
     end
