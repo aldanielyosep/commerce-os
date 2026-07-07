@@ -1,3 +1,20 @@
+# [1.7.0](https://github.com/aldanielyosep/commerce-os/compare/v1.6.0...v1.7.0) (2026-07-07)
+
+
+### Bug Fixes
+
+* lint pluck ([92f3142](https://github.com/aldanielyosep/commerce-os/commit/92f314267fcffc795b0f3b8972aea384056a0a3f))
+* lint user spec ([5275ad1](https://github.com/aldanielyosep/commerce-os/commit/5275ad128f348081afee02fb484d825b2a51cb88))
+
+
+### Features
+
+* **admin:** add api admin manage ([d8b7a71](https://github.com/aldanielyosep/commerce-os/commit/d8b7a7187aa477fd18bb5c52870461ec077b49a6))
+* **deps:** packages update ([5a94b5c](https://github.com/aldanielyosep/commerce-os/commit/5a94b5ccf43890fcc2a87315c6eccf99045480e1))
+* increase unit coverage test user specs ([a3f2a4b](https://github.com/aldanielyosep/commerce-os/commit/a3f2a4b3032a3452811553fde3f6581f92182768))
+* init admin-web ([a4604a5](https://github.com/aldanielyosep/commerce-os/commit/a4604a50d5b923e17692a4dc6ecbf9b2b830344b))
+* init admin-web ([859d0bc](https://github.com/aldanielyosep/commerce-os/commit/859d0bce31e58e0537a65ba5dede54ab136d7dd0))
+
 # [1.6.0](https://github.com/aldanielyosep/commerce-os/compare/v1.5.0...v1.6.0) (2026-07-07)
 
 
