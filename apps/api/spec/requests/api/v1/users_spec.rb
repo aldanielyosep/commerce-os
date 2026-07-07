@@ -2,6 +2,16 @@
 require "swagger_helper"
 
 RSpec.describe "Users" do
+  let(:force_update_failure) { false }
+
+  before do
+    next unless force_update_failure
+
+    # rubocop:disable RSpec/AnyInstance
+    allow_any_instance_of(User).to receive(:update).and_return(false)
+    # rubocop:enable RSpec/AnyInstance
+  end
+
   path "/api/v1/users" do
     get "List users" do
       tags "Users"
@@ -318,14 +328,10 @@ RSpec.describe "Users" do
         let!(:super_admin) do
           create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
         end
+
         let!(:target_user) { create(:user, status: :active) }
         let(:id) { target_user.id }
-
-        before do
-          # rubocop:disable RSpec/AnyInstance
-          allow_any_instance_of(User).to receive(:update).and_return(false)
-          # rubocop:enable RSpec/AnyInstance
-        end
+        let(:force_update_failure) { true }
 
         # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
@@ -333,6 +339,7 @@ RSpec.describe "Users" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
+
           expect(body["success"]).to be(false)
           expect(body["message"]).to eq("Unable to disable user")
         end
@@ -371,12 +378,7 @@ RSpec.describe "Users" do
         end
         let!(:target_user) { create(:user, status: :disabled) }
         let(:id) { target_user.id }
-
-        before do
-          # rubocop:disable RSpec/AnyInstance
-          allow_any_instance_of(User).to receive(:update).and_return(false)
-          # rubocop:enable RSpec/AnyInstance
-        end
+        let(:force_update_failure) { true }
 
         # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
