@@ -1096,7 +1096,7 @@
             "description": "user created"
           },
           "422": {
-            "description": "super admin creation blocked"
+            "description": "user invalid"
           }
         },
         "requestBody": {
@@ -1194,6 +1194,9 @@
         "responses": {
           "200": {
             "description": "user updated"
+          },
+          "422": {
+            "description": "user update invalid"
           }
         },
         "requestBody": {
@@ -1232,6 +1235,9 @@
         "responses": {
           "200": {
             "description": "user deleted"
+          },
+          "422": {
+            "description": "self delete blocked"
           }
         }
       }
@@ -1260,6 +1266,9 @@
         "responses": {
           "200": {
             "description": "user disabled"
+          },
+          "422": {
+            "description": "disable failed"
           }
         }
       }
@@ -1288,6 +1297,9 @@
         "responses": {
           "200": {
             "description": "user enabled"
+          },
+          "422": {
+            "description": "enable failed"
           }
         }
       }
