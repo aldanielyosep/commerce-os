@@ -1,3 +1,15 @@
+# [1.6.0](https://github.com/aldanielyosep/commerce-os/compare/v1.5.0...v1.6.0) (2026-07-07)
+
+
+### Bug Fixes
+
+* lint VariableName ([6f52371](https://github.com/aldanielyosep/commerce-os/commit/6f5237139abd57e7e3442ab0b7f5bf63a3db3a40))
+
+
+### Features
+
+* add api career ([3b95a86](https://github.com/aldanielyosep/commerce-os/commit/3b95a8683c3940f2dcb636f10ea299ec6f6822cd))
+
 # [1.5.0](https://github.com/aldanielyosep/commerce-os/compare/v1.4.0...v1.5.0) (2026-06-13)
 
 
