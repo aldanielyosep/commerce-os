@@ -37,4 +37,4 @@ jobs:
         run: npm install --global @railway/cli
 
       - name: Deploy admin-web service to Railway staging
-        run: railway up ./apps/admin-web --path-as-root --service admin-web --detach
+        run: rrailway up ./apps/admin-web --path-as-root --service admin-web --detach
