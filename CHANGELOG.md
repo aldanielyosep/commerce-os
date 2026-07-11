@@ -1,3 +1,11 @@
+# [1.9.0](https://github.com/aldanielyosep/commerce-os/compare/v1.8.0...v1.9.0) (2026-07-11)
+
+
+### Features
+
+* **deps:** update package ([9899e5e](https://github.com/aldanielyosep/commerce-os/commit/9899e5e5882e31968a65c1e1066587eacab9cc1f))
+* **deps:** update pnpm ([09699c5](https://github.com/aldanielyosep/commerce-os/commit/09699c55e5394f3459822566ef2308fc3cc269d7))
+
 # [1.8.0](https://github.com/aldanielyosep/commerce-os/compare/v1.7.0...v1.8.0) (2026-07-08)
 
 
