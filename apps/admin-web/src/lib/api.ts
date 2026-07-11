@@ -2,10 +2,20 @@ import type {
   ApiEnvelope,
   AuthUser,
   Department,
+  DepartmentPayload,
+  DepartmentUpdatePayload,
   Employee,
+  EmployeeDepartmentAssignment,
+  EmployeeDepartmentAssignmentPayload,
   EmployeeDocument,
+  EmployeeListFilters,
+  EmployeePayload,
+  EmployeeUpdatePayload,
   PositionHistory,
   SalaryRecord,
+  UserRole,
+  UserPayload,
+  UserUpdatePayload,
   UserRecord
 } from "./types";
 
@@ -28,6 +38,18 @@ type RequestOptions = {
   body?: unknown;
   headers?: Record<string, string>;
 };
+
+function buildQueryString(filters: Record<string, string | number | undefined>): string {
+  const query = new URLSearchParams();
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value === undefined || value === "") return;
+    query.set(key, String(value));
+  });
+
+  const stringified = query.toString();
+  return stringified ? `?${stringified}` : "";
+}
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", token, body, headers = {} } = options;
@@ -90,9 +112,97 @@ export async function signOut(token: string): Promise<void> {
   });
 }
 
-export async function listEmployees(token: string): Promise<Employee[]> {
-  const envelope = await request<ApiEnvelope<Employee[]>>("/api/v1/employees", { token });
+export async function listEmployees(token: string, filters: EmployeeListFilters = {}): Promise<Employee[]> {
+  const query = buildQueryString({
+    status: filters.status,
+    department_id: filters.department_id,
+    q: filters.q
+  });
+  const envelope = await request<ApiEnvelope<Employee[]>>(`/api/v1/employees${query}`, { token });
   return envelope.data;
+}
+
+export async function getEmployee(token: string, employeeId: number): Promise<Employee> {
+  const envelope = await request<ApiEnvelope<Employee>>(`/api/v1/employees/${employeeId}`, { token });
+  return envelope.data;
+}
+
+export async function createEmployee(token: string, payload: EmployeePayload): Promise<Employee> {
+  const envelope = await request<ApiEnvelope<Employee>>("/api/v1/employees", {
+    method: "POST",
+    token,
+    body: { employee: payload }
+  });
+  return envelope.data;
+}
+
+export async function updateEmployee(
+  token: string,
+  employeeId: number,
+  payload: EmployeeUpdatePayload
+): Promise<Employee> {
+  const envelope = await request<ApiEnvelope<Employee>>(`/api/v1/employees/${employeeId}`, {
+    method: "PATCH",
+    token,
+    body: { employee: payload }
+  });
+  return envelope.data;
+}
+
+export async function terminateEmployee(token: string, employeeId: number): Promise<Employee> {
+  const envelope = await request<ApiEnvelope<Employee>>(`/api/v1/employees/${employeeId}/terminate`, {
+    method: "PATCH",
+    token
+  });
+  return envelope.data;
+}
+
+export async function deleteEmployee(token: string, employeeId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(`/api/v1/employees/${employeeId}`, {
+    method: "DELETE",
+    token
+  });
+}
+
+export async function listEmployeeDepartments(
+  token: string,
+  employeeId: number
+): Promise<EmployeeDepartmentAssignment[]> {
+  const envelope = await request<ApiEnvelope<EmployeeDepartmentAssignment[]>>(
+    `/api/v1/employees/${employeeId}/employee_departments`,
+    { token }
+  );
+  return envelope.data;
+}
+
+export async function assignEmployeeDepartment(
+  token: string,
+  employeeId: number,
+  payload: EmployeeDepartmentAssignmentPayload
+): Promise<EmployeeDepartmentAssignment> {
+  const envelope = await request<ApiEnvelope<EmployeeDepartmentAssignment>>(
+    `/api/v1/employees/${employeeId}/employee_departments`,
+    {
+      method: "POST",
+      token,
+      body: { employee_department: payload }
+    }
+  );
+  return envelope.data;
+}
+
+export async function removeEmployeeDepartment(
+  token: string,
+  employeeId: number,
+  assignmentId: number
+): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(
+    `/api/v1/employees/${employeeId}/employee_departments/${assignmentId}`,
+    {
+      method: "DELETE",
+      token
+    }
+  );
 }
 
 export async function listDepartments(token: string): Promise<Department[]> {
@@ -100,9 +210,105 @@ export async function listDepartments(token: string): Promise<Department[]> {
   return envelope.data;
 }
 
+export async function getDepartment(token: string, departmentId: number): Promise<Department> {
+  const envelope = await request<ApiEnvelope<Department>>(`/api/v1/departments/${departmentId}`, { token });
+  return envelope.data;
+}
+
+export async function createDepartment(token: string, payload: DepartmentPayload): Promise<Department> {
+  const envelope = await request<ApiEnvelope<Department>>("/api/v1/departments", {
+    method: "POST",
+    token,
+    body: { department: payload }
+  });
+  return envelope.data;
+}
+
+export async function updateDepartment(
+  token: string,
+  departmentId: number,
+  payload: DepartmentUpdatePayload
+): Promise<Department> {
+  const envelope = await request<ApiEnvelope<Department>>(`/api/v1/departments/${departmentId}`, {
+    method: "PATCH",
+    token,
+    body: { department: payload }
+  });
+  return envelope.data;
+}
+
+export async function deleteDepartment(token: string, departmentId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(`/api/v1/departments/${departmentId}`, {
+    method: "DELETE",
+    token
+  });
+}
+
 export async function listUsers(token: string): Promise<UserRecord[]> {
   const envelope = await request<ApiEnvelope<UserRecord[]>>("/api/v1/users", { token });
   return envelope.data;
+}
+
+export async function getUser(token: string, userId: number): Promise<UserRecord> {
+  const envelope = await request<ApiEnvelope<UserRecord>>(`/api/v1/users/${userId}`, { token });
+  return envelope.data;
+}
+
+export async function createUser(token: string, payload: UserPayload): Promise<UserRecord> {
+  const envelope = await request<ApiEnvelope<UserRecord>>("/api/v1/users", {
+    method: "POST",
+    token,
+    body: { user: payload }
+  });
+  return envelope.data;
+}
+
+export async function updateUser(token: string, userId: number, payload: UserUpdatePayload): Promise<UserRecord> {
+  const envelope = await request<ApiEnvelope<UserRecord>>(`/api/v1/users/${userId}`, {
+    method: "PATCH",
+    token,
+    body: { user: payload }
+  });
+  return envelope.data;
+}
+
+export async function deleteUser(token: string, userId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; deleted: boolean }>>(`/api/v1/users/${userId}`, {
+    method: "DELETE",
+    token
+  });
+}
+
+export async function enableUser(token: string, userId: number): Promise<UserRecord> {
+  const envelope = await request<ApiEnvelope<UserRecord>>(`/api/v1/users/${userId}/enable`, {
+    method: "PATCH",
+    token
+  });
+  return envelope.data;
+}
+
+export async function disableUser(token: string, userId: number): Promise<UserRecord> {
+  const envelope = await request<ApiEnvelope<UserRecord>>(`/api/v1/users/${userId}/disable`, {
+    method: "PATCH",
+    token
+  });
+  return envelope.data;
+}
+
+export async function changeUserRole(token: string, userId: number, role: UserRole): Promise<UserRecord> {
+  const envelope = await request<ApiEnvelope<UserRecord>>(`/api/v1/users/${userId}/change_role`, {
+    method: "PATCH",
+    token,
+    body: { user: { role } }
+  });
+  return envelope.data;
+}
+
+export async function resetUserPassword(token: string, userId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; reset_password_sent: boolean }>>(`/api/v1/users/${userId}/reset_password`, {
+    method: "POST",
+    token
+  });
 }
 
 export async function listPositionTimeline(token: string, employeeId: number): Promise<PositionHistory[]> {
