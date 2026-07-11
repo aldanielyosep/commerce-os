@@ -21,18 +21,18 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: commerceos
+    database: <%= ENV.fetch("DB_PGSQL_DATABASE") { "railway" } %>
     username: <%= ENV.fetch("DB_PGSQL_USERNAME") { "" } %>
     password: <%= ENV.fetch("DB_PGSQL_PASSWORD") { "" } %>
   cache:
     <<: *primary_production
-    database: commerceos_cache
+    database: <%= ENV.fetch("DB_PGSQL_CACHE_DATABASE") { ENV.fetch("DB_PGSQL_DATABASE") { "railway" } } %>
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: commerceos_queue
+    database: <%= ENV.fetch("DB_PGSQL_QUEUE_DATABASE") { ENV.fetch("DB_PGSQL_DATABASE") { "railway" } } %>
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: commerceos_cable
+    database: <%= ENV.fetch("DB_PGSQL_CABLE_DATABASE") { ENV.fetch("DB_PGSQL_DATABASE") { "railway" } } %>
     migrations_paths: db/cable_migrate

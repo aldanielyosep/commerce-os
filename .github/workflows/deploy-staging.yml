@@ -1,0 +1,60 @@
+name: Deploy Staging API
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "apps/api/**"
+      - ".github/workflows/deploy-staging.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging-api
+  cancel-in-progress: true
+
+jobs:
+  deploy_staging_api:
+    name: Deploy API to Railway Staging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      RAILWAY_TOKEN: ${{ secrets['RAILWAY_TOKEN'] }}
+      RAILWAY_PROJECT_ID: ${{ secrets['RAILWAY_PROJECT_ID'] }}
+      RAILWAY_ENVIRONMENT: ${{ secrets['RAILWAY_ENV_STAGING'] }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Railway CLI
+        run: npm install --global @railway/cli
+
+      - name: Deploy apps/api to Railway staging
+        working-directory: apps/api
+        run: railway up --service api --detach
+
+      - name: Wait for staging health check
+        env:
+          HEALTHCHECK_BASE_URL: ${{ secrets['STAGING_API_HEALTHCHECK_URL'] }}
+        run: |
+          set -euo pipefail
+
+          for i in {1..30}; do
+            if curl --fail --silent --show-error "${HEALTHCHECK_BASE_URL}/up" > /dev/null; then
+              echo "Health check passed on attempt ${i}."
+              exit 0
+            fi
+
+            echo "Health check not ready yet (attempt ${i}/30), waiting..."
+            sleep 10
+          done
+
+          echo "Health check failed after 30 attempts."
+          exit 1
