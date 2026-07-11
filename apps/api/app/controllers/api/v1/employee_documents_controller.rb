@@ -16,12 +16,26 @@ module Api
       def create
         authorize EmployeeDocument
 
-        document = @employee.employee_documents.new(employee_document_params)
+        document = @employee.employee_documents.new(employee_document_attributes)
         document.uploaded_by = current_user
+
+        uploaded_file = employee_document_file
+        sequence = EmployeeDocument.next_file_sequence_for(@employee)
+        document.file_sequence = sequence
+
+        blob = ActiveStorage::Blob.create_and_upload!(
+          io: uploaded_file,
+          filename: uploaded_file.original_filename,
+          content_type: uploaded_file.content_type,
+          key: document.storage_key_for(sequence: sequence, original_filename: uploaded_file.original_filename)
+        )
+
+        document.file.attach(blob)
 
         if document.save
           render_success(EmployeeDocumentBlueprint.render_as_hash(document), status: :created)
         else
+          blob.purge_later
           render_error("Unable to upload employee document", errors: document.errors.full_messages)
         end
       end
@@ -60,16 +74,30 @@ module Api
         @employee_document = @employee.employee_documents.kept.find(params.expect(:id))
       end
 
-      def employee_document_params
-        permitted_keys = %i[document_type expiry_date notes file]
-        return params.expect(employee_document: permitted_keys) if params[:employee_document].present?
+      def employee_document_attributes
+        permitted_keys = %i[document_type expiry_date notes]
+        if params[:employee_document].present?
+          return params.expect(employee_document: %i[document_type expiry_date notes
+                                                     file]).slice(*permitted_keys)
+        end
 
         ActionController::Parameters.new(
           document_type: params["employee_document[document_type]"] || params[:document_type],
           expiry_date: params["employee_document[expiry_date]"] || params[:expiry_date],
-          notes: params["employee_document[notes]"] || params[:notes],
-          file: params["employee_document[file]"] || params[:file]
+          notes: params["employee_document[notes]"] || params[:notes]
         ).permit(*permitted_keys)
+      end
+
+      def employee_document_file
+        if params[:employee_document].present?
+          file = params.expect(employee_document: %i[file]).fetch(:file)
+          return file if file.present?
+        end
+
+        file = params["employee_document[file]"] || params[:file]
+        return file if file.present?
+
+        raise ActionController::ParameterMissing, :file
       end
 
       def set_active_storage_url_options
