@@ -6,7 +6,7 @@ RSpec.describe EmployeeDocument do
   let(:uploader) { create(:user) }
 
   around do |example|
-    original_aws_path = ENV["AWS_PATH"]
+    original_aws_path = ENV.fetch("AWS_PATH", nil)
     example.run
     ENV["AWS_PATH"] = original_aws_path
   end
