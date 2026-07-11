@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/aldanielyosep/commerce-os/compare/v1.9.0...v1.10.0) (2026-07-11)
+
+
+### Features
+
+* **employee:** add employees and departments modules ([c8b3c12](https://github.com/aldanielyosep/commerce-os/commit/c8b3c12a1c67636def8d8b7a9348629f0a2d30b9))
+
 # [1.9.0](https://github.com/aldanielyosep/commerce-os/compare/v1.8.0...v1.9.0) (2026-07-11)
 
 
