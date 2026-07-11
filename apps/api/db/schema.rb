@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_13_110012) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_11_162000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -102,6 +102,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_110012) do
     t.integer "document_type", null: false
     t.bigint "employee_id", null: false
     t.date "expiry_date"
+    t.integer "file_sequence"
     t.text "notes"
     t.datetime "updated_at", null: false
     t.bigint "updated_by_id"
@@ -109,6 +110,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_110012) do
     t.index ["created_by_id"], name: "index_employee_documents_on_created_by_id"
     t.index ["discarded_at"], name: "index_employee_documents_on_discarded_at"
     t.index ["document_type"], name: "index_employee_documents_on_document_type"
+    t.index ["employee_id", "file_sequence"], name: "index_employee_documents_on_employee_id_and_file_sequence", unique: true, where: "(file_sequence IS NOT NULL)"
     t.index ["employee_id"], name: "index_employee_documents_on_employee_id"
     t.index ["updated_by_id"], name: "index_employee_documents_on_updated_by_id"
     t.index ["uploaded_by_id"], name: "index_employee_documents_on_uploaded_by_id"
