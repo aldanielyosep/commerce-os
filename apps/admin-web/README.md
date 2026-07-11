@@ -30,6 +30,9 @@ VITE_API_BASE_URL=http://localhost:3000
 
 Defaults to `http://localhost:3000` when not set.
 
+For containerized deployment, runtime config takes priority over Vite build-time config.
+Set `ADMIN_WEB_API_BASE_URL` in the runtime environment (for example in Railway variables).
+
 ## Run
 
 From repo root:
@@ -44,6 +47,28 @@ Build:
 ```bash
 pnpm --filter @commerce-os/admin-web build
 ```
+
+## Docker
+
+Build image from `apps/admin-web`:
+
+```bash
+docker build -t commerce-os-admin-web .
+```
+
+Run image with runtime API URL:
+
+```bash
+docker run --rm -p 8080:8080 -e ADMIN_WEB_API_BASE_URL=https://api-staging.bungkusand.com commerce-os-admin-web
+```
+
+## Railway Staging Setup
+
+- Service name: `admin-web`
+- Root Directory: `/apps/admin-web`
+- Dockerfile Path: `/Dockerfile`
+- Disable source auto deploy so GitHub Actions is the only deployment owner.
+- Set Railway variable: `ADMIN_WEB_API_BASE_URL=https://api-staging.bungkusand.com`
 
 ## Quality Checks
 

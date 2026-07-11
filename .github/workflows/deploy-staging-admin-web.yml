@@ -1,20 +1,20 @@
-name: Deploy Staging API
+name: Deploy Staging Admin Web
 
 on:
   push:
     branches: [ main ]
     paths:
-      - "apps/api/**"
-      - ".github/workflows/deploy-staging.yml"
+      - "apps/admin-web/**"
+      - ".github/workflows/deploy-staging-admin-web.yml"
   workflow_dispatch:
 
 concurrency:
-  group: deploy-staging-api
+  group: deploy-staging-admin-web
   cancel-in-progress: true
 
 jobs:
-  deploy_staging_api:
-    name: Deploy API to Railway Staging
+  deploy_staging_admin_web:
+    name: Deploy admin-web to Railway Staging
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,5 +36,5 @@ jobs:
       - name: Install Railway CLI
         run: npm install --global @railway/cli
 
-      - name: Deploy api service to Railway staging
-        run: railway up --service api --detach
+      - name: Deploy admin-web service to Railway staging
+        run: railway up --service admin-web --detach

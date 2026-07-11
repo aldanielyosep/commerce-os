@@ -19,7 +19,21 @@ import type {
   UserRecord
 } from "./types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+function resolveApiBaseUrl(): string {
+  const runtimeBaseUrl = window.__RUNTIME_CONFIG__?.API_BASE_URL;
+  if (runtimeBaseUrl && runtimeBaseUrl.trim().length > 0) {
+    return runtimeBaseUrl;
+  }
+
+  const viteBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  if (viteBaseUrl && viteBaseUrl.trim().length > 0) {
+    return viteBaseUrl;
+  }
+
+  return "http://localhost:3000";
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 export class ApiError extends Error {
   status: number;
