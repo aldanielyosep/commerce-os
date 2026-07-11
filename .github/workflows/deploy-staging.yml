@@ -36,8 +36,7 @@ jobs:
       - name: Install Railway CLI
         run: npm install --global @railway/cli
 
-      - name: Deploy apps/api to Railway staging
-        working-directory: apps/api
+      - name: Deploy api service to Railway staging
         run: railway up --service api --detach
 
       - name: Wait for staging health check
