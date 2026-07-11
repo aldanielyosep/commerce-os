@@ -44,3 +44,40 @@ Build:
 ```bash
 pnpm --filter @commerce-os/admin-web build
 ```
+
+## Quality Checks
+
+Lint:
+
+```bash
+pnpm --filter @commerce-os/admin-web lint
+```
+
+Typecheck:
+
+```bash
+pnpm --filter @commerce-os/admin-web typecheck
+```
+
+Unit tests:
+
+```bash
+pnpm --filter @commerce-os/admin-web test
+```
+
+Coverage:
+
+```bash
+pnpm --filter @commerce-os/admin-web test:coverage
+```
+
+Coverage gate policy:
+
+- Global line coverage must be at least 90%.
+- Per-file line coverage must be at least 80%.
+
+Dependency security audit (high+ prod issues):
+
+```bash
+pnpm --filter @commerce-os/admin-web audit --prod --audit-level=high
+```
