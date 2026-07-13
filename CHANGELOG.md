@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/aldanielyosep/commerce-os/compare/v1.12.0...v1.13.0) (2026-07-13)
+
+
+### Features
+
+* **ci:** add ci prod ([8c4fb85](https://github.com/aldanielyosep/commerce-os/commit/8c4fb8547518d4c4151a3cc06f9894ea11d17445))
+
 # [1.12.0](https://github.com/aldanielyosep/commerce-os/compare/v1.11.0...v1.12.0) (2026-07-13)
 
 
