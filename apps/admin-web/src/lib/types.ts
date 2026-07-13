@@ -135,3 +135,92 @@ export type EmployeeDocument = {
   filename?: string;
   expiry_date: string | null;
 };
+
+export type CompanyType = "individual" | "cv" | "pt";
+export type CompanyStatus = "active" | "inactive";
+
+export type CompanyMarketplace =
+  | "shopee"
+  | "tokopedia"
+  | "tiktok_shop"
+  | "lazada"
+  | "blibli"
+  | "shopify"
+  | "website";
+
+export type CompanyMarketplaceLink = {
+  id: number;
+  marketplace: CompanyMarketplace;
+  store_name: string;
+  store_url: string;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type Company = {
+  id: number;
+  code: string;
+  name: string;
+  owner_name: string;
+  company_type: CompanyType;
+  email: string;
+  phone: string;
+  website: string | null;
+  description: string | null;
+  address: string | null;
+  province: string | null;
+  city: string | null;
+  postal_code: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  status: CompanyStatus;
+  company_registration_number: string | null;
+  nib: string | null;
+  siup: string | null;
+  deed_number: string | null;
+  pkp_number: string | null;
+  logo_url: string | null;
+  marketplace_links: CompanyMarketplaceLink[];
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type CompanyPayload = {
+  code: string;
+  name: string;
+  owner_name: string;
+  company_type: CompanyType;
+  email: string;
+  phone: string;
+  website?: string;
+  description?: string;
+  address?: string;
+  province?: string;
+  city?: string;
+  postal_code?: string;
+  latitude?: number;
+  longitude?: number;
+  status: CompanyStatus;
+  company_registration_number?: string;
+  nib?: string;
+  siup?: string;
+  deed_number?: string;
+  pkp_number?: string;
+};
+
+export type CompanyUpdatePayload = Partial<CompanyPayload>;
+
+export type CompanyMutationOptions = {
+  logo?: File;
+  remove_logo?: boolean;
+};
+
+export type CompanyMarketplaceLinkPayload = {
+  marketplace: CompanyMarketplace;
+  store_name: string;
+  store_url: string;
+  is_active: boolean;
+};
+
+export type CompanyMarketplaceLinkUpdatePayload = Partial<CompanyMarketplaceLinkPayload>;

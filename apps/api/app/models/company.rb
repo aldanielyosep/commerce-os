@@ -51,6 +51,21 @@ class Company < ApplicationRecord
 
   audited
 
+  def storage_key_for_logo(original_filename:)
+    extension = File.extname(original_filename.to_s).downcase
+    extension = ".bin" if extension.blank?
+
+    path_prefix = ENV.fetch("AWS_PATH", "").strip.gsub(%r{\A/+|/+$}, "")
+
+    segments = []
+    segments << path_prefix unless path_prefix.empty?
+    segments << "companies"
+    segments << "logo"
+    segments << "#{code}_#{SecureRandom.hex(6)}#{extension}"
+
+    segments.join("/")
+  end
+
   private
 
   def latitude_and_longitude_presence

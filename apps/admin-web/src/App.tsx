@@ -6,6 +6,7 @@ import { DepartmentsPage } from "./pages/DepartmentsPage";
 import { DocumentsPage } from "./pages/DocumentsPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
 import { CareerPage } from "./pages/CareerPage";
+import { CompaniesPage } from "./pages/CompaniesPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { PasswordPage } from "./pages/PasswordPage";
@@ -28,6 +29,7 @@ export default function App() {
 
           <Route element={<RoleRoute allowed={["super_admin"]} />}>
             <Route path="/users" element={<UsersPage />} />
+            <Route path="/companies" element={<CompaniesPage />} />
           </Route>
         </Route>
       </Route>
