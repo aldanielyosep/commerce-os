@@ -90,7 +90,7 @@ jobs:
 
       - name: Prepare API databases on Railway production
         working-directory: apps/api
-        run: railway run --service api-prd bundle exec rails db:prepare
+        run: railway run --service api-prd -- bundle exec rails db:prepare
 
       - name: Deployment summary
         run: |
@@ -126,7 +126,8 @@ jobs:
         run: npm install --global @railway/cli
 
       - name: Deploy admin-web-prd service to Railway production
-        run: railway up ./apps/admin-web --path-as-root --service admin-web-prd --detach
+        working-directory: apps/admin-web
+        run: railway up --service admin-web-prd --detach
 
       - name: Deployment summary
         run: |
