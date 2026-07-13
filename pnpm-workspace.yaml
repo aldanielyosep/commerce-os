@@ -5,3 +5,5 @@ allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
   - semantic-release@25.0.6
+overrides:
+  typescript: 5.9.3

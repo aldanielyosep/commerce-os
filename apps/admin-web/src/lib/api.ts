@@ -90,7 +90,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined
   });
 
-  let payload: unknown = null;
+  let payload: unknown;
   try {
     payload = await response.json();
   } catch {

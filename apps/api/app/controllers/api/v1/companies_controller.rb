@@ -119,7 +119,7 @@ module Api
 
       def attach_logo_blob(company)
         uploaded_logo = params.dig(:company, :logo)
-        return nil unless uploaded_logo.present?
+        return nil if uploaded_logo.blank?
 
         blob = ActiveStorage::Blob.create_and_upload!(
           io: uploaded_logo,
