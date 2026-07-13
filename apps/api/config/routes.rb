@@ -41,9 +41,10 @@ Rails.application.routes.draw do
       end
     end
   end
-
-  mount Rswag::Ui::Engine => "/api-docs"
-  mount Rswag::Api::Engine => "/api-docs"
+  if ENV["RSWAG_ENABLED"] == "true"
+    mount Rswag::Ui::Engine => "/api-docs"
+    mount Rswag::Api::Engine => "/api-docs"
+  end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

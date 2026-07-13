@@ -2,16 +2,32 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: "Production deploy target"
+        required: true
+        type: choice
+        options:
+          - api
+          - admin-web-prd
+          - both
+        default: both
+      run_semantic_release:
+        description: "Run semantic-release before deploy"
+        required: true
+        type: boolean
+        default: true
 
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release: 
+  release:
     name: Semantic Release
+    if: ${{ inputs.run_semantic_release }}
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       contents: write
       issues: write
       pull-requests: write
@@ -44,3 +60,79 @@ jobs:
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: action@github.com
         run: pnpm exec semantic-release
+
+  deploy_prod_api:
+    name: Deploy Production API
+    needs: [release]
+    if: ${{ (inputs.deploy_target == 'api' || inputs.deploy_target == 'both') && (!inputs.run_semantic_release || needs.release.result == 'success') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      RAILWAY_TOKEN: ${{ secrets['RAILWAY_TOKEN'] }}
+      RAILWAY_PROJECT_ID: ${{ secrets['RAILWAY_PROJECT_ID'] }}
+      RAILWAY_ENVIRONMENT: ${{ secrets['RAILWAY_ENV_PRODUCTION'] }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Railway CLI
+        run: npm install --global @railway/cli
+
+      - name: Deploy api service to Railway production
+        run: railway up --service api --detach
+
+      - name: Prepare API databases on Railway production
+        working-directory: apps/api
+        run: railway run bundle exec rails db:prepare
+
+      - name: Deployment summary
+        run: |
+          {
+            echo "## Release Deploy Summary"
+            echo "- Target: api"
+            echo "- Environment: production"
+            echo "- Service: api"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy_prod_admin_web:
+    name: Deploy Production Admin Web
+    needs: [release]
+    if: ${{ (inputs.deploy_target == 'admin-web-prd' || inputs.deploy_target == 'both') && (!inputs.run_semantic_release || needs.release.result == 'success') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      RAILWAY_TOKEN: ${{ secrets['RAILWAY_TOKEN'] }}
+      RAILWAY_PROJECT_ID: ${{ secrets['RAILWAY_PROJECT_ID'] }}
+      RAILWAY_ENVIRONMENT: ${{ secrets['RAILWAY_ENV_PRODUCTION'] }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Railway CLI
+        run: npm install --global @railway/cli
+
+      - name: Deploy admin-web-prd service to Railway production
+        run: railway up ./apps/admin-web --path-as-root --service admin-web-prd --detach
+
+      - name: Deployment summary
+        run: |
+          {
+            echo "## Release Deploy Summary"
+            echo "- Target: admin-web-prd"
+            echo "- Environment: production"
+            echo "- Service: admin-web-prd"
+          } >> "$GITHUB_STEP_SUMMARY"
