@@ -61,7 +61,6 @@ type CompanyFormState = {
   deed_number: string;
   pkp_number: string;
   logo: File | null;
-  remove_logo: boolean;
 };
 
 type MarketplaceFormState = {
@@ -93,8 +92,7 @@ const EMPTY_COMPANY_FORM: CompanyFormState = {
   siup: "",
   deed_number: "",
   pkp_number: "",
-  logo: null,
-  remove_logo: false
+  logo: null
 };
 
 const EMPTY_MARKETPLACE_FORM: MarketplaceFormState = {
@@ -127,8 +125,7 @@ function companyToForm(company: Company): CompanyFormState {
     siup: company.siup ?? "",
     deed_number: company.deed_number ?? "",
     pkp_number: company.pkp_number ?? "",
-    logo: null,
-    remove_logo: false
+    logo: null
   };
 }
 
@@ -345,12 +342,6 @@ export function CompaniesPage() {
     event.preventDefault();
     if (!token) return;
 
-    if (form.remove_logo && form.logo) {
-      setError("Cannot upload logo and remove logo in the same request.");
-      setErrorDetails([]);
-      return;
-    }
-
     if (form.company_type !== "individual") {
       if (!form.company_registration_number.trim() || !form.nib.trim()) {
         setError("Company registration number and NIB are required for CV/PT companies.");
@@ -366,8 +357,7 @@ export function CompaniesPage() {
     try {
       const payload = buildCompanyPayload(form);
       const options = {
-        logo: form.logo ?? undefined,
-        remove_logo: form.remove_logo || undefined
+        logo: form.logo ?? undefined
       };
 
       if (drawer.mode === "create") {
@@ -483,8 +473,7 @@ export function CompaniesPage() {
   const latitudeValue = form.latitude.trim().length > 0 ? Number(form.latitude) : null;
   const longitudeValue = form.longitude.trim().length > 0 ? Number(form.longitude) : null;
   const existingLogoPath = editingCompany?.logo_url ?? null;
-  const existingLogoUrl =
-    existingLogoPath && !form.remove_logo ? resolveLogoPreviewUrl(existingLogoPath) : null;
+  const existingLogoUrl = existingLogoPath ? resolveLogoPreviewUrl(existingLogoPath) : null;
 
   return (
     <section>
@@ -536,16 +525,18 @@ export function CompaniesPage() {
                 <td>{row.status}</td>
                 <td>{row.city ?? "-"}</td>
                 <td>{row.website ?? "-"}</td>
-                <td>{row.logo_url ? "Yes" : "No"}</td>
+                <td>
+                  {row.logo_url ? (
+                    <img
+                      className="table-logo-thumb"
+                      src={resolveLogoPreviewUrl(row.logo_url)}
+                      alt={`${row.name} logo`}
+                    />
+                  ) : (
+                    <div className="table-logo-empty" aria-label="No logo preview" />
+                  )}
+                </td>
                 <td className="actions">
-                  <button
-                    className="ghost"
-                    type="button"
-                    onClick={() => setSelectedCompanyId(row.id)}
-                    disabled={actionDisabled}
-                  >
-                    Select
-                  </button>
                   <button className="ghost" type="button" onClick={() => void openEdit(row.id)} disabled={actionDisabled}>
                     Edit
                   </button>
@@ -902,8 +893,7 @@ export function CompaniesPage() {
                   onChange={(event) =>
                     setForm((current) => ({
                       ...current,
-                      logo: event.target.files?.[0] ?? null,
-                      remove_logo: event.target.files?.[0] ? false : current.remove_logo
+                      logo: event.target.files?.[0] ?? null
                     }))
                   }
                 />
@@ -921,29 +911,6 @@ export function CompaniesPage() {
                   <img className="logo-preview-image" src={existingLogoUrl} alt="Current company logo" />
                   <p className="state">Current logo from server</p>
                 </div>
-              ) : null}
-
-              {drawer.mode === "edit" ? (
-                <label className="span-2">
-                  <input
-                    type="checkbox"
-                    checked={form.remove_logo}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        remove_logo: event.target.checked,
-                        logo: event.target.checked ? null : current.logo
-                      }))
-                    }
-                  />
-                  Remove existing logo
-                </label>
-              ) : null}
-
-              {drawer.mode === "edit" && existingLogoPath ? (
-                <p className="state span-2">
-                  Current logo path: {existingLogoPath}
-                </p>
               ) : null}
 
               <div className="actions span-2">

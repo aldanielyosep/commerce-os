@@ -330,6 +330,24 @@ button.danger {
   background: #fff;
 }
 
+.table-logo-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  display: block;
+}
+
+.table-logo-empty {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px dashed var(--line);
+  background: #f3eee3;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
