@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { signIn, signOut } from "../lib/api";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { signIn, signOut, UNAUTHORIZED_EVENT } from "../lib/api";
 import type { AuthUser } from "../lib/types";
 
 type AuthState = {
@@ -31,6 +31,11 @@ function readAuthFromStorage(): AuthState {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>(() => readAuthFromStorage());
 
+  const clearAuth = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setState({ token: null, user: null });
+  }, []);
+
   const login = useCallback(async (email: string, password: string) => {
     const result = await signIn(email, password);
     const nextState: AuthState = { token: result.token, user: result.user };
@@ -48,9 +53,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    localStorage.removeItem(STORAGE_KEY);
-    setState({ token: null, user: null });
-  }, [state.token]);
+    clearAuth();
+  }, [state.token, clearAuth]);
+
+  useEffect(() => {
+    const handler = () => {
+      clearAuth();
+    };
+
+    window.addEventListener(UNAUTHORIZED_EVENT, handler);
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, handler);
+  }, [clearAuth]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

@@ -44,7 +44,13 @@ RSpec.describe "Companies logo upload flow", type: :request do
 
         expect(response).to have_http_status(:created)
         expect(response.parsed_body.dig("data", "logo_url")).to be_present
-        expect(Company.order(:id).last.logo).to be_attached
+        company = Company.order(:id).last
+        expect(company.logo).to be_attached
+
+        path_prefix = ENV.fetch("AWS_PATH", "").strip.gsub(%r{\A/+|/+$}, "")
+        expected_prefix = path_prefix.empty? ? "companies/logo/" : "#{path_prefix}/companies/logo/"
+
+        expect(company.logo.blob.key).to start_with(expected_prefix)
       end
     end
 

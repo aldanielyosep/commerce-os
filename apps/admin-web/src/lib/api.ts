@@ -1,6 +1,13 @@
 import type {
   ApiEnvelope,
   AuthUser,
+  Company,
+  CompanyMarketplaceLink,
+  CompanyMarketplaceLinkPayload,
+  CompanyMarketplaceLinkUpdatePayload,
+  CompanyMutationOptions,
+  CompanyPayload,
+  CompanyUpdatePayload,
   Department,
   DepartmentPayload,
   DepartmentUpdatePayload,
@@ -33,7 +40,12 @@ function resolveApiBaseUrl(): string {
   return "http://localhost:3000";
 }
 
-const API_BASE_URL = resolveApiBaseUrl();
+export const API_BASE_URL = resolveApiBaseUrl();
+export const UNAUTHORIZED_EVENT = "commerce_os:unauthorized";
+
+function notifyUnauthorized() {
+  window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT));
+}
 
 export class ApiError extends Error {
   status: number;
@@ -78,7 +90,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined
   });
 
-  let payload: unknown = null;
+  let payload: unknown;
   try {
     payload = await response.json();
   } catch {
@@ -87,6 +99,10 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   if (!response.ok) {
     const envelope = payload as Partial<ApiEnvelope<unknown>> | null;
+    if (response.status === 401 && token) {
+      notifyUnauthorized();
+    }
+
     throw new ApiError(
       envelope?.message ?? "Request failed",
       response.status,
@@ -393,6 +409,139 @@ export async function archiveDocument(token: string, employeeId: number, documen
     `/api/v1/employees/${employeeId}/employee_documents/${documentId}/archive`,
     {
       method: "PATCH",
+      token
+    }
+  );
+}
+
+function appendCompanyFormData(form: FormData, payload: CompanyPayload | CompanyUpdatePayload) {
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    form.append(`company[${key}]`, String(value));
+  });
+}
+
+export async function listCompanies(token: string): Promise<Company[]> {
+  const envelope = await request<ApiEnvelope<Company[]>>("/api/v1/companies", { token });
+  return envelope.data;
+}
+
+export async function getCompany(token: string, companyId: number): Promise<Company> {
+  const envelope = await request<ApiEnvelope<Company>>(`/api/v1/companies/${companyId}`, { token });
+  return envelope.data;
+}
+
+export async function createCompany(
+  token: string,
+  payload: CompanyPayload,
+  options: CompanyMutationOptions = {}
+): Promise<Company> {
+  const form = new FormData();
+  appendCompanyFormData(form, payload);
+
+  if (options.logo) {
+    form.append("company[logo]", options.logo);
+  }
+
+  if (options.remove_logo) {
+    form.append("company[remove_logo]", "true");
+  }
+
+  const envelope = await request<ApiEnvelope<Company>>("/api/v1/companies", {
+    method: "POST",
+    token,
+    body: form
+  });
+
+  return envelope.data;
+}
+
+export async function updateCompany(
+  token: string,
+  companyId: number,
+  payload: CompanyUpdatePayload,
+  options: CompanyMutationOptions = {}
+): Promise<Company> {
+  const form = new FormData();
+  appendCompanyFormData(form, payload);
+
+  if (options.logo) {
+    form.append("company[logo]", options.logo);
+  }
+
+  if (options.remove_logo) {
+    form.append("company[remove_logo]", "true");
+  }
+
+  const envelope = await request<ApiEnvelope<Company>>(`/api/v1/companies/${companyId}`, {
+    method: "PATCH",
+    token,
+    body: form
+  });
+
+  return envelope.data;
+}
+
+export async function deleteCompany(token: string, companyId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(`/api/v1/companies/${companyId}`, {
+    method: "DELETE",
+    token
+  });
+}
+
+export async function listCompanyMarketplaceLinks(
+  token: string,
+  companyId: number
+): Promise<CompanyMarketplaceLink[]> {
+  const envelope = await request<ApiEnvelope<CompanyMarketplaceLink[]>>(
+    `/api/v1/companies/${companyId}/marketplace_links`,
+    { token }
+  );
+  return envelope.data;
+}
+
+export async function createCompanyMarketplaceLink(
+  token: string,
+  companyId: number,
+  payload: CompanyMarketplaceLinkPayload
+): Promise<CompanyMarketplaceLink> {
+  const envelope = await request<ApiEnvelope<CompanyMarketplaceLink>>(
+    `/api/v1/companies/${companyId}/marketplace_links`,
+    {
+      method: "POST",
+      token,
+      body: { company_marketplace_link: payload }
+    }
+  );
+  return envelope.data;
+}
+
+export async function updateCompanyMarketplaceLink(
+  token: string,
+  companyId: number,
+  linkId: number,
+  payload: CompanyMarketplaceLinkUpdatePayload
+): Promise<CompanyMarketplaceLink> {
+  const envelope = await request<ApiEnvelope<CompanyMarketplaceLink>>(
+    `/api/v1/companies/${companyId}/marketplace_links/${linkId}`,
+    {
+      method: "PATCH",
+      token,
+      body: { company_marketplace_link: payload }
+    }
+  );
+  return envelope.data;
+}
+
+export async function deleteCompanyMarketplaceLink(
+  token: string,
+  companyId: number,
+  linkId: number
+): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(
+    `/api/v1/companies/${companyId}/marketplace_links/${linkId}`,
+    {
+      method: "DELETE",
       token
     }
   );

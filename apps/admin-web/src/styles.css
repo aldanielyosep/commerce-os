@@ -296,6 +296,58 @@ button.danger {
   gap: 0.7rem;
 }
 
+.map-picker {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f7f4ec;
+}
+
+.map-canvas {
+  height: 280px;
+  width: 100%;
+}
+
+.coordinate-readout {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  margin-top: 0.8rem;
+}
+
+.logo-preview-wrap {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.logo-preview-image {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.table-logo-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  display: block;
+}
+
+.table-logo-empty {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px dashed var(--line);
+  background: #f3eee3;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -320,6 +372,10 @@ button.danger {
   .grid,
   .grid.two-col,
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .coordinate-readout {
     grid-template-columns: 1fr;
   }
 

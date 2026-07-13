@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginPage } from "./LoginPage";
+import { ApiError } from "../lib/api";
 
 const { loginMock, navigateMock } = vi.hoisted(() => ({
   loginMock: vi.fn(),
@@ -54,5 +55,42 @@ describe("LoginPage", () => {
 
     expect(loginMock).toHaveBeenCalledWith("admin@example.com", "Password123!");
     expect(navigateMock).toHaveBeenCalledWith("/dashboard");
+  });
+
+  it("shows a fallback error when login throws non-ApiError", async () => {
+    loginMock.mockRejectedValue(new Error("network down"));
+    const user = userEvent.setup();
+
+    render(<LoginPage />);
+
+    await user.click(screen.getByRole("button", { name: "Sign In" }));
+
+    expect(await screen.findByText("Unable to sign in")).toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("shows API error message when login throws ApiError", async () => {
+    loginMock.mockRejectedValue(new ApiError("Invalid credentials", 401));
+    const user = userEvent.setup();
+
+    render(<LoginPage />);
+
+    await user.click(screen.getByRole("button", { name: "Sign In" }));
+
+    expect(await screen.findByText("Invalid credentials")).toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("returns submit button label back to Sign In after failed submit", async () => {
+    loginMock.mockRejectedValue(new Error("timeout"));
+    const user = userEvent.setup();
+
+    render(<LoginPage />);
+
+    await user.click(screen.getByRole("button", { name: "Sign In" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Sign In" })).toBeInTheDocument();
+    });
   });
 });

@@ -13,7 +13,6 @@ module Api
         website
         description
         status
-        logo
         remove_logo
       ].freeze
 
@@ -59,10 +58,12 @@ module Api
         return unless valid_logo_mutation_request?
 
         company = Company.new(company_params)
+        logo_blob = attach_logo_blob(company)
 
         if company.save
           render_success(CompanyBlueprint.render_as_hash(company), status: :created)
         else
+          logo_blob&.purge_later
           render_error("Unable to save company", errors: company.errors.full_messages)
         end
       end
@@ -72,10 +73,14 @@ module Api
 
         return unless valid_logo_mutation_request?
 
-        if @company.update(company_params)
+        @company.assign_attributes(company_params)
+        logo_blob = attach_logo_blob(@company)
+
+        if @company.save
           @company.logo.purge if remove_logo_requested?
           render_success(CompanyBlueprint.render_as_hash(@company))
         else
+          logo_blob&.purge_later
           render_error("Unable to update company", errors: @company.errors.full_messages)
         end
       end
@@ -110,6 +115,21 @@ module Api
 
       def logo_payload_present?
         params.dig(:company, :logo).present?
+      end
+
+      def attach_logo_blob(company)
+        uploaded_logo = params.dig(:company, :logo)
+        return nil if uploaded_logo.blank?
+
+        blob = ActiveStorage::Blob.create_and_upload!(
+          io: uploaded_logo,
+          filename: uploaded_logo.original_filename,
+          content_type: uploaded_logo.content_type,
+          key: company.storage_key_for_logo(original_filename: uploaded_logo.original_filename)
+        )
+
+        company.logo.attach(blob)
+        blob
       end
     end
   end
