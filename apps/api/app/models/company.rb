@@ -27,7 +27,7 @@ class Company < ApplicationRecord
   validates :status, presence: true
   validates :website,
             format: {
-              with: %r{\Ahttps://.+}i,
+              with: %r{\Ahttps://.+\z}i,
               message: "must use HTTPS"
             },
             allow_blank: true

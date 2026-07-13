@@ -20,7 +20,7 @@ class CompanyMarketplaceLink < ApplicationRecord
   validates :store_url,
             presence: true,
             format: {
-              with: %r{\Ahttps://.+}i,
+              with: %r{\Ahttps://.+\z}i,
               message: "must use HTTPS"
             }
   validates :is_active, inclusion: { in: [true, false] }
