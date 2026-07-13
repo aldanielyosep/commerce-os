@@ -308,6 +308,181 @@
         }
       }
     },
+    "/api/v1/companies/{company_id}/marketplace_links": {
+      "parameters": [
+        {
+          "name": "company_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "List marketplace links",
+        "tags": [
+          "Company Marketplace Links"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "links listed"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create marketplace link",
+        "tags": [
+          "Company Marketplace Links"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "link created"
+          },
+          "422": {
+            "description": "non-https url rejected"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "company_marketplace_link": {
+                    "type": "object",
+                    "properties": {
+                      "marketplace": {
+                        "type": "string",
+                        "enum": [
+                          "shopee",
+                          "tokopedia",
+                          "tiktok_shop",
+                          "lazada",
+                          "blibli",
+                          "shopify",
+                          "website"
+                        ]
+                      },
+                      "store_name": {
+                        "type": "string"
+                      },
+                      "store_url": {
+                        "type": "string"
+                      },
+                      "is_active": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "marketplace",
+                      "store_name",
+                      "store_url",
+                      "is_active"
+                    ]
+                  }
+                },
+                "required": [
+                  "company_marketplace_link"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/companies/{company_id}/marketplace_links/{id}": {
+      "parameters": [
+        {
+          "name": "company_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Update marketplace link",
+        "tags": [
+          "Company Marketplace Links"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "link updated"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "company_marketplace_link": {
+                    "type": "object",
+                    "properties": {
+                      "store_name": {
+                        "type": "string"
+                      },
+                      "store_url": {
+                        "type": "string"
+                      },
+                      "is_active": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "company_marketplace_link"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete marketplace link",
+        "tags": [
+          "Company Marketplace Links"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "link discarded"
+          }
+        }
+      }
+    },
     "/api/v1/departments": {
       "get": {
         "summary": "List departments",

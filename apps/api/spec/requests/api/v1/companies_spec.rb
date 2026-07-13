@@ -28,14 +28,18 @@ RSpec.describe "Companies" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
+
           expect(body["success"]).to be(true)
+
           rows = body["data"]
-          names = rows.map { |row| row["name"] }
+          names = rows.pluck("name")
+
           expect(names).to include("Alpha Store", "Beta Store")
 
           alpha_row = rows.find { |row| row["name"] == "Alpha Store" }
-          expect(alpha_row["marketplace_links"].size).to eq(1)
-          expect(alpha_row["marketplace_links"].first["marketplace"]).to eq("shopee")
+
+          expect(alpha_row.fetch("marketplace_links").size).to eq(1)
+          expect(alpha_row.fetch("marketplace_links").first.fetch("marketplace")).to eq("shopee")
         end
       end
     end

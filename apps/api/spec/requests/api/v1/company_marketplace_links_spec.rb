@@ -16,8 +16,9 @@ RSpec.describe "Company Marketplace Links" do
         let!(:link_one) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
         let!(:link_two) { create(:company_marketplace_link, company: company, marketplace: :tokopedia) }
         let(:company_id) { company.id }
-
+        # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -64,7 +65,9 @@ RSpec.describe "Company Marketplace Links" do
           }
         end
 
+        # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -88,7 +91,9 @@ RSpec.describe "Company Marketplace Links" do
           }
         end
 
+        # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -112,7 +117,9 @@ RSpec.describe "Company Marketplace Links" do
           }
         end
 
+        # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -163,7 +170,9 @@ RSpec.describe "Company Marketplace Links" do
           }
         end
 
+        # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -185,7 +194,9 @@ RSpec.describe "Company Marketplace Links" do
         let(:company_id) { company.id }
         let(:id) { marketplace_link.id }
 
+        # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
