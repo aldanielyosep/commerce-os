@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_13_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_13_103000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -96,6 +96,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_13_100000) do
     t.index ["discarded_at"], name: "index_companies_on_discarded_at"
     t.index ["status"], name: "index_companies_on_status"
     t.index ["updated_by_id"], name: "index_companies_on_updated_by_id"
+  end
+
+  create_table "company_marketplace_links", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.datetime "discarded_at"
+    t.boolean "is_active", default: true, null: false
+    t.integer "marketplace", null: false
+    t.string "store_name", null: false
+    t.string "store_url", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["company_id", "marketplace"], name: "index_company_marketplace_links_on_company_and_marketplace", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["company_id"], name: "index_company_marketplace_links_on_company_id"
+    t.index ["created_by_id"], name: "index_company_marketplace_links_on_created_by_id"
+    t.index ["discarded_at"], name: "index_company_marketplace_links_on_discarded_at"
+    t.index ["updated_by_id"], name: "index_company_marketplace_links_on_updated_by_id"
   end
 
   create_table "departments", force: :cascade do |t|
@@ -240,6 +258,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_13_100000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "companies", "users", column: "created_by_id"
   add_foreign_key "companies", "users", column: "updated_by_id"
+  add_foreign_key "company_marketplace_links", "companies"
+  add_foreign_key "company_marketplace_links", "users", column: "created_by_id"
+  add_foreign_key "company_marketplace_links", "users", column: "updated_by_id"
   add_foreign_key "departments", "users", column: "created_by_id"
   add_foreign_key "departments", "users", column: "updated_by_id"
   add_foreign_key "employee_departments", "departments"

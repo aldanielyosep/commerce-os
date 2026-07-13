@@ -27,4 +27,8 @@ class CompanyBlueprint < Blueprinter::Base
   field :logo_url do |company|
     Rails.application.routes.url_helpers.rails_blob_path(company.logo, only_path: true) if company.logo.attached?
   end
+
+  association :marketplace_links, blueprint: CompanyMarketplaceLinkBlueprint do |company|
+    company.company_marketplace_links.kept.order(:marketplace)
+  end
 end

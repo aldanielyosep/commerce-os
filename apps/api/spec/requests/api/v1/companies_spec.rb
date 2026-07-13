@@ -12,6 +12,15 @@ RSpec.describe "Companies" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_one) { create(:company, name: "Alpha Store") }
         let!(:company_two) { create(:company, name: "Beta Store") }
+        let!(:company_one_link) do
+          create(
+            :company_marketplace_link,
+            company: company_one,
+            marketplace: :shopee,
+            store_name: "Alpha Official",
+            store_url: "https://shopee.co.id/alpha-official"
+          )
+        end
 
         # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
@@ -20,7 +29,13 @@ RSpec.describe "Companies" do
         run_test! do |response|
           body = JSON.parse(response.body)
           expect(body["success"]).to be(true)
-          expect(body["data"].size).to eq(2)
+          rows = body["data"]
+          names = rows.map { |row| row["name"] }
+          expect(names).to include("Alpha Store", "Beta Store")
+
+          alpha_row = rows.find { |row| row["name"] == "Alpha Store" }
+          expect(alpha_row["marketplace_links"].size).to eq(1)
+          expect(alpha_row["marketplace_links"].first["marketplace"]).to eq("shopee")
         end
       end
     end
@@ -179,6 +194,15 @@ RSpec.describe "Companies" do
       response "200", "company shown" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company, name: "Alpha Store") }
+        let!(:marketplace_link) do
+          create(
+            :company_marketplace_link,
+            company: company_record,
+            marketplace: :tokopedia,
+            store_name: "Alpha Tokopedia",
+            store_url: "https://tokopedia.com/alpha-tokopedia"
+          )
+        end
         let(:id) { company_record.id }
         # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
@@ -187,6 +211,8 @@ RSpec.describe "Companies" do
         run_test! do |response|
           body = JSON.parse(response.body)
           expect(body["data"]["id"]).to eq(company_record.id)
+          expect(body["data"]["marketplace_links"].size).to eq(1)
+          expect(body["data"]["marketplace_links"].first["marketplace"]).to eq("tokopedia")
         end
       end
     end

@@ -14,6 +14,7 @@ module Api
         description
         status
         logo
+        remove_logo
       ].freeze
 
       ADDRESS_PARAMS = %i[
@@ -55,6 +56,8 @@ module Api
       def create
         authorize Company
 
+        return unless valid_logo_mutation_request?
+
         company = Company.new(company_params)
 
         if company.save
@@ -67,7 +70,10 @@ module Api
       def update
         authorize @company
 
+        return unless valid_logo_mutation_request?
+
         if @company.update(company_params)
+          @company.logo.purge if remove_logo_requested?
           render_success(CompanyBlueprint.render_as_hash(@company))
         else
           render_error("Unable to update company", errors: @company.errors.full_messages)
@@ -88,7 +94,22 @@ module Api
       end
 
       def company_params
-        params.expect(company: COMPANY_PARAMS)
+        params.expect(company: COMPANY_PARAMS).except(:remove_logo)
+      end
+
+      def valid_logo_mutation_request?
+        return true unless remove_logo_requested? && logo_payload_present?
+
+        render_error("Unable to process logo", errors: ["Logo upload and remove_logo cannot be sent together"])
+        false
+      end
+
+      def remove_logo_requested?
+        ActiveModel::Type::Boolean.new.cast(params.dig(:company, :remove_logo))
+      end
+
+      def logo_payload_present?
+        params.dig(:company, :logo).present?
       end
     end
   end

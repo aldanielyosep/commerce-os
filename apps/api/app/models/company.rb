@@ -14,6 +14,7 @@ class Company < ApplicationRecord
   enum :status, { active: 0, inactive: 1 }, default: :active
 
   has_one_attached :logo
+  has_many :company_marketplace_links, dependent: :destroy
 
   phony_normalize :phone, default_country_code: "ID"
 

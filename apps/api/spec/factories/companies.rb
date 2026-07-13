@@ -1,9 +1,9 @@
 FactoryBot.define do
   factory :company do
-    sequence(:code) { |n| "COMP#{n}" }
+    sequence(:code) { |n| "COMP#{n}-#{SecureRandom.hex(2)}" }
     sequence(:name) { |n| "Company #{n}" }
     sequence(:owner_name) { |n| "Owner #{n}" }
-    sequence(:email) { |n| "company#{n}@example.com" }
+    sequence(:email) { |n| "company#{n}-#{SecureRandom.hex(2)}@example.com" }
     phone { "+628123450001" }
     company_type { :individual }
     status { :active }
