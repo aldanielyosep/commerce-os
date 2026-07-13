@@ -13,6 +13,11 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      resources :companies do
+        resources :marketplace_links,
+                  controller: "company_marketplace_links",
+                  only: %i[index create update destroy]
+      end
       resources :departments
       resources :users do
         member do

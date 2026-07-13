@@ -95,6 +95,394 @@
         }
       }
     },
+    "/api/v1/companies": {
+      "get": {
+        "summary": "List companies",
+        "tags": [
+          "Companies"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "companies listed"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create company",
+        "tags": [
+          "Companies"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "pt company created"
+          },
+          "422": {
+            "description": "pt company requires business fields"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "company": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "owner_name": {
+                        "type": "string"
+                      },
+                      "company_type": {
+                        "type": "string",
+                        "enum": [
+                          "individual",
+                          "cv",
+                          "pt"
+                        ]
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "phone": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "active",
+                          "inactive"
+                        ]
+                      },
+                      "company_registration_number": {
+                        "type": "string"
+                      },
+                      "nib": {
+                        "type": "string"
+                      },
+                      "latitude": {
+                        "type": "number"
+                      },
+                      "longitude": {
+                        "type": "number"
+                      },
+                      "website": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "code",
+                      "name",
+                      "owner_name",
+                      "company_type",
+                      "email",
+                      "phone",
+                      "status"
+                    ]
+                  }
+                },
+                "required": [
+                  "company"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/companies/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Show company",
+        "tags": [
+          "Companies"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "company shown"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update company",
+        "tags": [
+          "Companies"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "company updated"
+          },
+          "422": {
+            "description": "company invalid coordinates"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "company": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "active",
+                          "inactive"
+                        ]
+                      },
+                      "latitude": {
+                        "type": "number"
+                      },
+                      "longitude": {
+                        "type": "number"
+                      },
+                      "website": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "company"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete company",
+        "tags": [
+          "Companies"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "company discarded"
+          }
+        }
+      }
+    },
+    "/api/v1/companies/{company_id}/marketplace_links": {
+      "parameters": [
+        {
+          "name": "company_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "List marketplace links",
+        "tags": [
+          "Company Marketplace Links"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "links listed"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create marketplace link",
+        "tags": [
+          "Company Marketplace Links"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "link created"
+          },
+          "422": {
+            "description": "non-https url rejected"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "company_marketplace_link": {
+                    "type": "object",
+                    "properties": {
+                      "marketplace": {
+                        "type": "string",
+                        "enum": [
+                          "shopee",
+                          "tokopedia",
+                          "tiktok_shop",
+                          "lazada",
+                          "blibli",
+                          "shopify",
+                          "website"
+                        ]
+                      },
+                      "store_name": {
+                        "type": "string"
+                      },
+                      "store_url": {
+                        "type": "string"
+                      },
+                      "is_active": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "marketplace",
+                      "store_name",
+                      "store_url",
+                      "is_active"
+                    ]
+                  }
+                },
+                "required": [
+                  "company_marketplace_link"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/companies/{company_id}/marketplace_links/{id}": {
+      "parameters": [
+        {
+          "name": "company_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Update marketplace link",
+        "tags": [
+          "Company Marketplace Links"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "link updated"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "company_marketplace_link": {
+                    "type": "object",
+                    "properties": {
+                      "store_name": {
+                        "type": "string"
+                      },
+                      "store_url": {
+                        "type": "string"
+                      },
+                      "is_active": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "company_marketplace_link"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete marketplace link",
+        "tags": [
+          "Company Marketplace Links"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "link discarded"
+          }
+        }
+      }
+    },
     "/api/v1/departments": {
       "get": {
         "summary": "List departments",

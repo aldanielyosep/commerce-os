@@ -86,11 +86,7 @@ jobs:
         run: npm install --global @railway/cli
 
       - name: Deploy api service to Railway production
-        run: railway up --service api-prd --detach
-
-      - name: Prepare API databases on Railway production
-        working-directory: apps/api
-        run: railway run --service api-prd -- bundle exec rails db:prepare
+        run: railway up --service api --detach
 
       - name: Deployment summary
         run: |
@@ -98,7 +94,7 @@ jobs:
             echo "## Release Deploy Summary"
             echo "- Target: api"
             echo "- Environment: production"
-            echo "- Service: api-prd"
+            echo "- Service: api"
           } >> "$GITHUB_STEP_SUMMARY"
 
   deploy_prod_admin_web:
