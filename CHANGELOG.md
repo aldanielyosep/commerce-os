@@ -1,3 +1,29 @@
+# [1.11.0](https://github.com/aldanielyosep/commerce-os/compare/v1.10.0...v1.11.0) (2026-07-13)
+
+
+### Bug Fixes
+
+* **storage-file:** ci test fail vars are absent ([a1efeb8](https://github.com/aldanielyosep/commerce-os/commit/a1efeb84385b113e5f7ad7afe16ec46611e1e1a3))
+* **storage-file:** lint aws_path ([262c710](https://github.com/aldanielyosep/commerce-os/commit/262c710e69b3d745b41868f9fb63c66973cdd426))
+* **storage-file:** unit test upload documents ([e5744d9](https://github.com/aldanielyosep/commerce-os/commit/e5744d9d28c99577033c2c17e12fa7a23cc0a640))
+
+
+### Features
+
+* **ci:** add ci frontend ([ef01a29](https://github.com/aldanielyosep/commerce-os/commit/ef01a29853b34a034c3ee472aac3c4de43021b2d))
+* **ci:** add ci frontend ([60ebc98](https://github.com/aldanielyosep/commerce-os/commit/60ebc982b4e78c625ddcd1c5340ee921cd7cb766))
+* **ci:** add ci prod ([127982a](https://github.com/aldanielyosep/commerce-os/commit/127982a86871683684fc0951adebfc4f23b1fec9))
+* **ci:** remove tag version pnpm ([75ad4b6](https://github.com/aldanielyosep/commerce-os/commit/75ad4b67ba17ef5327e4f7543a13039151c3d8d6))
+* **ci:** setup railway admin-web service ([bf7ac0b](https://github.com/aldanielyosep/commerce-os/commit/bf7ac0bfa651aa32e2301baa6e37f7acad92ac63))
+* **ci:** setup railway admin-web service ([65f8b74](https://github.com/aldanielyosep/commerce-os/commit/65f8b74ec4306bd5f9f3ef88c0e1d092f3cb1da3))
+* **ci:** setup railway admin-web service ([897108b](https://github.com/aldanielyosep/commerce-os/commit/897108ba656bbe12c6089ae1a95d9d3b014ed057))
+* **ci:** setup railway admin-web service ([7e63892](https://github.com/aldanielyosep/commerce-os/commit/7e63892d4865dd6a43e3cedaf328520641059a36))
+* **ci:** setup railway admin-web service ([9e92bbc](https://github.com/aldanielyosep/commerce-os/commit/9e92bbc21bdd764fdb700327aeed296dc95555c3))
+* **ci:** setup railway admin-web service ([4e5cc65](https://github.com/aldanielyosep/commerce-os/commit/4e5cc65e3470f62a98a72efbbad61293f37642cd))
+* **ci:** setup railway api service ([e073f13](https://github.com/aldanielyosep/commerce-os/commit/e073f13a47efb0f0b90e2dcb22c493995f8e4232))
+* **ci:** setup railway api service ([1333cf9](https://github.com/aldanielyosep/commerce-os/commit/1333cf945c5754232c3377a74ce1274bbbea2303))
+* **storage-file:** add s3 compatible for employees documents ([9b2c63f](https://github.com/aldanielyosep/commerce-os/commit/9b2c63f371ffa45c7a0940f00c89133dd19062dc))
+
 # [1.10.0](https://github.com/aldanielyosep/commerce-os/compare/v1.9.0...v1.10.0) (2026-07-11)
 
 
