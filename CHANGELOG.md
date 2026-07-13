@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/aldanielyosep/commerce-os/compare/v1.13.0...v1.14.0) (2026-07-13)
+
+
+### Features
+
+* **ci:** add railway token prod env ([cc569da](https://github.com/aldanielyosep/commerce-os/commit/cc569dad717ea6d53122d3f2a1a099fc0460c8f0))
+
 # [1.13.0](https://github.com/aldanielyosep/commerce-os/compare/v1.12.0...v1.13.0) (2026-07-13)
 
 
