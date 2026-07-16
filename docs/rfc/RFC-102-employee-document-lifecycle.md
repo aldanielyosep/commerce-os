@@ -18,6 +18,14 @@
 
 Mendefinisikan lifecycle dokumen employee dari upload sampai archive dengan storage S3-compatible.
 
+## Related Documents
+
+- ARCH-000 Foundation Architecture
+- PRD-100 HR Foundation
+- TDD-100 HR API Contract
+- RFC-100 HR Foundation Implementation
+- RFC-101 Access Control and Role Matrix (HR)
+
 ---
 
 ## 2. Scope

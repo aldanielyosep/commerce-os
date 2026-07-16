@@ -18,6 +18,14 @@
 
 Mendefinisikan matriks akses role `super_admin` dan `admin` agar policy API dan UI guard konsisten.
 
+## Related Documents
+
+- ARCH-000 Foundation Architecture
+- PRD-100 HR Foundation
+- TDD-100 HR API Contract
+- RFC-100 HR Foundation Implementation
+- RFC-102 Employee Document Lifecycle
+
 ---
 
 ## 2. Roles

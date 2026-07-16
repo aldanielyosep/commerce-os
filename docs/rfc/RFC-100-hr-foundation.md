@@ -27,6 +27,14 @@ RFC ini mendefinisikan implementasi teknis HR Foundation untuk `api` dan `admin-
 
 Implementasi wajib mengikuti baseline ARCH-000 (auth, pagination/search/order, soft delete, test/lint/security/coverage gates).
 
+## Related Documents
+
+- ARCH-000 Foundation Architecture
+- PRD-100 HR Foundation
+- TDD-100 HR API Contract
+- RFC-101 Access Control and Role Matrix (HR)
+- RFC-102 Employee Document Lifecycle
+
 Dokumen turunan yang wajib dirujuk untuk implementasi detail:
 
 - RFC-101 Access Control and Role Matrix (HR)
