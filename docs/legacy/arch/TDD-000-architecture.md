@@ -4,7 +4,7 @@ Status dokumen ini: legacy reference only.
 
 Untuk baseline arsitektur aktif, gunakan dokumen berikut:
 
-- [ARCH-000 Foundation Architecture](./ARCH-000-foundation.md)
+- [ARCH-000 Foundation Architecture](../../arch/ARCH-000-foundation.md)
 
 Alasan perubahan:
 
