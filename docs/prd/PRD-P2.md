@@ -1,25 +1,10 @@
-# Product Requirements Document (PRD)
+# PRD-P2 (Legacy)
 
-# Employee Management System
+Status dokumen ini: legacy reference only.
 
+Dokumen HR aktif gunakan:
 
-# 6. Future Enhancements
+- [PRD-100 HR Foundation](./PRD-100-hr-foundation.md)
+- [RFC-100 HR Foundation Implementation](../rfc/RFC-100-hr-foundation.md)
 
-### Phase 2
-
-* Attendance Management
-* Leave Management
-* Payroll Integration
-* Performance Review
-* Organization Chart
-* Employee Self-Service Portal
-* Mobile Application
-
-### Phase 3
-
-* Recruitment Module
-* Onboarding Workflow
-* Asset Management
-* Training & Certification Tracking
-* KPI Management
-* Succession Planning
+Daftar enhancement pada dokumen ini dapat dipindahkan secara selektif ke roadmap setelah fondasi HR selesai.
