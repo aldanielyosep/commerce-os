@@ -10,7 +10,7 @@
 | Version | 1.0 |
 | Owner | Engineering Team |
 | Date | 2026-07-16 |
-| Depends On | ARCH-000, PRD-100, TDD-100, RFC-101, RFC-102 |
+| Depends On | ARCH-000, PRD-100, PRD-110, TDD-100, RFC-101, RFC-102, RFC-110 |
 
 ---
 
@@ -31,9 +31,11 @@ Implementasi wajib mengikuti baseline ARCH-000 (auth, pagination/search/order, s
 
 - ARCH-000 Foundation Architecture
 - PRD-100 HR Foundation
+- PRD-110 Companies Foundation
 - TDD-100 HR API Contract
 - RFC-101 Access Control and Role Matrix (HR)
 - RFC-102 Employee Document Lifecycle
+- RFC-110 Companies Foundation
 
 Dokumen turunan yang wajib dirujuk untuk implementasi detail:
 
@@ -145,6 +147,7 @@ Dokumen turunan yang wajib dirujuk untuk implementasi detail:
 - Fase sekarang: company dominan individual.
 - System harus ready untuk CV/PT dengan kolom business data yang sudah disiapkan.
 - HR module tidak boleh hard-code asumsi company hanya individual.
+- Detail implementasi domain Companies dirujuk ke PRD-110 dan RFC-110.
 
 ---
 

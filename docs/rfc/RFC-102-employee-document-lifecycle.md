@@ -10,7 +10,7 @@
 | Version | 1.0 |
 | Owner | Engineering Team |
 | Date | 2026-07-16 |
-| Depends On | ARCH-000, RFC-100, TDD-100 |
+| Depends On | ARCH-000, RFC-100, RFC-110, TDD-100, PRD-110 |
 
 ---
 
@@ -22,9 +22,11 @@ Mendefinisikan lifecycle dokumen employee dari upload sampai archive dengan stor
 
 - ARCH-000 Foundation Architecture
 - PRD-100 HR Foundation
+- PRD-110 Companies Foundation
 - TDD-100 HR API Contract
 - RFC-100 HR Foundation Implementation
 - RFC-101 Access Control and Role Matrix (HR)
+- RFC-110 Companies Foundation
 
 ---
 
