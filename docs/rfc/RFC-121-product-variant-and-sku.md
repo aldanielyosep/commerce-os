@@ -27,6 +27,8 @@ RFC ini mendefinisikan implementasi teknis Variant sebagai turunan Product SPU a
 - TDD-121 Product Variant API Contract
 - RFC-122 Marketplace Data Ingestion (Pre-API Mode)
 - TDD-122 Marketplace Ingestion Contract
+- RFC-130 Promotion and Voucher Engine
+- TDD-130 Promotion and Voucher API Contract
 
 ---
 
@@ -108,6 +110,28 @@ Hierarchy implementasi:
 - Price berada di level variant.
 - Stock berada di level variant.
 - Product SPU tidak menyimpan price/stock operasional.
+
+### 6.1 Price History Model
+
+- Variant menyimpan `current_price` sebagai snapshot harga aktif.
+- Perubahan harga dicatat ke `variant_price_histories` dengan:
+	- `effective_from`
+	- `effective_to` (nullable untuk active row)
+	- `price`
+	- `changed_by`
+- Dalam satu waktu, hanya boleh ada satu baris harga aktif per variant.
+- Effective period antar row tidak boleh overlap.
+
+### 6.2 Stock Ledger Model
+
+- Variant menyimpan `current_stock` sebagai snapshot stok aktif.
+- Perubahan stok dicatat sebagai event immutable di `variant_stock_ledger`.
+- Event minimum:
+	- `adjustment_in`
+	- `adjustment_out`
+	- `sale_deduction`
+	- `return_in`
+- Snapshot `current_stock` harus konsisten dengan akumulasi ledger.
 
 Future extension:
 

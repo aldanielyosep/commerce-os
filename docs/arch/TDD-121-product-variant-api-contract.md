@@ -32,6 +32,7 @@ Mendefinisikan kontrak API Variant agar API dan admin-web sinkron untuk use case
 
 - Detail strategi domain variant mengikuti RFC-121.
 - Detail policy scope mengacu RFC-111.
+- Detail campaign discount mengacu RFC-130/TDD-130.
 
 ---
 
@@ -82,6 +83,8 @@ List query params:
 
 - `PATCH /api/v1/products/:product_id/variants/:id/price`
 - `PATCH /api/v1/products/:product_id/variants/:id/stock`
+- `GET /api/v1/products/:product_id/variants/:id/price_histories`
+- `GET /api/v1/products/:product_id/variants/:id/stock_ledger`
 
 ### 4.3 Variant Images
 
@@ -112,18 +115,50 @@ List query params:
 }
 ```
 
+Catatan:
+
+- `price` pada create menjadi `current_price` awal variant.
+- `stock` pada create menjadi `current_stock` awal variant.
+
 ### 5.2 Variant Update Payload
 
 ```json
 {
   "variant": {
     "status": "inactive",
-    "price": 1200,
-    "stock": 350,
     "attributes": [
       { "name": "motif", "value": "Singa" },
       { "name": "ukuran", "value": "22x30" }
     ]
+  }
+}
+```
+
+Catatan:
+
+- Perubahan harga disarankan melalui endpoint `PATCH .../price` agar history tercatat konsisten.
+- Perubahan stok disarankan melalui endpoint `PATCH .../stock` agar ledger event tercatat.
+
+### 5.3 Price Update Payload
+
+```json
+{
+  "price": {
+    "value": 1200,
+    "effective_from": "2026-07-20T00:00:00Z",
+    "reason": "promo period adjustment"
+  }
+}
+```
+
+### 5.4 Stock Update Payload
+
+```json
+{
+  "stock": {
+    "delta": -150,
+    "event_type": "adjustment_out",
+    "reason": "manual stock correction"
   }
 }
 ```
@@ -149,7 +184,20 @@ List query params:
 - `price` >= 0.
 - `stock` >= 0.
 
-### 6.4 Variant Images
+### 6.4 Price History
+
+- `effective_from` wajib ada pada perubahan harga.
+- Hanya boleh satu harga aktif per variant pada satu waktu.
+- Effective window antar price history tidak boleh overlap.
+
+### 6.5 Stock Ledger
+
+- `event_type` wajib enum valid.
+- `delta` tidak boleh 0.
+- Update stok wajib menghasilkan satu ledger event immutable.
+- `current_stock` setelah apply event tidak boleh negatif.
+
+### 6.6 Variant Images
 
 - Allowed extension: `jpg`, `jpeg`, `png`, `webp`.
 - Max file size: 5 MB.
@@ -214,10 +262,14 @@ Duplicate barcode:
 
 - CRUD variant.
 - Update price/stock.
+- Price history retrieval.
+- Stock ledger retrieval.
 - Variant image upload/update/delete.
 - Search/pagination/ordering.
 - Duplicate combination ditolak.
 - Duplicate sku/barcode ditolak.
+- Price history overlap ditolak.
+- Concurrent stock update tidak menghasilkan stok negatif.
 
 ### 10.2 Policy Specs
 

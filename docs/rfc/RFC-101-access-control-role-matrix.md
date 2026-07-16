@@ -16,7 +16,9 @@
 
 ## 1. Summary
 
-Mendefinisikan matriks akses role `super_admin` dan `admin` agar policy API dan UI guard konsisten.
+Mendefinisikan matriks akses role internal agar policy API dan UI guard konsisten dengan prinsip least-privilege.
+
+Modul sensitif bisnis (`salary`, `promotion`, `voucher`) dibatasi hanya untuk `super_admin` (C-level).
 
 ## Related Documents
 
@@ -32,28 +34,41 @@ Mendefinisikan matriks akses role `super_admin` dan `admin` agar policy API dan 
 
 ## 2. Roles
 
-- `super_admin`: full access + sensitive actions.
-- `admin`: operational access terbatas.
+- `super_admin`: full access + sensitive actions (C-level only).
+- `admin_company`: operasional company/product non-sensitif, berbasis company scope.
+- `admin_storefront_ops`: operasional order/storefront non-sensitif.
+
+Catatan transisi:
+
+- Role `admin` legacy dipetakan bertahap ke `admin_company` atau `admin_storefront_ops`.
 
 ---
 
 ## 3. Permission Matrix
 
-| Feature | Action | super_admin | admin |
-|------|------|------|------|
-| Employee | View/List | Allow | Allow |
-| Employee | Create/Update | Allow | Allow |
-| Employee | Terminate | Allow | Allow |
-| Employee | Soft Delete | Allow | Deny |
-| Department | CRUD | Allow | Allow |
-| Department Assignment | Assign/Remove | Allow | Allow |
-| Career History | Create/Update/View | Allow | Allow |
-| Salary History | View | Allow | Allow |
-| Salary History | Create/Update | Allow | Allow |
-| Employee Documents | Upload/View/Download/Archive | Allow | Allow |
-| Users | Create/Disable/Delete | Allow | Deny |
-| Users | Role Change | Allow | Deny |
-| Audit Logs | View | Allow | Deny |
+| Feature | Action | super_admin | admin_company | admin_storefront_ops |
+|------|------|------|------|------|
+| Employee | View/List | Allow | Allow | Deny |
+| Employee | Create/Update | Allow | Allow | Deny |
+| Employee | Terminate | Allow | Deny | Deny |
+| Employee | Soft Delete | Allow | Deny | Deny |
+| Department | CRUD | Allow | Allow | Deny |
+| Department Assignment | Assign/Remove | Allow | Allow | Deny |
+| Career History | Create/Update/View | Allow | Allow | Deny |
+| Salary History | View | Allow | Deny | Deny |
+| Salary History | Create/Update | Allow | Deny | Deny |
+| Employee Documents | Upload/View/Download/Archive | Allow | Allow | Deny |
+| Companies | CRUD | Allow | Allow (scoped) | Deny |
+| Product SPU/Variant | CRUD | Allow | Allow (scoped) | Deny |
+| Promotion | Create/Update/Delete | Allow | Deny | Deny |
+| Promotion | View/List | Allow | Deny | Deny |
+| Voucher | Create/Update/Delete | Allow | Deny | Deny |
+| Voucher | View/List | Allow | Deny | Deny |
+| Orders | View/List | Allow | Allow (scoped) | Allow (scoped) |
+| Orders | Fulfillment/Status Update | Allow | Allow (scoped) | Allow (scoped) |
+| Users | Create/Disable/Delete | Allow | Deny | Deny |
+| Users | Role Change | Allow | Deny | Deny |
+| Audit Logs | View | Allow | Deny | Deny |
 
 ---
 
@@ -62,13 +77,15 @@ Mendefinisikan matriks akses role `super_admin` dan `admin` agar policy API dan 
 - Enforcement utama di API (Pundit policy).
 - UI guard di admin-web hanya sebagai layer tambahan.
 - Semua akses ditolak harus return 401/403 sesuai konteks.
+- Role non-super-admin wajib lolos company scope check untuk resource scoped.
 
 ---
 
 ## 5. Security Notes
 
 - Endpoint user management dibatasi ketat ke `super_admin`.
-- Aksi sensitif (role change, delete user, delete employee) wajib audit log.
+- Modul sensitif (`salary`, `promotion`, `voucher`) dibatasi ketat ke `super_admin`.
+- Aksi sensitif (role change, campaign mutation, salary mutation, delete user, delete employee) wajib audit log.
 
 ---
 
@@ -85,4 +102,5 @@ Mendefinisikan matriks akses role `super_admin` dan `admin` agar policy API dan 
 1. Finalisasi Pundit policy matrix per resource.
 2. Sinkronkan guard role di admin-web pages.
 3. Tambahkan test coverage untuk cases deny.
-4. Review ulang permission matrix setelah UAT HR.
+4. Migrasi role `admin` legacy ke `admin_company` atau `admin_storefront_ops`.
+5. Review ulang permission matrix setelah UAT HR dan storefront ops.

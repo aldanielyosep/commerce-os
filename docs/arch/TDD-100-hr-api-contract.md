@@ -113,7 +113,11 @@ Create payload example:
 - `POST /api/v1/employees/:employee_id/salary_records`
 - `PATCH /api/v1/employees/:employee_id/salary_records/:id`
 
-Rule: salary period tidak boleh overlap per employee.
+Rules:
+
+- Salary period tidak boleh overlap per employee.
+- Endpoint salary records adalah modul sensitif: `super_admin` only.
+- Role non-super-admin wajib ditolak dengan `403`.
 
 ### 4.5 Employee Documents
 
@@ -139,6 +143,7 @@ Rule: salary period tidak boleh overlap per employee.
 
 - API request specs untuk semua endpoint utama HR.
 - Policy specs untuk semua aksi sensitif.
+- Policy specs wajib mencakup deny salary records untuk semua role non-super-admin.
 - Coverage per file >= 80%.
 - Coverage overall >= 90%.
 - Lint pass.
