@@ -29,10 +29,12 @@ Fokus utama:
 
 - ARCH-000 Foundation Architecture
 - PRD-110 Companies Foundation
+- TDD-110 Companies API Contract
 - TDD-100 HR API Contract
 - RFC-100 HR Foundation Implementation
 - RFC-101 Access Control and Role Matrix (HR)
 - RFC-102 Employee Document Lifecycle
+- RFC-111 Company-Scoped Authorization
 
 ---
 
@@ -164,4 +166,4 @@ Fokus utama:
 
 1. Apakah geocoding reverse lookup diperlukan di fase foundation?
 2. Apakah legal fields CV/PT wajib semua di phase awal atau bertahap?
-3. Apakah multi-company role scope (per company) masuk fase berikutnya?
+3. Multi-company role scope (per company) ditetapkan sebagai fase berikutnya melalui RFC-111.
