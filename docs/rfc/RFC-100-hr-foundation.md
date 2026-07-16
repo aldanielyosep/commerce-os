@@ -10,7 +10,7 @@
 | Version | 1.0 |
 | Owner | Engineering Team |
 | Date | 2026-07-16 |
-| Depends On | ARCH-000, PRD-100 |
+| Depends On | ARCH-000, PRD-100, TDD-100, RFC-101, RFC-102 |
 
 ---
 
@@ -26,6 +26,11 @@ RFC ini mendefinisikan implementasi teknis HR Foundation untuk `api` dan `admin-
 - Internal admin access
 
 Implementasi wajib mengikuti baseline ARCH-000 (auth, pagination/search/order, soft delete, test/lint/security/coverage gates).
+
+Dokumen turunan yang wajib dirujuk untuk implementasi detail:
+
+- RFC-101 Access Control and Role Matrix (HR)
+- RFC-102 Employee Document Lifecycle
 
 ---
 
@@ -82,6 +87,7 @@ Implementasi wajib mengikuti baseline ARCH-000 (auth, pagination/search/order, s
 - Internal user mengakses admin-web menggunakan JWT.
 - Authorization diputuskan di API policy layer.
 - Role minimum saat ini: `super_admin`, `admin`.
+- Aturan permission matrix detail mengikuti RFC-101.
 
 ---
 
@@ -105,6 +111,12 @@ Implementasi wajib mengikuti baseline ARCH-000 (auth, pagination/search/order, s
 ### 4.4 Auditing
 
 - Perubahan data kritis employee, department, documents, position history, salary records harus tercatat audit trail.
+
+### 4.5 Cross-Reference
+
+- Kontrak endpoint dan request/response baseline mengikuti TDD-100.
+- Detail akses role/action mengikuti RFC-101.
+- Detail lifecycle dokumen employee mengikuti RFC-102.
 
 ---
 
@@ -174,6 +186,8 @@ Implementasi wajib mengikuti baseline ARCH-000 (auth, pagination/search/order, s
 2. Standarkan pagination util lintas endpoint HR bila belum konsisten.
 3. Tambahkan permission matrix granular jika role global belum cukup.
 4. Validasi kesiapan multi-company untuk employee code sequence jika nanti diperlukan.
+
+Backlog ini harus dikerjakan sinkron dengan RFC-101 dan RFC-102 agar tidak terjadi gap antara policy, API contract, dan dokumen lifecycle.
 
 ---
 

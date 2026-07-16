@@ -319,7 +319,7 @@ Section:
 - Province
 - City
 - Postal Code
-- Company Location (Google Maps)
+- Company Location (Map Picker - react-leaflet)
 
 ---
 
@@ -372,7 +372,7 @@ Field:
 - Province
 - City
 - Postal Code
-- Search Location (Google Maps)
+- Search Location (Map Picker)
 - Latitude *(Read Only)*
 - Longitude *(Read Only)*
 
@@ -399,16 +399,16 @@ Preview menggunakan ukuran yang sama seperti pada Company List sehingga hasil ya
 
 ## Company Location Preview
 
-Admin dapat menentukan lokasi perusahaan menggunakan **Google Maps**.
+Admin dapat menentukan lokasi perusahaan menggunakan **react-leaflet map picker**.
 
 Flow:
 
-1. Admin mencari lokasi melalui Google Maps Search Box.
-2. Memilih lokasi dari hasil pencarian.
-3. Marker otomatis muncul pada peta.
-4. Marker dapat dipindahkan (*drag & drop*) untuk menyesuaikan posisi.
-5. Latitude dan Longitude otomatis diperbarui.
-6. Nilai Latitude dan Longitude ditampilkan sebagai **read-only**.
+1. Admin membuka peta pada form Company.
+2. Admin menaruh titik (pin) langsung pada peta.
+3. Marker dapat dipindahkan (*drag & drop*) untuk menyesuaikan posisi.
+4. Latitude dan Longitude otomatis diperbarui dari posisi marker.
+5. Nilai Latitude dan Longitude ditampilkan sebagai **read-only**.
+6. Saat mode Edit, marker otomatis berada di koordinat yang sudah tersimpan.
 
 Contoh UI:
 
@@ -429,12 +429,12 @@ Postal Code
 
 Search Location
 -------------------------------------------------------
-Golden Park 3
+Klik peta untuk menaruh titik
 -------------------------------------------------------
 
 +------------------------------------------------------+
 |                                                      |
-|                  Google Maps                         |
+|               react-leaflet map                      |
 |                                                      |
 |                        📍                            |
 |                                                      |
@@ -637,8 +637,8 @@ Features:
 
 ## Company Location
 
-- Admin dapat mencari lokasi menggunakan Google Maps.
-- Admin dapat memilih lokasi melalui Google Maps.
+- Admin dapat memilih lokasi melalui map picker berbasis react-leaflet.
+- Admin dapat menaruh titik langsung pada map.
 - Marker dapat dipindahkan (*drag & drop*).
 - Latitude dan Longitude diperbarui secara otomatis.
 - Latitude dan Longitude ditampilkan sebagai read-only.
