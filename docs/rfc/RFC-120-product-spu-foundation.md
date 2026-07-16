@@ -25,6 +25,9 @@ RFC ini mendefinisikan implementasi teknis Product pada level SPU sebagai source
 - PRD-110 Companies Foundation
 - RFC-111 Company-Scoped Authorization
 - TDD-120 Product SPU API Contract
+- PRD-121 Product Variant Foundation
+- RFC-121 Product Variant and SKU Aggregate
+- TDD-121 Product Variant API Contract
 
 ---
 
@@ -146,4 +149,5 @@ Perubahan state melalui service object, bukan direct event call di controller.
 2. Implement product code generator service + sequence storage.
 3. Implement API CRUD + lifecycle + image upload.
 4. Implement admin-web form sesuai contract.
-5. Lengkapi test, lint, security gates sebelum release.
+5. Implement modul Variant sesuai PRD-121/RFC-121/TDD-121.
+6. Lengkapi test, lint, security gates sebelum release.
