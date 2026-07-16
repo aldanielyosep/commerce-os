@@ -72,9 +72,12 @@ RFC ini mendefinisikan implementasi teknis Product pada level SPU sebagai source
 
 ## 4. Description Strategy
 
-- Description mendukung rich text.
-- Rich text adalah canonical source untuk presentasi konten.
-- Simpan plain text turunan untuk kebutuhan indexing/search.
+- Admin-web menggunakan WYSIWYG editor untuk input description.
+- Payload dari WYSIWYG disimpan sebagai `description_richtext` (structured JSON) dan menjadi canonical source.
+- Sistem menghasilkan turunan `description_html` yang sudah disanitasi untuk rendering.
+- Sistem menghasilkan turunan `description_text` untuk kebutuhan indexing/search.
+- Sanitasi wajib memakai allowlist tag aman (`p`, `br`, `ul`, `ol`, `li`, `strong`, `em`, `a`).
+- Tag/atribut berbahaya (`script`, `style`, inline event handler) wajib diblokir.
 - Channel override description belum diaktifkan pada fase ini.
 
 ---

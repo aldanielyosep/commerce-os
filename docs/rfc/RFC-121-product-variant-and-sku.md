@@ -25,6 +25,8 @@ RFC ini mendefinisikan implementasi teknis Variant sebagai turunan Product SPU a
 - RFC-120 Product SPU Foundation
 - RFC-111 Company-Scoped Authorization
 - TDD-121 Product Variant API Contract
+- RFC-122 Marketplace Data Ingestion (Pre-API Mode)
+- TDD-122 Marketplace Ingestion Contract
 
 ---
 
@@ -141,6 +143,7 @@ Validasi image mengikuti baseline RFC-120.
 - Satu listing channel dapat memetakan banyak variant.
 - Mapping transaksi order line harus menuju variant.
 - Untuk channel seperti Shopee, key mapping utama di variant adalah `item_id + model_id`.
+- Selama Open API masih review, ingestion awal mengikuti RFC-122 (CSV/manual pre-API mode).
 
 ---
 

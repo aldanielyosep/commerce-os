@@ -119,6 +119,8 @@ Notes:
 
 - `product_code` tidak diterima dari client.
 - `product_code` dihasilkan otomatis di backend saat create.
+- `description_richtext` dikirim dari admin-web WYSIWYG editor.
+- `description_html` dan `description_text` adalah server-derived fields (read-only dari client).
 
 ### 5.2 Product Update Payload
 
@@ -162,7 +164,10 @@ Multipart form data:
 ### 6.2 Description
 
 - Rich text object harus valid schema minimal editor yang dipakai.
-- Server menurunkan plain-text version untuk indexing/search.
+- Server melakukan sanitasi output HTML dari rich text.
+- Server menurunkan `description_text` untuk indexing/search.
+- Sanitizer wajib menghapus tag/atribut berbahaya (`script`, `style`, inline event handler).
+- Sanitizer hanya mengizinkan tag aman (`p`, `br`, `ul`, `ol`, `li`, `strong`, `em`, `a`).
 
 ### 6.3 Images
 
@@ -203,6 +208,16 @@ Product code override attempt:
   "success": false,
   "message": "Validation failed",
   "errors": ["product_code is system-generated and cannot be changed"]
+}
+```
+
+Invalid rich text payload:
+
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": ["description_richtext is invalid"]
 }
 ```
 
