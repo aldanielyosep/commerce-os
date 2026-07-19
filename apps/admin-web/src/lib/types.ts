@@ -9,6 +9,13 @@ export type AuthUser = {
   status: UserStatus;
 };
 
+export type AuthSession = {
+  token: string;
+  refresh_token: string;
+  refresh_token_expires_at: string;
+  user: AuthUser;
+};
+
 export type ApiEnvelope<T> = {
   success: boolean;
   data: T;
@@ -16,6 +23,25 @@ export type ApiEnvelope<T> = {
   message?: string;
   errors?: string[];
 };
+
+export type PaginationMeta = {
+  page: number;
+  per_page: number;
+  total_count: number;
+  total_pages: number;
+};
+
+export type PaginatedResult<T> = {
+  items: T[];
+  meta: PaginationMeta;
+};
+
+export type PaginationParams = {
+  page?: number;
+  per_page?: number;
+};
+
+export type SortDirection = "asc" | "desc";
 
 export type EmployeeGender = "male" | "female";
 export type EmployeeStatus = "active" | "probation" | "resigned" | "terminated" | "retired";
@@ -59,6 +85,8 @@ export type EmployeeListFilters = {
   q?: string;
 };
 
+export type EmployeeOrderBy = "employee_id" | "full_name" | "email" | "status" | "city" | "join_date";
+
 export type Department = {
   id: number;
   code: string;
@@ -71,6 +99,8 @@ export type DepartmentPayload = {
   code: string;
   name: string;
 };
+
+export type DepartmentOrderBy = "code" | "name" | "created_at";
 
 export type DepartmentUpdatePayload = Partial<DepartmentPayload>;
 
@@ -96,6 +126,8 @@ export type UserRecord = {
   created_at?: string;
   updated_at?: string;
 };
+
+export type UserOrderBy = "id" | "email" | "username" | "role" | "status" | "created_at";
 
 export type UserPayload = {
   email: string;
@@ -159,6 +191,8 @@ export type EmployeeDocument = {
 
 export type CompanyType = "individual" | "cv" | "pt";
 export type CompanyStatus = "active" | "inactive";
+
+export type CompanyOrderBy = "code" | "name" | "owner_name" | "status" | "city" | "created_at";
 
 export type CompanyMarketplace =
   | "shopee"

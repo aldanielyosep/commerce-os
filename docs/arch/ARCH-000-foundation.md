@@ -70,13 +70,15 @@ Storefront (React) ---->                     -> S3 Compatible Object Storage (Ra
 
 - Semua request admin-web ke API wajib authenticated.
 - Semua request storefront ke API wajib authenticated.
-- Strategi auth: JWT access token + refresh token.
+- Strategi auth aktif saat ini: JWT access token (Bearer token).
+- Refresh token flow bersifat mandatory untuk readiness production storefront dan harus diimplementasikan sebagai endpoint API dedicated.
 
 ### 4.2 Auth Domain Boundary
 
 - Domain auth dipisah:
   - admin users (internal)
   - storefront customers (external)
+- Pemisahan model, policy scope, dan lifecycle token untuk admin users vs storefront customers wajib dipertahankan saat implementasi storefront diaktifkan.
 
 ### 4.3 Authorization
 
@@ -94,6 +96,14 @@ Secara default, endpoint list harus mendukung:
 - pagination
 - search
 - ordering
+
+Kontrak minimum endpoint list:
+
+- Query `page` (default: 1).
+- Query `per_page` (default: 20, maksimum: 100).
+- Query `q` untuk search bebas (jika domain relevan).
+- Query `order_by` + `order_dir` (`asc|desc`) dengan whitelist field yang valid.
+- Response `meta` harus memuat informasi pagination (minimal: `page`, `per_page`, `total_count`, `total_pages`).
 
 ### 5.2 Soft Delete
 
@@ -137,6 +147,8 @@ Aturan ini wajib berlaku di API, admin-web, dan storefront.
 
 - Gunakan Bullet untuk mendeteksi N+1 query di API.
 - Endpoint yang mengakses relasi harus menggunakan eager loading yang sesuai.
+- Bullet wajib aktif minimal di environment development.
+- Direkomendasikan aktif di test/CI untuk endpoint kritikal agar potensi N+1 terdeteksi sebelum merge.
 
 ### 7.2 Validation
 
@@ -183,6 +195,8 @@ Pipeline deploy mengikuti workflow CI/CD yang sudah ada di repository.
 Sebuah fitur dianggap siap merge hanya jika:
 
 - memenuhi auth, pagination/search/ordering (jika endpoint list), dan soft delete (jika relevan)
+- endpoint list mematuhi kontrak query/meta pagination yang ditetapkan di dokumen ini
+- tidak ada temuan N+1 yang belum ditangani pada skenario endpoint yang ditambahkan/diubah
 - lulus test + coverage gate (80% per file, 90% overall)
 - lulus lint
 - lulus security checks

@@ -16,7 +16,7 @@ Built with:
 
 * Ruby on Rails 8
 * PostgreSQL
-* Solid Queue
+* GoodJob
 * Solid Cache
 * Solid Cable
 
@@ -34,7 +34,7 @@ Built with:
 
 ## Background Jobs
 
-* Solid Queue
+* GoodJob
 
 ## Cache
 
@@ -142,7 +142,7 @@ http://localhost:3000
 
 # Running Background Jobs
 
-Using Solid Queue.
+Using GoodJob.
 
 Start worker:
 

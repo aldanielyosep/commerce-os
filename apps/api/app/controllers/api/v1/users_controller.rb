@@ -1,13 +1,22 @@
 module Api
   module V1
     class UsersController < BaseController
+      ORDERABLE_FIELDS = {
+        "id" => :id,
+        "email" => :email,
+        "username" => :username,
+        "role" => :role,
+        "status" => :status,
+        "created_at" => :created_at
+      }.freeze
+
       before_action :set_user, only: %i[show update destroy enable disable change_role reset_password]
 
       def index
         authorize User
 
-        users = scoped_records(User.includes(:employee)).order(:id)
-        render_success(UserBlueprint.render_as_hash(users))
+        pagy_record, users = paginate_collection(filtered_users)
+        render_success(UserBlueprint.render_as_hash(users), meta: pagination_meta(pagy_record))
       end
 
       def show
@@ -118,6 +127,37 @@ module Api
 
       def change_role_params
         params.expect(user: [ :role ])
+      end
+
+      def filtered_users
+        scope = scoped_records(User)
+        scope = filter_by_query(scope)
+        apply_order(scope)
+      end
+
+      def filter_by_query(scope)
+        query_term = params.fetch(:q, nil)
+        return scope if query_term.blank?
+
+        query = "%#{query_term.strip}%"
+        search_clause = [
+          "users.email ILIKE :query",
+          "users.username ILIKE :query",
+          "employees.employee_id ILIKE :query",
+          "employees.full_name ILIKE :query"
+        ].join(" OR ")
+
+        scope.left_joins(:employee).where(
+          search_clause,
+          query: query
+        )
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(params.fetch(:order_by, "id"), ORDERABLE_FIELDS.fetch("id"))
+        order_direction = normalized_order_direction(params[:order_dir])
+
+        scope.order(order_column => order_direction, id: :asc)
       end
     end
   end

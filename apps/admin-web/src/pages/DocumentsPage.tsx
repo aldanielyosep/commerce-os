@@ -17,6 +17,7 @@ const DOCUMENT_TYPES = [
   "tax_id",
   "employment_contract",
   "education_certificate",
+  "profile_photo",
   "other"
 ];
 

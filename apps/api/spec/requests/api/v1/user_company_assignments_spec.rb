@@ -10,6 +10,11 @@ RSpec.describe "User Company Assignments" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
+
       response "200", "assignments listed" do
         let!(:super_admin) do
           create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
@@ -45,6 +50,35 @@ RSpec.describe "User Company Assignments" do
         # rubocop:enable RSpec/VariableName
 
         run_test!
+      end
+
+      response "200", "assignments ordered by role in company descending" do
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:target_user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company_one) { create(:company, name: "Alpha Store") }
+        let!(:company_two) { create(:company, name: "Beta Store") }
+        let!(:assignment_one) do
+          create(:company_assignment, user: target_user, company: company_one, role_in_company: "manager")
+        end
+        let!(:assignment_two) do
+          create(:company_assignment, user: target_user, company: company_two, role_in_company: "owner")
+        end
+        let(:user_id) { target_user.id }
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "role_in_company" }
+        let(:order_dir) { "desc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(super_admin) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          ids = JSON.parse(response.body)["data"].pluck("id")
+          expect(ids.index(assignment_two.id)).to be < ids.index(assignment_one.id)
+        end
       end
     end
 

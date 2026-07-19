@@ -1,13 +1,20 @@
 module Api
   module V1
     class AuditsController < BaseController
+      ORDERABLE_FIELDS = {
+        "created_at" => :created_at,
+        "action" => :action,
+        "auditable_type" => :auditable_type,
+        "user_id" => :user_id
+      }.freeze
+
       before_action :set_audit, only: :show
 
       def index
         authorize Audited::Audit
 
-        audits = filtered_audits
-        render_success(AuditBlueprint.render_as_hash(audits))
+        pagy_record, audits = paginate_collection(filtered_audits)
+        render_success(AuditBlueprint.render_as_hash(audits), meta: pagination_meta(pagy_record))
       end
 
       def show
@@ -29,7 +36,17 @@ module Api
         scope = scope.where(auditable_id: params[:auditable_id]) if params[:auditable_id].present?
         scope = scope.where(user_id: params[:user_id]) if params[:user_id].present?
 
-        scope.order(created_at: :desc, id: :desc)
+        apply_order(scope)
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(
+          params.fetch(:order_by, "created_at"),
+          ORDERABLE_FIELDS.fetch("created_at")
+        )
+        order_direction = params.key?(:order_dir) ? normalized_order_direction(params[:order_dir]) : :desc
+
+        scope.order(order_column => order_direction, id: :desc)
       end
     end
   end

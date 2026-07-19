@@ -1,13 +1,19 @@
 module Api
   module V1
     class UserCompanyAssignmentsController < BaseController
+      ORDERABLE_FIELDS = {
+        "id" => :id,
+        "role_in_company" => :role_in_company,
+        "created_at" => :created_at
+      }.freeze
+
       before_action :authorize_company_assignment_access!
       before_action :set_user
       before_action :set_company_assignment, only: :destroy
 
       def index
-        assignments = @user.company_assignments.kept.includes(:company).order(:id)
-        render_success(CompanyAssignmentBlueprint.render_as_hash(assignments))
+        pagy_record, assignments = paginate_collection(apply_order(@user.company_assignments.kept.includes(:company)))
+        render_success(CompanyAssignmentBlueprint.render_as_hash(assignments), meta: pagination_meta(pagy_record))
       end
 
       def create
@@ -118,6 +124,13 @@ module Api
           updated_count: updated_count,
           total_assigned_companies: @user.company_assignments.kept.count
         }
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(params.fetch(:order_by, "id"), ORDERABLE_FIELDS.fetch("id"))
+        order_direction = normalized_order_direction(params[:order_dir])
+
+        scope.order(order_column => order_direction, id: :asc)
       end
     end
   end

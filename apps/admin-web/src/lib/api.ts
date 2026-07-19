@@ -1,5 +1,6 @@
 import type {
   ApiEnvelope,
+  AuthSession,
   AuthUser,
   Company,
   CompanyMarketplaceLink,
@@ -9,6 +10,7 @@ import type {
   CompanyPayload,
   CompanyUpdatePayload,
   Department,
+  DepartmentOrderBy,
   DepartmentPayload,
   DepartmentUpdatePayload,
   Employee,
@@ -16,10 +18,17 @@ import type {
   EmployeeDepartmentAssignmentPayload,
   EmployeeDocument,
   EmployeeListFilters,
+  EmployeeOrderBy,
   EmployeePayload,
   EmployeeUpdatePayload,
+  PaginatedResult,
+  PaginationMeta,
+  PaginationParams,
+  CompanyOrderBy,
   PositionHistory,
   SalaryRecord,
+  SortDirection,
+  UserOrderBy,
   UserCompanyAssignment,
   UserCompanyAssignmentPayload,
   UserRole,
@@ -45,6 +54,12 @@ function resolveApiBaseUrl(): string {
 export const API_BASE_URL = resolveApiBaseUrl();
 export const UNAUTHORIZED_EVENT = "commerce_os:unauthorized";
 
+let refreshSessionHandler: ((refreshToken: string) => Promise<AuthSession | null>) | null = null;
+
+export function setRefreshSessionHandler(handler: ((refreshToken: string) => Promise<AuthSession | null>) | null) {
+  refreshSessionHandler = handler;
+}
+
 function notifyUnauthorized() {
   window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT));
 }
@@ -59,6 +74,13 @@ export class ApiError extends Error {
     this.details = details;
   }
 }
+
+const DEFAULT_PAGINATION_META: PaginationMeta = {
+  page: 1,
+  per_page: 20,
+  total_count: 0,
+  total_pages: 0
+};
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
@@ -79,7 +101,41 @@ function buildQueryString(filters: Record<string, string | number | undefined>):
   return stringified ? `?${stringified}` : "";
 }
 
+function normalizePaginationMeta(meta?: Record<string, unknown>): PaginationMeta {
+  const page = Number(meta?.page);
+  const perPage = Number(meta?.per_page);
+  const totalCount = Number(meta?.total_count);
+  const totalPages = Number(meta?.total_pages);
+
+  return {
+    page: Number.isFinite(page) && page > 0 ? page : DEFAULT_PAGINATION_META.page,
+    per_page: Number.isFinite(perPage) && perPage > 0 ? perPage : DEFAULT_PAGINATION_META.per_page,
+    total_count: Number.isFinite(totalCount) && totalCount >= 0 ? totalCount : DEFAULT_PAGINATION_META.total_count,
+    total_pages: Number.isFinite(totalPages) && totalPages >= 0 ? totalPages : DEFAULT_PAGINATION_META.total_pages
+  };
+}
+
+async function collectAllPages<T>(
+  fetchPage: (page: number) => Promise<PaginatedResult<T>>
+): Promise<T[]> {
+  const firstPage = await fetchPage(1);
+  const items = [ ...firstPage.items ];
+
+  for (let page = 2; page <= firstPage.meta.total_pages; page += 1) {
+    const nextPage = await fetchPage(page);
+    items.push(...nextPage.items);
+  }
+
+  return items;
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const { method = "GET", token, body, headers = {} } = options;
+
+  return performRequest<T>(path, { method, token, body, headers }, true);
+}
+
+async function performRequest<T>(path: string, options: RequestOptions, allowRefresh: boolean): Promise<T> {
   const { method = "GET", token, body, headers = {} } = options;
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -101,6 +157,15 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   if (!response.ok) {
     const envelope = payload as Partial<ApiEnvelope<unknown>> | null;
+    if (response.status === 401 && token && allowRefresh && refreshSessionHandler) {
+      const currentRefreshToken = localStorage.getItem("commerce_os_web_refresh_token");
+      const refreshedSession = currentRefreshToken ? await refreshSessionHandler(currentRefreshToken) : null;
+
+      if (refreshedSession) {
+        return performRequest<T>(path, { ...options, token: refreshedSession.token }, false);
+      }
+    }
+
     if (response.status === 401 && token) {
       notifyUnauthorized();
     }
@@ -115,7 +180,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   return payload as T;
 }
 
-export async function signIn(email: string, password: string): Promise<{ token: string; user: AuthUser }> {
+export async function signIn(email: string, password: string): Promise<AuthSession> {
   const response = await fetch(`${API_BASE_URL}/api/v1/users/sign_in`, {
     method: "POST",
     headers: {
@@ -133,7 +198,49 @@ export async function signIn(email: string, password: string): Promise<{ token: 
 
   return {
     token: authHeader,
-    user: payload.data
+    refresh_token: String((payload.data as AuthUser & { refresh_token?: string }).refresh_token ?? ""),
+    refresh_token_expires_at: String(
+      (payload.data as AuthUser & { refresh_token_expires_at?: string }).refresh_token_expires_at ?? ""
+    ),
+    user: {
+      id: payload.data.id,
+      email: payload.data.email,
+      username: payload.data.username,
+      role: payload.data.role,
+      status: payload.data.status
+    }
+  };
+}
+
+export async function refreshAccessToken(refreshToken: string): Promise<AuthSession> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/users/refresh_token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ refresh_token: { token: refreshToken } })
+  });
+
+  const payload = (await response.json()) as ApiEnvelope<AuthUser>;
+  const authHeader = response.headers.get("Authorization") ?? response.headers.get("authorization");
+
+  if (!response.ok || !payload.success || !payload.data || !authHeader) {
+    throw new ApiError(payload.message ?? "Unable to refresh session", response.status, payload.errors);
+  }
+
+  return {
+    token: authHeader,
+    refresh_token: String((payload.data as AuthUser & { refresh_token?: string }).refresh_token ?? ""),
+    refresh_token_expires_at: String(
+      (payload.data as AuthUser & { refresh_token_expires_at?: string }).refresh_token_expires_at ?? ""
+    ),
+    user: {
+      id: payload.data.id,
+      email: payload.data.email,
+      username: payload.data.username,
+      role: payload.data.role,
+      status: payload.data.status
+    }
   };
 }
 
@@ -145,13 +252,24 @@ export async function signOut(token: string): Promise<void> {
 }
 
 export async function listEmployees(token: string, filters: EmployeeListFilters = {}): Promise<Employee[]> {
+  return collectAllPages((page) => listEmployeesPage(token, { ...filters, page }));
+}
+
+export async function listEmployeesPage(
+  token: string,
+  filters: EmployeeListFilters & PaginationParams & { order_by?: EmployeeOrderBy; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<Employee>> {
   const query = buildQueryString({
     status: filters.status,
     department_id: filters.department_id,
-    q: filters.q
+    q: filters.q,
+    page: filters.page,
+    per_page: filters.per_page,
+    order_by: filters.order_by,
+    order_dir: filters.order_dir
   });
   const envelope = await request<ApiEnvelope<Employee[]>>(`/api/v1/employees${query}`, { token });
-  return envelope.data;
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
 }
 
 export async function getEmployee(token: string, employeeId: number): Promise<Employee> {
@@ -238,8 +356,22 @@ export async function removeEmployeeDepartment(
 }
 
 export async function listDepartments(token: string): Promise<Department[]> {
-  const envelope = await request<ApiEnvelope<Department[]>>("/api/v1/departments", { token });
-  return envelope.data;
+  return collectAllPages((page) => listDepartmentsPage(token, { page }));
+}
+
+export async function listDepartmentsPage(
+  token: string,
+  pagination: PaginationParams & { q?: string; order_by?: DepartmentOrderBy; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<Department>> {
+  const query = buildQueryString({
+    page: pagination.page,
+    per_page: pagination.per_page,
+    q: pagination.q,
+    order_by: pagination.order_by,
+    order_dir: pagination.order_dir
+  });
+  const envelope = await request<ApiEnvelope<Department[]>>(`/api/v1/departments${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
 }
 
 export async function getDepartment(token: string, departmentId: number): Promise<Department> {
@@ -277,8 +409,22 @@ export async function deleteDepartment(token: string, departmentId: number): Pro
 }
 
 export async function listUsers(token: string): Promise<UserRecord[]> {
-  const envelope = await request<ApiEnvelope<UserRecord[]>>("/api/v1/users", { token });
-  return envelope.data;
+  return collectAllPages((page) => listUsersPage(token, { page }));
+}
+
+export async function listUsersPage(
+  token: string,
+  pagination: PaginationParams & { q?: string; order_by?: UserOrderBy; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<UserRecord>> {
+  const query = buildQueryString({
+    page: pagination.page,
+    per_page: pagination.per_page,
+    q: pagination.q,
+    order_by: pagination.order_by,
+    order_dir: pagination.order_dir
+  });
+  const envelope = await request<ApiEnvelope<UserRecord[]>>(`/api/v1/users${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
 }
 
 export async function getUser(token: string, userId: number): Promise<UserRecord> {
@@ -465,8 +611,22 @@ function appendCompanyFormData(form: FormData, payload: CompanyPayload | Company
 }
 
 export async function listCompanies(token: string): Promise<Company[]> {
-  const envelope = await request<ApiEnvelope<Company[]>>("/api/v1/companies", { token });
-  return envelope.data;
+  return collectAllPages((page) => listCompaniesPage(token, { page }));
+}
+
+export async function listCompaniesPage(
+  token: string,
+  pagination: PaginationParams & { q?: string; order_by?: CompanyOrderBy; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<Company>> {
+  const query = buildQueryString({
+    page: pagination.page,
+    per_page: pagination.per_page,
+    q: pagination.q,
+    order_by: pagination.order_by,
+    order_dir: pagination.order_dir
+  });
+  const envelope = await request<ApiEnvelope<Company[]>>(`/api/v1/companies${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
 }
 
 export async function getCompany(token: string, companyId: number): Promise<Company> {

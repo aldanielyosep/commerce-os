@@ -1,14 +1,20 @@
 module Api
   module V1
     class SalaryRecordsController < BaseController
+      ORDERABLE_FIELDS = {
+        "effective_date" => :effective_date,
+        "basic_salary_cents" => :basic_salary_cents,
+        "created_at" => :created_at
+      }.freeze
+
       before_action :set_employee
       before_action :set_salary_record, only: :update
 
       def index
         authorize SalaryRecord
 
-        records = @employee.salary_records.order(effective_date: :desc, id: :desc)
-        render_success(SalaryRecordBlueprint.render_as_hash(records))
+        pagy_record, records = paginate_collection(apply_order(@employee.salary_records))
+        render_success(SalaryRecordBlueprint.render_as_hash(records), meta: pagination_meta(pagy_record))
       end
 
       def create
@@ -45,6 +51,16 @@ module Api
 
       def salary_record_params
         params.expect(salary_record: %i[basic_salary_cents allowance_cents bonus_cents effective_date end_date notes])
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(
+          params.fetch(:order_by, "effective_date"),
+          ORDERABLE_FIELDS.fetch("effective_date")
+        )
+        order_direction = params.key?(:order_dir) ? normalized_order_direction(params[:order_dir]) : :desc
+
+        scope.order(order_column => order_direction, id: :desc)
       end
     end
   end

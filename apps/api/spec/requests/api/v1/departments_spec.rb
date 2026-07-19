@@ -1,4 +1,4 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:disable RSpec/MultipleMemoizedHelpers
 require "swagger_helper"
 
 RSpec.describe "Departments" do
@@ -8,10 +8,18 @@ RSpec.describe "Departments" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :q, in: :query, type: :string, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
+
       response "200", "departments listed" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:department_one) { create(:department, code: "HR", name: "Human Resources") }
         let!(:department_two) { create(:department, code: "ENG", name: "Engineering") }
+        let(:page) { 1 }
+        let(:per_page) { 1 }
 
         # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
@@ -20,7 +28,13 @@ RSpec.describe "Departments" do
         run_test! do |response|
           body = JSON.parse(response.body)
           expect(body["success"]).to be(true)
-          expect(body["data"].size).to eq(2)
+          expect(body["data"].size).to eq(1)
+          expect(body["meta"]).to include(
+            "page" => 1,
+            "per_page" => 1,
+            "total_count" => 2,
+            "total_pages" => 2
+          )
         end
       end
 
@@ -35,6 +49,43 @@ RSpec.describe "Departments" do
         # rubocop:enable RSpec/VariableName
 
         run_test!
+      end
+
+      response "200", "departments ordered by code descending" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:department_one) { create(:department, code: "AAA", name: "Alpha") }
+        let!(:department_two) { create(:department, code: "ZZZ", name: "Zulu") }
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "code" }
+        let(:order_dir) { "desc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          codes = body["data"].pluck("code")
+
+          expect(codes.index(department_two.code)).to be < codes.index(department_one.code)
+        end
+      end
+
+      response "200", "departments filtered by query" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:department_one) { create(:department, code: "OPS", name: "Operations") }
+        let!(:department_two) { create(:department, code: "ENG", name: "Engineering") }
+        let(:q) { "Oper" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          names = JSON.parse(response.body)["data"].pluck("name")
+          expect(names).to contain_exactly(department_one.name)
+        end
       end
     end
 
@@ -184,4 +235,4 @@ RSpec.describe "Departments" do
   end
 end
 
-# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:enable RSpec/MultipleMemoizedHelpers

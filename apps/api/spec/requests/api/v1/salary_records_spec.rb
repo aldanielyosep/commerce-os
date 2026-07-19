@@ -10,6 +10,11 @@ RSpec.describe "Salary Records" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
+
       response "200", "salary records listed" do
         let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
@@ -46,6 +51,42 @@ RSpec.describe "Salary Records" do
         # rubocop:enable RSpec/VariableName
 
         run_test!
+      end
+
+      response "200", "salary records ordered by basic salary ascending" do
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:employee) { create(:employee, full_name: "Alice Johnson") }
+        let!(:record_one) do
+          create(
+            :salary_record,
+            employee: employee,
+            basic_salary_cents: 6_000_000,
+            effective_date: Date.new(2026, 1, 1),
+            end_date: Date.new(2026, 1, 31)
+          )
+        end
+        let!(:record_two) do
+          create(
+            :salary_record,
+            employee: employee,
+            basic_salary_cents: 8_000_000,
+            effective_date: Date.new(2026, 2, 1)
+          )
+        end
+        let(:employee_id) { employee.id }
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "basic_salary_cents" }
+        let(:order_dir) { "asc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          ids = JSON.parse(response.body)["data"].pluck("id")
+          expect(ids.index(record_one.id)).to be < ids.index(record_two.id)
+        end
       end
     end
 

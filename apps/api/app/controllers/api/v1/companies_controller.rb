@@ -1,6 +1,15 @@
 module Api
   module V1
     class CompaniesController < BaseController
+      ORDERABLE_FIELDS = {
+        "code" => :code,
+        "name" => :name,
+        "owner_name" => :owner_name,
+        "status" => :status,
+        "city" => :city,
+        "created_at" => :created_at
+      }.freeze
+
       before_action :set_company, only: %i[show update destroy]
 
       BASIC_PARAMS = %i[
@@ -42,8 +51,8 @@ module Api
       def index
         authorize Company
 
-        companies = scoped_records(Company.kept).order(:name)
-        render_success(CompanyBlueprint.render_as_hash(companies))
+        pagy_record, companies = paginate_collection(filtered_companies)
+        render_success(CompanyBlueprint.render_as_hash(companies), meta: pagination_meta(pagy_record))
       end
 
       def show
@@ -100,6 +109,38 @@ module Api
 
       def company_params
         params.expect(company: COMPANY_PARAMS).except(:remove_logo)
+      end
+
+      def filtered_companies
+        scope = scoped_records(Company.kept.with_attached_logo)
+        scope = filter_by_query(scope)
+        apply_order(scope)
+      end
+
+      def filter_by_query(scope)
+        query_term = params.fetch(:q, nil)
+        return scope if query_term.blank?
+
+        query = "%#{query_term.strip}%"
+        search_clause = [
+          "companies.code ILIKE :query",
+          "companies.name ILIKE :query",
+          "companies.owner_name ILIKE :query",
+          "companies.email ILIKE :query",
+          "companies.city ILIKE :query"
+        ].join(" OR ")
+
+        scope.where(
+          search_clause,
+          query: query
+        )
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(params.fetch(:order_by, "name"), ORDERABLE_FIELDS.fetch("name"))
+        order_direction = normalized_order_direction(params[:order_dir])
+
+        scope.order(order_column => order_direction, id: :asc)
       end
 
       def valid_logo_mutation_request?

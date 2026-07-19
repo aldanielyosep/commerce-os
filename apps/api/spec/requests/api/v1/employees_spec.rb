@@ -11,6 +11,10 @@ RSpec.describe "Employees" do
       parameter name: :status, in: :query, type: :string, required: false
       parameter name: :department_id, in: :query, type: :string, required: false
       parameter name: :q, in: :query, type: :string, required: false
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
 
       response "200", "employees listed" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
@@ -20,6 +24,8 @@ RSpec.describe "Employees" do
         let!(:assignment) { create(:employee_department, employee: employee_one, department: department) }
 
         let(:department_id) { department.id }
+        let(:page) { 1 }
+        let(:per_page) { 10 }
 
         # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
@@ -29,6 +35,12 @@ RSpec.describe "Employees" do
           body = JSON.parse(response.body)
           expect(body["data"].size).to eq(1)
           expect(body["data"].first["full_name"]).to eq("Alice Johnson")
+          expect(body["meta"]).to include(
+            "page" => 1,
+            "per_page" => 10,
+            "total_count" => 1,
+            "total_pages" => 1
+          )
         end
       end
 
@@ -43,6 +55,26 @@ RSpec.describe "Employees" do
         # rubocop:enable RSpec/VariableName
 
         run_test!
+      end
+
+      response "200", "employees ordered by employee id descending" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:employee_one) { create(:employee, employee_id: "EMP-0010", full_name: "Alice Johnson") }
+        let!(:employee_two) { create(:employee, employee_id: "EMP-0020", full_name: "Bob Smith") }
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "employee_id" }
+        let(:order_dir) { "desc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(body["data"].first["employee_id"]).to eq(employee_two.employee_id)
+          expect(body["data"].second["employee_id"]).to eq(employee_one.employee_id)
+        end
       end
     end
 

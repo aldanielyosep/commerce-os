@@ -39,8 +39,38 @@ class ApplicationController < ActionController::API
     render_error("Authentication required", status: :unauthorized)
   end
 
+  def paginate_collection(scope)
+    pagy_record, records = pagy(scope, page: pagination_page, limit: pagination_limit)
+    [ pagy_record, records ]
+  end
+
+  def pagination_meta(pagy_record)
+    {
+      page: pagy_record.page,
+      per_page: pagy_record.limit,
+      total_count: pagy_record.count,
+      total_pages: pagy_record.pages
+    }
+  end
+
   def pundit_user
     current_user
+  end
+
+  def pagination_page
+    page = params.fetch(:page, 1).to_i
+    page.positive? ? page : 1
+  end
+
+  def pagination_limit
+    per_page = params.fetch(:per_page, 20).to_i
+    return 20 unless per_page.positive?
+
+    [ per_page, 100 ].min
+  end
+
+  def normalized_order_direction(value)
+    value.to_s.casecmp("desc").zero? ? :desc : :asc
   end
 
   def set_current_request_user

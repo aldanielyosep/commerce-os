@@ -1,13 +1,21 @@
 module Api
   module V1
     class CompanyMarketplaceLinksController < BaseController
+      ORDERABLE_FIELDS = {
+        "marketplace" => :marketplace,
+        "store_name" => :store_name,
+        "store_url" => :store_url,
+        "is_active" => :is_active,
+        "created_at" => :created_at
+      }.freeze
+
       before_action :set_company
       before_action :authorize_company_marketplace_management!
       before_action :set_marketplace_link, only: %i[update destroy]
 
       def index
-        links = @company.company_marketplace_links.kept.order(:marketplace)
-        render_success(CompanyMarketplaceLinkBlueprint.render_as_hash(links))
+        pagy_record, links = paginate_collection(apply_order(@company.company_marketplace_links.kept))
+        render_success(CompanyMarketplaceLinkBlueprint.render_as_hash(links), meta: pagination_meta(pagy_record))
       end
 
       def create
@@ -53,6 +61,16 @@ module Api
 
       def company_marketplace_link_params
         params.expect(company_marketplace_link: %i[marketplace store_name store_url is_active])
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(
+          params.fetch(:order_by, "marketplace"),
+          ORDERABLE_FIELDS.fetch("marketplace")
+        )
+        order_direction = normalized_order_direction(params[:order_dir])
+
+        scope.order(order_column => order_direction, id: :asc)
       end
     end
   end

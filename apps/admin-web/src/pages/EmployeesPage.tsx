@@ -8,7 +8,7 @@ import {
   getEmployee,
   listDepartments,
   listEmployeeDepartments,
-  listEmployees,
+  listEmployeesPage,
   removeEmployeeDepartment,
   terminateEmployee,
   updateEmployee
@@ -18,11 +18,15 @@ import type {
   Employee,
   EmployeeDepartmentAssignment,
   EmployeeGender,
+  EmployeeOrderBy,
   EmployeePayload,
+  PaginationMeta,
+  SortDirection,
   EmployeeStatus
 } from "../lib/types";
 
 const STATUSES: EmployeeStatus[] = ["active", "probation", "resigned", "terminated", "retired"];
+const EMPLOYEE_SORT_FIELDS: EmployeeOrderBy[] = ["full_name", "employee_id", "email", "status", "city", "join_date"];
 
 type EmployeeFormState = EmployeePayload;
 
@@ -45,6 +49,13 @@ const EMPTY_FORM: EmployeeFormState = {
   postal_code: ""
 };
 
+const DEFAULT_PAGINATION_META: PaginationMeta = {
+  page: 1,
+  per_page: 20,
+  total_count: 0,
+  total_pages: 0
+};
+
 export function EmployeesPage() {
   const { token, user } = useAuth();
   const [rows, setRows] = useState<Employee[]>([]);
@@ -52,11 +63,21 @@ export function EmployeesPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [pagination, setPagination] = useState<PaginationMeta>(DEFAULT_PAGINATION_META);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [statusFilter, setStatusFilter] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [queryFilter, setQueryFilter] = useState("");
-  const [appliedFilters, setAppliedFilters] = useState<{ status?: EmployeeStatus; department_id?: number; q?: string }>({});
+  const [sortBy, setSortBy] = useState<EmployeeOrderBy>("full_name");
+  const [sortDir, setSortDir] = useState<SortDirection>("asc");
+  const [appliedFilters, setAppliedFilters] = useState<{
+    status?: EmployeeStatus;
+    department_id?: number;
+    q?: string;
+    order_by?: EmployeeOrderBy;
+    order_dir?: SortDirection;
+  }>({});
 
   const [drawer, setDrawer] = useState<DrawerState>({ mode: "none" });
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -86,17 +107,21 @@ export function EmployeesPage() {
     setLoading(true);
     setError(null);
 
-    listEmployees(token, appliedFilters)
-      .then(setRows)
+    listEmployeesPage(token, { ...appliedFilters, page: currentPage })
+      .then((result) => {
+        setRows(result.items);
+        setPagination(result.meta);
+      })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [token, appliedFilters]);
+  }, [token, appliedFilters, currentPage]);
 
   async function refreshEmployeeList() {
     if (!token) return;
 
-    const refreshed = await listEmployees(token, appliedFilters);
-    setRows(refreshed);
+    const refreshed = await listEmployeesPage(token, { ...appliedFilters, page: currentPage });
+    setRows(refreshed.items);
+    setPagination(refreshed.meta);
   }
 
   async function openCreate() {
@@ -166,10 +191,13 @@ export function EmployeesPage() {
   }
 
   function applyFilters() {
+    setCurrentPage(1);
     setAppliedFilters({
       status: statusFilter ? (statusFilter as EmployeeStatus) : undefined,
       department_id: departmentFilter ? Number(departmentFilter) : undefined,
-      q: queryFilter.trim() ? queryFilter.trim() : undefined
+      q: queryFilter.trim() ? queryFilter.trim() : undefined,
+      order_by: sortBy === "full_name" ? undefined : sortBy,
+      order_dir: sortDir === "asc" ? undefined : sortDir
     });
   }
 
@@ -177,7 +205,21 @@ export function EmployeesPage() {
     setStatusFilter("");
     setDepartmentFilter("");
     setQueryFilter("");
+    setSortBy("full_name");
+    setSortDir("asc");
+    setCurrentPage(1);
     setAppliedFilters({});
+  }
+
+  function goToPreviousPage() {
+    setCurrentPage((page) => Math.max(1, page - 1));
+  }
+
+  function goToNextPage() {
+    setCurrentPage((page) => {
+      if (pagination.total_pages <= 0) return page;
+      return Math.min(pagination.total_pages, page + 1);
+    });
   }
 
   function onFormFieldChange<K extends keyof EmployeeFormState>(field: K, value: EmployeeFormState[K]) {
@@ -329,6 +371,23 @@ export function EmployeesPage() {
             onChange={(event) => setQueryFilter(event.target.value)}
           />
         </label>
+        <label>
+          Sort By
+          <select value={sortBy} onChange={(event) => setSortBy(event.target.value as EmployeeOrderBy)}>
+            {EMPLOYEE_SORT_FIELDS.map((field) => (
+              <option key={field} value={field}>
+                {field}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Direction
+          <select value={sortDir} onChange={(event) => setSortDir(event.target.value as SortDirection)}>
+            <option value="asc">asc</option>
+            <option value="desc">desc</option>
+          </select>
+        </label>
         <div className="actions">
           <button className="primary" onClick={applyFilters} disabled={actionDisabled}>
             Apply
@@ -340,6 +399,24 @@ export function EmployeesPage() {
       </div>
 
       <DataState loading={loading} error={error} empty={rows.length === 0} emptyLabel="No employees found.">
+        <div className="actions" style={{ marginBottom: 12, justifyContent: "space-between" }}>
+          <span>
+            Page {pagination.page} of {Math.max(pagination.total_pages, 1)} ({pagination.total_count} total)
+          </span>
+          <div className="actions">
+            <button className="ghost" type="button" onClick={goToPreviousPage} disabled={actionDisabled || currentPage <= 1}>
+              Previous
+            </button>
+            <button
+              className="ghost"
+              type="button"
+              onClick={goToNextPage}
+              disabled={actionDisabled || pagination.total_pages <= 1 || currentPage >= pagination.total_pages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
         <table>
           <thead>
             <tr>

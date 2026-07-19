@@ -1,13 +1,22 @@
 module Api
   module V1
     class EmployeesController < BaseController
+      ORDERABLE_FIELDS = {
+        "employee_id" => :employee_id,
+        "full_name" => :full_name,
+        "email" => :email,
+        "status" => :status,
+        "city" => :city,
+        "join_date" => :join_date
+      }.freeze
+
       before_action :set_employee, only: %i[show update destroy terminate]
 
       def index
         authorize Employee
 
-        employees = filtered_employees
-        render_success(EmployeeBlueprint.render_as_hash(employees))
+        pagy_record, employees = paginate_collection(filtered_employees)
+        render_success(EmployeeBlueprint.render_as_hash(employees), meta: pagination_meta(pagy_record))
       end
 
       def show
@@ -67,7 +76,14 @@ module Api
         scope = filter_by_status(scope)
         scope = filter_by_department(scope)
         scope = filter_by_query(scope)
-        scope.distinct.order(:full_name)
+        apply_order(scope.distinct)
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(params.fetch(:order_by, "full_name"), ORDERABLE_FIELDS.fetch("full_name"))
+        order_direction = normalized_order_direction(params[:order_dir])
+
+        scope.order(order_column => order_direction, id: :asc)
       end
 
       def filter_by_status(scope)

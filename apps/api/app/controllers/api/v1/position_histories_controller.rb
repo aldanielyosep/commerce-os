@@ -1,14 +1,20 @@
 module Api
   module V1
     class PositionHistoriesController < BaseController
+      ORDERABLE_FIELDS = {
+        "effective_date" => :effective_date,
+        "position" => :position,
+        "created_at" => :created_at
+      }.freeze
+
       before_action :set_employee
       before_action :set_position_history, only: :update
 
       def index
         authorize PositionHistory
 
-        histories = @employee.position_histories.includes(:department).order(effective_date: :desc, id: :desc)
-        render_success(PositionHistoryBlueprint.render_as_hash(histories))
+        pagy_record, histories = paginate_collection(apply_order(@employee.position_histories.includes(:department)))
+        render_success(PositionHistoryBlueprint.render_as_hash(histories), meta: pagination_meta(pagy_record))
       end
 
       def create
@@ -58,6 +64,16 @@ module Api
 
       def position_history_params
         params.expect(position_history: %i[position department_id effective_date notes])
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(
+          params.fetch(:order_by, "effective_date"),
+          ORDERABLE_FIELDS.fetch("effective_date")
+        )
+        order_direction = params.key?(:order_dir) ? normalized_order_direction(params[:order_dir]) : :desc
+
+        scope.order(order_column => order_direction, id: :desc)
       end
     end
   end

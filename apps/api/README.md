@@ -6,7 +6,7 @@ Built with:
 
 * Ruby on Rails 8
 * PostgreSQL
-* Solid Queue
+* GoodJob
 * Solid Cache
 * Solid Cable
 
@@ -24,7 +24,7 @@ Built with:
 
 ## Background Jobs
 
-* Solid Queue
+* GoodJob
 
 ## Cache
 
@@ -100,6 +100,9 @@ CORS_ORIGINS=http://localhost:5173
 EMPLOYEE_ID_PREFIX=B
 RSWAG_USERNAME=
 RSWAG_PASSWORD=
+GOOD_JOB_DASHBOARD_ENABLED=false
+GOOD_JOB_DASHBOARD_USERNAME=
+GOOD_JOB_DASHBOARD_PASSWORD=
 ```
 
 ---
@@ -140,13 +143,25 @@ http://localhost:3000
 
 # Running Background Jobs
 
-Using Solid Queue.
+Using GoodJob.
 
 Start worker:
 
 ```bash id="m2q7xt"
 bin/jobs
 ```
+
+Enable cron scheduler on worker:
+
+```bash
+bin/jobs start --enable-cron
+```
+
+GoodJob dashboard route is mounted at `/good_job` only when all conditions are met:
+
+* `GOOD_JOB_DASHBOARD_ENABLED=true`
+
+If `GOOD_JOB_DASHBOARD_USERNAME` and `GOOD_JOB_DASHBOARD_PASSWORD` are set, `/good_job` is protected with HTTP Basic Auth.
 
 ---
 

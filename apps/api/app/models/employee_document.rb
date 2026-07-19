@@ -19,7 +19,8 @@ class EmployeeDocument < ApplicationRecord
          tax_id: 3,
          employment_contract: 4,
          education_certificate: 5,
-         other: 6
+         profile_photo: 6,
+         other: 99
        }
 
   belongs_to :employee

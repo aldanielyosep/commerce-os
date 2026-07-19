@@ -13,6 +13,10 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      namespace :users do
+        resource :refresh_token, only: :create, controller: "refresh_tokens"
+      end
+
       resources :companies do
         resources :marketplace_links,
                   controller: "company_marketplace_links",
@@ -58,6 +62,8 @@ Rails.application.routes.draw do
     mount Rswag::Ui::Engine => "/api-docs"
     mount Rswag::Api::Engine => "/api-docs"
   end
+
+  mount GoodJob::Engine => "/good_job" if ENV["GOOD_JOB_DASHBOARD_ENABLED"] == "true"
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

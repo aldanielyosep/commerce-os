@@ -13,14 +13,17 @@ import {
   listCompanies,
   listEmployees,
   listUserCompanyAssignments,
-  listUsers,
+  listUsersPage,
   resetUserPassword,
   updateUser
 } from "../lib/api";
 import type {
   Company,
   Employee,
+  PaginationMeta,
+  SortDirection,
   UserCompanyAssignment,
+  UserOrderBy,
   UserPayload,
   UserRecord,
   UserRole,
@@ -74,6 +77,14 @@ const EMPTY_ASSIGNMENT_FORM: AssignmentFormState = {
   company_id: "",
   role_in_company: ""
 };
+const USER_SORT_FIELDS: UserOrderBy[] = ["id", "email", "username", "role", "status", "created_at"];
+
+const DEFAULT_PAGINATION_META: PaginationMeta = {
+  page: 1,
+  per_page: 20,
+  total_count: 0,
+  total_pages: 0
+};
 
 export function UsersPage() {
   const { token, user: currentUser } = useAuth();
@@ -89,6 +100,12 @@ export function UsersPage() {
   const [assignmentBusy, setAssignmentBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [assignmentError, setAssignmentError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationMeta>(DEFAULT_PAGINATION_META);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState<UserOrderBy>("id");
+  const [sortDir, setSortDir] = useState<SortDirection>("asc");
+  const [queryFilter, setQueryFilter] = useState("");
+  const [appliedQuery, setAppliedQuery] = useState<string | undefined>();
   const [drawer, setDrawer] = useState<DrawerState>({ mode: "none" });
   const [createForm, setCreateForm] = useState<CreateFormState>(EMPTY_CREATE_FORM);
   const [editForm, setEditForm] = useState<EditFormState>(EMPTY_EDIT_FORM);
@@ -114,20 +131,71 @@ export function UsersPage() {
     setLoading(true);
     setError(null);
 
-    Promise.all([listUsers(token), listEmployees(token), listCompanies(token)])
-      .then(([userRows, employeeRows, companyRows]) => {
-        setRows(userRows);
+    Promise.all([
+      listUsersPage(token, {
+        page: currentPage,
+        q: appliedQuery,
+        order_by: sortBy === "id" ? undefined : sortBy,
+        order_dir: sortDir === "asc" ? undefined : sortDir
+      }),
+      listEmployees(token),
+      listCompanies(token)
+    ])
+      .then(([usersPage, employeeRows, companyRows]) => {
+        setRows(usersPage.items);
+        setPagination(usersPage.meta);
         setEmployees(employeeRows);
         setCompanies(companyRows);
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, currentPage, sortBy, sortDir, appliedQuery]);
 
   async function refreshUsers() {
     if (!token) return;
-    const userRows = await listUsers(token);
-    setRows(userRows);
+    const usersPage = await listUsersPage(token, {
+      page: currentPage,
+      q: appliedQuery,
+      order_by: sortBy === "id" ? undefined : sortBy,
+      order_dir: sortDir === "asc" ? undefined : sortDir
+    });
+    setRows(usersPage.items);
+    setPagination(usersPage.meta);
+    if (usersPage.meta.total_pages > 0 && currentPage > usersPage.meta.total_pages) {
+      setCurrentPage(usersPage.meta.total_pages);
+    }
+  }
+
+  function onChangeSortBy(value: UserOrderBy) {
+    setCurrentPage(1);
+    setSortBy(value);
+  }
+
+  function onChangeSortDir(value: SortDirection) {
+    setCurrentPage(1);
+    setSortDir(value);
+  }
+
+  function applyQuery() {
+    setCurrentPage(1);
+    setAppliedQuery(queryFilter.trim() || undefined);
+  }
+
+  function resetQuery() {
+    setQueryFilter("");
+    setCurrentPage(1);
+    setAppliedQuery(undefined);
+  }
+
+  function goToPreviousPage() {
+    setCurrentPage((page) => Math.max(1, page - 1));
+  }
+
+  function goToNextPage() {
+    setCurrentPage((page) => {
+      if (pagination.total_pages <= 0) return page;
+      return Math.min(pagination.total_pages, page + 1);
+    });
   }
 
   async function refreshAssignments(userId: number) {
@@ -362,6 +430,53 @@ export function UsersPage() {
       </div>
 
       <DataState loading={loading} error={error} empty={rows.length === 0} emptyLabel="No users found.">
+        <div className="actions" style={{ marginBottom: 12, justifyContent: "space-between" }}>
+          <div className="actions">
+            <label>
+              Search
+              <input value={queryFilter} onChange={(event) => setQueryFilter(event.target.value)} placeholder="Email, username, employee" />
+            </label>
+            <label>
+              Sort By
+              <select value={sortBy} onChange={(event) => onChangeSortBy(event.target.value as UserOrderBy)}>
+                {USER_SORT_FIELDS.map((field) => (
+                  <option key={field} value={field}>
+                    {field}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Direction
+              <select value={sortDir} onChange={(event) => onChangeSortDir(event.target.value as SortDirection)}>
+                <option value="asc">asc</option>
+                <option value="desc">desc</option>
+              </select>
+            </label>
+            <button className="primary" type="button" onClick={applyQuery} disabled={busy || loading}>
+              Apply
+            </button>
+            <button className="ghost" type="button" onClick={resetQuery} disabled={busy || loading}>
+              Reset
+            </button>
+          </div>
+          <div className="actions">
+            <span>
+              Page {pagination.page} of {Math.max(pagination.total_pages, 1)} ({pagination.total_count} total)
+            </span>
+            <button className="ghost" type="button" onClick={goToPreviousPage} disabled={busy || loading || currentPage <= 1}>
+              Previous
+            </button>
+            <button
+              className="ghost"
+              type="button"
+              onClick={goToNextPage}
+              disabled={busy || loading || pagination.total_pages <= 1 || currentPage >= pagination.total_pages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
         <table>
           <thead>
             <tr>

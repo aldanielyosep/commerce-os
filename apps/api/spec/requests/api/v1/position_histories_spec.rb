@@ -10,6 +10,11 @@ RSpec.describe "Position Histories" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
+
       response "200", "position histories listed" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
@@ -49,6 +54,28 @@ RSpec.describe "Position Histories" do
         # rubocop:enable RSpec/VariableName
 
         run_test!
+      end
+
+      response "200", "position histories ordered by position ascending" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:employee) { create(:employee, full_name: "Alice Johnson") }
+        let!(:department) { create(:department, code: "ENG", name: "Engineering") }
+        let!(:history_one) { create(:position_history, employee: employee, department: department, position: "Lead") }
+        let!(:history_two) { create(:position_history, employee: employee, department: department, position: "Staff") }
+        let(:employee_id) { employee.id }
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "position" }
+        let(:order_dir) { "asc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          ids = JSON.parse(response.body)["data"].pluck("id")
+          expect(ids.index(history_one.id)).to be < ids.index(history_two.id)
+        end
       end
     end
 
