@@ -11,7 +11,7 @@ RSpec.describe "Company Marketplace Links" do
       security [ { bearerAuth: [] } ]
 
       response "200", "links listed" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
         let!(:link_one) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
         let!(:link_two) { create(:company_marketplace_link, company: company, marketplace: :tokopedia) }
@@ -23,6 +23,22 @@ RSpec.describe "Company Marketplace Links" do
         run_test! do |response|
           body = JSON.parse(response.body)
           expect(body["data"].size).to eq(2)
+        end
+      end
+
+      response "404", "admin cannot list links outside scope" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company) { create(:company, :pt) }
+        let!(:link_one) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
+        let(:company_id) { company.id }
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response.status).to eq(404)
+          expect(body["success"]).to be(false)
         end
       end
     end
@@ -51,7 +67,7 @@ RSpec.describe "Company Marketplace Links" do
       }
 
       response "201", "link created" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
         let(:company_id) { company.id }
         let(:company_marketplace_link) do
@@ -76,7 +92,7 @@ RSpec.describe "Company Marketplace Links" do
       end
 
       response "422", "duplicate marketplace rejected" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
         let!(:existing_link) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
         let(:company_id) { company.id }
@@ -103,7 +119,7 @@ RSpec.describe "Company Marketplace Links" do
       end
 
       response "422", "non-https url rejected" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
         let(:company_id) { company.id }
         let(:company_marketplace_link) do
@@ -125,6 +141,32 @@ RSpec.describe "Company Marketplace Links" do
           body = JSON.parse(response.body)
           expect(body["success"]).to be(false)
           expect(body["message"]).to eq("Unable to save marketplace link")
+        end
+      end
+
+      response "404", "admin cannot create link outside scope" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company) { create(:company, :pt) }
+        let(:company_id) { company.id }
+        let(:company_marketplace_link) do
+          {
+            company_marketplace_link: {
+              marketplace: "shopee",
+              store_name: "ABC Official",
+              store_url: "https://shopee.co.id/abc-official",
+              is_active: true
+            }
+          }
+        end
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response.status).to eq(404)
+          expect(body["success"]).to be(false)
         end
       end
     end
@@ -156,7 +198,7 @@ RSpec.describe "Company Marketplace Links" do
       }
 
       response "200", "link updated" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
         let!(:marketplace_link) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
         let(:company_id) { company.id }
@@ -180,6 +222,31 @@ RSpec.describe "Company Marketplace Links" do
           expect(body.dig("data", "is_active")).to be(false)
         end
       end
+
+      response "404", "admin cannot update link outside scope" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company) { create(:company, :pt) }
+        let!(:marketplace_link) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
+        let(:company_id) { company.id }
+        let(:id) { marketplace_link.id }
+        let(:company_marketplace_link) do
+          {
+            company_marketplace_link: {
+              store_name: "Should Not Update"
+            }
+          }
+        end
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response.status).to eq(404)
+          expect(body["success"]).to be(false)
+        end
+      end
     end
 
     delete "Delete marketplace link" do
@@ -188,7 +255,7 @@ RSpec.describe "Company Marketplace Links" do
       security [ { bearerAuth: [] } ]
 
       response "200", "link discarded" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
         let!(:marketplace_link) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
         let(:company_id) { company.id }
@@ -201,6 +268,24 @@ RSpec.describe "Company Marketplace Links" do
         run_test! do |response|
           body = JSON.parse(response.body)
           expect(body.dig("data", "discarded")).to be(true)
+        end
+      end
+
+      response "404", "admin cannot delete link outside scope" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company) { create(:company, :pt) }
+        let!(:marketplace_link) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
+        let(:company_id) { company.id }
+        let(:id) { marketplace_link.id }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response.status).to eq(404)
+          expect(body["success"]).to be(false)
         end
       end
     end

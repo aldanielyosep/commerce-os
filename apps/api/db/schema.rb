@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_13_103000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_19_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -114,6 +114,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_13_103000) do
     t.index ["created_by_id"], name: "index_company_marketplace_links_on_created_by_id"
     t.index ["discarded_at"], name: "index_company_marketplace_links_on_discarded_at"
     t.index ["updated_by_id"], name: "index_company_marketplace_links_on_updated_by_id"
+  end
+
+  create_table "company_assignments", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.datetime "discarded_at"
+    t.string "role_in_company"
+    t.bigint "updated_by_id"
+    t.bigint "user_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_company_assignments_on_company_id"
+    t.index ["created_by_id"], name: "index_company_assignments_on_created_by_id"
+    t.index ["discarded_at"], name: "index_company_assignments_on_discarded_at"
+    t.index ["updated_by_id"], name: "index_company_assignments_on_updated_by_id"
+    t.index ["user_id", "company_id"], name: "index_company_assignments_on_user_and_company", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["user_id"], name: "index_company_assignments_on_user_id"
   end
 
   create_table "departments", force: :cascade do |t|
@@ -258,6 +275,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_13_103000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "companies", "users", column: "created_by_id"
   add_foreign_key "companies", "users", column: "updated_by_id"
+  add_foreign_key "company_assignments", "companies"
+  add_foreign_key "company_assignments", "users", column: "created_by_id"
+  add_foreign_key "company_assignments", "users", column: "updated_by_id"
+  add_foreign_key "company_assignments", "users"
   add_foreign_key "company_marketplace_links", "companies"
   add_foreign_key "company_marketplace_links", "users", column: "created_by_id"
   add_foreign_key "company_marketplace_links", "users", column: "updated_by_id"
