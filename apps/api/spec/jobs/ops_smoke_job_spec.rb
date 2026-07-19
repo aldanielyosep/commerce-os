@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe OpsSmokeJob, type: :job do
+RSpec.describe OpsSmokeJob do
   around do |example|
     original_adapter = ActiveJob::Base.queue_adapter
     ActiveJob::Base.queue_adapter = :good_job

@@ -6,8 +6,8 @@ module Api
       before_action :set_company_assignment, only: :destroy
 
       def index
-        assignments = @user.company_assignments.kept.includes(:company).order(:id)
-        render_success(CompanyAssignmentBlueprint.render_as_hash(assignments))
+        pagy_record, assignments = paginate_collection(@user.company_assignments.kept.includes(:company).order(:id))
+        render_success(CompanyAssignmentBlueprint.render_as_hash(assignments), meta: pagination_meta(pagy_record))
       end
 
       def create

@@ -6,8 +6,8 @@ module Api
       def index
         authorize Department
 
-        departments = scoped_records(Department.kept).order(:name)
-        render_success(DepartmentBlueprint.render_as_hash(departments))
+        pagy_record, departments = paginate_collection(scoped_records(Department.kept).order(:name))
+        render_success(DepartmentBlueprint.render_as_hash(departments), meta: pagination_meta(pagy_record))
       end
 
       def show

@@ -18,6 +18,11 @@ RSpec.describe "Users" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
+
       response "200", "users listed" do
         let!(:super_admin) do
           create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
@@ -33,6 +38,33 @@ RSpec.describe "Users" do
           ids = body["data"].pluck("id")
 
           expect(ids).to include(super_admin.id, admin_user.id)
+        end
+      end
+
+      response "200", "users ordered by email descending" do
+        let!(:super_admin) do
+          create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:user_one) do
+          create(:user, email: "alpha@example.com", password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:user_two) do
+          create(:user, email: "zeta@example.com", password: "Password123!", password_confirmation: "Password123!")
+        end
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "email" }
+        let(:order_dir) { "desc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(super_admin) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          emails = body["data"].pluck("email")
+
+          expect(emails.index(user_two.email)).to be < emails.index(user_one.email)
         end
       end
 

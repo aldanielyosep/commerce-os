@@ -1,13 +1,22 @@
 module Api
   module V1
     class UsersController < BaseController
+      ORDERABLE_FIELDS = {
+        "id" => "users.id",
+        "email" => "users.email",
+        "username" => "users.username",
+        "role" => "users.role",
+        "status" => "users.status",
+        "created_at" => "users.created_at"
+      }.freeze
+
       before_action :set_user, only: %i[show update destroy enable disable change_role reset_password]
 
       def index
         authorize User
 
-        users = scoped_records(User.includes(:employee)).order(:id)
-        render_success(UserBlueprint.render_as_hash(users))
+        pagy_record, users = paginate_collection(apply_order(scoped_records(User.includes(:employee))))
+        render_success(UserBlueprint.render_as_hash(users), meta: pagination_meta(pagy_record))
       end
 
       def show
@@ -118,6 +127,13 @@ module Api
 
       def change_role_params
         params.expect(user: [ :role ])
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(params.fetch(:order_by, "id"), ORDERABLE_FIELDS.fetch("id"))
+        order_direction = normalized_order_direction(params[:order_dir])
+
+        scope.order(Arel.sql("#{order_column} #{order_direction}, users.id asc"))
       end
     end
   end

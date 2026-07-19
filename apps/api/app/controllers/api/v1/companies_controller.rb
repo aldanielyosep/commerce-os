@@ -1,6 +1,15 @@
 module Api
   module V1
     class CompaniesController < BaseController
+      ORDERABLE_FIELDS = {
+        "code" => "companies.code",
+        "name" => "companies.name",
+        "owner_name" => "companies.owner_name",
+        "status" => "companies.status",
+        "city" => "companies.city",
+        "created_at" => "companies.created_at"
+      }.freeze
+
       before_action :set_company, only: %i[show update destroy]
 
       BASIC_PARAMS = %i[
@@ -42,8 +51,8 @@ module Api
       def index
         authorize Company
 
-        companies = scoped_records(Company.kept).order(:name)
-        render_success(CompanyBlueprint.render_as_hash(companies))
+        pagy_record, companies = paginate_collection(apply_order(scoped_records(Company.kept)))
+        render_success(CompanyBlueprint.render_as_hash(companies), meta: pagination_meta(pagy_record))
       end
 
       def show
@@ -100,6 +109,13 @@ module Api
 
       def company_params
         params.expect(company: COMPANY_PARAMS).except(:remove_logo)
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(params.fetch(:order_by, "name"), ORDERABLE_FIELDS.fetch("name"))
+        order_direction = normalized_order_direction(params[:order_dir])
+
+        scope.order(Arel.sql("#{order_column} #{order_direction}, companies.id asc"))
       end
 
       def valid_logo_mutation_request?

@@ -7,8 +7,10 @@ module Api
       def index
         authorize PositionHistory
 
-        histories = @employee.position_histories.includes(:department).order(effective_date: :desc, id: :desc)
-        render_success(PositionHistoryBlueprint.render_as_hash(histories))
+        pagy_record, histories = paginate_collection(
+          @employee.position_histories.includes(:department).order(effective_date: :desc, id: :desc)
+        )
+        render_success(PositionHistoryBlueprint.render_as_hash(histories), meta: pagination_meta(pagy_record))
       end
 
       def create

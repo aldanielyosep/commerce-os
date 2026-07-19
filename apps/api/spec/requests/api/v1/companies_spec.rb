@@ -8,6 +8,11 @@ RSpec.describe "Companies" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
+
       response "200", "companies listed" do
         let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_one) { create(:company, name: "Alpha Store") }
@@ -58,6 +63,26 @@ RSpec.describe "Companies" do
 
           expect(body["success"]).to be(true)
           expect(body["data"].pluck("name")).to contain_exactly("Alpha Store")
+        end
+      end
+
+      response "200", "companies ordered by code descending" do
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company_one) { create(:company, code: "ALPHA", name: "Alpha Store") }
+        let!(:company_two) { create(:company, code: "BETA", name: "Beta Store") }
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "code" }
+        let(:order_dir) { "desc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(body["data"].first["code"]).to eq(company_two.code)
+          expect(body["data"].second["code"]).to eq(company_one.code)
         end
       end
     end

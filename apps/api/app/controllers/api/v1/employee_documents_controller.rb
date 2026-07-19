@@ -9,8 +9,8 @@ module Api
       def index
         authorize EmployeeDocument
 
-        documents = @employee.employee_documents.kept.order(created_at: :desc)
-        render_success(EmployeeDocumentBlueprint.render_as_hash(documents))
+        pagy_record, documents = paginate_collection(@employee.employee_documents.kept.order(created_at: :desc))
+        render_success(EmployeeDocumentBlueprint.render_as_hash(documents), meta: pagination_meta(pagy_record))
       end
 
       def create

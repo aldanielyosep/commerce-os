@@ -10,17 +10,20 @@ import {
   deleteCompany,
   deleteCompanyMarketplaceLink,
   getCompany,
-  listCompanies,
+  listCompaniesPage,
   listCompanyMarketplaceLinks,
   updateCompany,
   updateCompanyMarketplaceLink
 } from "../lib/api";
 import type {
   Company,
+  CompanyOrderBy,
   CompanyMarketplace,
   CompanyMarketplaceLink,
   CompanyPayload,
+  PaginationMeta,
   CompanyStatus,
+  SortDirection,
   CompanyType
 } from "../lib/types";
 
@@ -33,6 +36,7 @@ const MARKETPLACE_OPTIONS: CompanyMarketplace[] = [
   "shopify",
   "website"
 ];
+const COMPANY_SORT_FIELDS: CompanyOrderBy[] = ["name", "code", "owner_name", "status", "city", "created_at"];
 
 type DrawerState =
   | { mode: "none" }
@@ -101,6 +105,13 @@ const EMPTY_MARKETPLACE_FORM: MarketplaceFormState = {
   store_name: "",
   store_url: "",
   is_active: true
+};
+
+const DEFAULT_PAGINATION_META: PaginationMeta = {
+  page: 1,
+  per_page: 20,
+  total_count: 0,
+  total_pages: 0
 };
 
 function companyToForm(company: Company): CompanyFormState {
@@ -194,6 +205,10 @@ export function CompaniesPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string[]>([]);
+  const [pagination, setPagination] = useState<PaginationMeta>(DEFAULT_PAGINATION_META);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState<CompanyOrderBy>("name");
+  const [sortDir, setSortDir] = useState<SortDirection>("asc");
   const [drawer, setDrawer] = useState<DrawerState>({ mode: "none" });
   const [form, setForm] = useState<CompanyFormState>(EMPTY_COMPANY_FORM);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
@@ -231,14 +246,22 @@ export function CompaniesPage() {
     setError(null);
     setErrorDetails([]);
 
-    listCompanies(token)
-      .then((companies) => {
-        setRows(companies);
-        setSelectedCompanyId((current) => current ?? companies[0]?.id ?? null);
+    listCompaniesPage(token, {
+      page: currentPage,
+      order_by: sortBy === "name" ? undefined : sortBy,
+      order_dir: sortDir === "asc" ? undefined : sortDir
+    })
+      .then((companiesPage) => {
+        setRows(companiesPage.items);
+        setPagination(companiesPage.meta);
+        setSelectedCompanyId((current) => {
+          if (current && companiesPage.items.some((company) => company.id === current)) return current;
+          return companiesPage.items[0]?.id ?? null;
+        });
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, currentPage, sortBy, sortDir]);
 
   useEffect(() => {
     if (!token || !selectedCompanyId) {
@@ -257,12 +280,42 @@ export function CompaniesPage() {
   async function refreshCompanies() {
     if (!token) return;
 
-    const companies = await listCompanies(token);
-    setRows(companies);
+    const companiesPage = await listCompaniesPage(token, {
+      page: currentPage,
+      order_by: sortBy === "name" ? undefined : sortBy,
+      order_dir: sortDir === "asc" ? undefined : sortDir
+    });
+    setRows(companiesPage.items);
+    setPagination(companiesPage.meta);
 
-    if (selectedCompanyId && !companies.some((company) => company.id === selectedCompanyId)) {
-      setSelectedCompanyId(companies[0]?.id ?? null);
+    if (selectedCompanyId && !companiesPage.items.some((company) => company.id === selectedCompanyId)) {
+      setSelectedCompanyId(companiesPage.items[0]?.id ?? null);
     }
+
+    if (companiesPage.meta.total_pages > 0 && currentPage > companiesPage.meta.total_pages) {
+      setCurrentPage(companiesPage.meta.total_pages);
+    }
+  }
+
+  function goToPreviousPage() {
+    setCurrentPage((page) => Math.max(1, page - 1));
+  }
+
+  function goToNextPage() {
+    setCurrentPage((page) => {
+      if (pagination.total_pages <= 0) return page;
+      return Math.min(pagination.total_pages, page + 1);
+    });
+  }
+
+  function onChangeSortBy(value: CompanyOrderBy) {
+    setCurrentPage(1);
+    setSortBy(value);
+  }
+
+  function onChangeSortDir(value: SortDirection) {
+    setCurrentPage(1);
+    setSortDir(value);
   }
 
   async function refreshMarketplaceLinks(companyId: number) {
@@ -500,7 +553,45 @@ export function CompaniesPage() {
         </div>
       ) : null}
 
+      <div className="card inline-form">
+        <label>
+          Sort By
+          <select value={sortBy} onChange={(event) => onChangeSortBy(event.target.value as CompanyOrderBy)}>
+            {COMPANY_SORT_FIELDS.map((field) => (
+              <option key={field} value={field}>
+                {field}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Direction
+          <select value={sortDir} onChange={(event) => onChangeSortDir(event.target.value as SortDirection)}>
+            <option value="asc">asc</option>
+            <option value="desc">desc</option>
+          </select>
+        </label>
+      </div>
+
       <DataState loading={loading} error={errorDetails.length === 0 ? error : null} empty={rows.length === 0} emptyLabel="No companies found.">
+        <div className="actions" style={{ marginBottom: 12, justifyContent: "space-between" }}>
+          <span>
+            Page {pagination.page} of {Math.max(pagination.total_pages, 1)} ({pagination.total_count} total)
+          </span>
+          <div className="actions">
+            <button className="ghost" type="button" onClick={goToPreviousPage} disabled={actionDisabled || currentPage <= 1}>
+              Previous
+            </button>
+            <button
+              className="ghost"
+              type="button"
+              onClick={goToNextPage}
+              disabled={actionDisabled || pagination.total_pages <= 1 || currentPage >= pagination.total_pages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
         <table>
           <thead>
             <tr>

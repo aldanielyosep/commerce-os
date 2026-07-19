@@ -7,8 +7,10 @@ module Api
       def index
         authorize EmployeeDepartment
 
-        assignments = @employee.employee_departments.kept.includes(:department).order(assigned_date: :desc)
-        render_success(EmployeeDepartmentBlueprint.render_as_hash(assignments))
+        pagy_record, assignments = paginate_collection(
+          @employee.employee_departments.kept.includes(:department).order(assigned_date: :desc)
+        )
+        render_success(EmployeeDepartmentBlueprint.render_as_hash(assignments), meta: pagination_meta(pagy_record))
       end
 
       def create

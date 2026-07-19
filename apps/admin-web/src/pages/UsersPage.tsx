@@ -13,13 +13,14 @@ import {
   listCompanies,
   listEmployees,
   listUserCompanyAssignments,
-  listUsers,
+  listUsersPage,
   resetUserPassword,
   updateUser
 } from "../lib/api";
 import type {
   Company,
   Employee,
+  PaginationMeta,
   UserCompanyAssignment,
   UserPayload,
   UserRecord,
@@ -75,6 +76,13 @@ const EMPTY_ASSIGNMENT_FORM: AssignmentFormState = {
   role_in_company: ""
 };
 
+const DEFAULT_PAGINATION_META: PaginationMeta = {
+  page: 1,
+  per_page: 20,
+  total_count: 0,
+  total_pages: 0
+};
+
 export function UsersPage() {
   const { token, user: currentUser } = useAuth();
   const [rows, setRows] = useState<UserRecord[]>([]);
@@ -89,6 +97,8 @@ export function UsersPage() {
   const [assignmentBusy, setAssignmentBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [assignmentError, setAssignmentError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationMeta>(DEFAULT_PAGINATION_META);
+  const [currentPage, setCurrentPage] = useState(1);
   const [drawer, setDrawer] = useState<DrawerState>({ mode: "none" });
   const [createForm, setCreateForm] = useState<CreateFormState>(EMPTY_CREATE_FORM);
   const [editForm, setEditForm] = useState<EditFormState>(EMPTY_EDIT_FORM);
@@ -114,20 +124,36 @@ export function UsersPage() {
     setLoading(true);
     setError(null);
 
-    Promise.all([listUsers(token), listEmployees(token), listCompanies(token)])
-      .then(([userRows, employeeRows, companyRows]) => {
-        setRows(userRows);
+    Promise.all([listUsersPage(token, { page: currentPage }), listEmployees(token), listCompanies(token)])
+      .then(([usersPage, employeeRows, companyRows]) => {
+        setRows(usersPage.items);
+        setPagination(usersPage.meta);
         setEmployees(employeeRows);
         setCompanies(companyRows);
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, currentPage]);
 
   async function refreshUsers() {
     if (!token) return;
-    const userRows = await listUsers(token);
-    setRows(userRows);
+    const usersPage = await listUsersPage(token, { page: currentPage });
+    setRows(usersPage.items);
+    setPagination(usersPage.meta);
+    if (usersPage.meta.total_pages > 0 && currentPage > usersPage.meta.total_pages) {
+      setCurrentPage(usersPage.meta.total_pages);
+    }
+  }
+
+  function goToPreviousPage() {
+    setCurrentPage((page) => Math.max(1, page - 1));
+  }
+
+  function goToNextPage() {
+    setCurrentPage((page) => {
+      if (pagination.total_pages <= 0) return page;
+      return Math.min(pagination.total_pages, page + 1);
+    });
   }
 
   async function refreshAssignments(userId: number) {
@@ -362,6 +388,24 @@ export function UsersPage() {
       </div>
 
       <DataState loading={loading} error={error} empty={rows.length === 0} emptyLabel="No users found.">
+        <div className="actions" style={{ marginBottom: 12, justifyContent: "space-between" }}>
+          <span>
+            Page {pagination.page} of {Math.max(pagination.total_pages, 1)} ({pagination.total_count} total)
+          </span>
+          <div className="actions">
+            <button className="ghost" type="button" onClick={goToPreviousPage} disabled={busy || loading || currentPage <= 1}>
+              Previous
+            </button>
+            <button
+              className="ghost"
+              type="button"
+              onClick={goToNextPage}
+              disabled={busy || loading || pagination.total_pages <= 1 || currentPage >= pagination.total_pages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
         <table>
           <thead>
             <tr>

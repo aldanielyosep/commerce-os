@@ -17,6 +17,25 @@ export type ApiEnvelope<T> = {
   errors?: string[];
 };
 
+export type PaginationMeta = {
+  page: number;
+  per_page: number;
+  total_count: number;
+  total_pages: number;
+};
+
+export type PaginatedResult<T> = {
+  items: T[];
+  meta: PaginationMeta;
+};
+
+export type PaginationParams = {
+  page?: number;
+  per_page?: number;
+};
+
+export type SortDirection = "asc" | "desc";
+
 export type EmployeeGender = "male" | "female";
 export type EmployeeStatus = "active" | "probation" | "resigned" | "terminated" | "retired";
 
@@ -58,6 +77,8 @@ export type EmployeeListFilters = {
   department_id?: number;
   q?: string;
 };
+
+export type EmployeeOrderBy = "employee_id" | "full_name" | "email" | "status" | "city" | "join_date";
 
 export type Department = {
   id: number;
@@ -159,6 +180,8 @@ export type EmployeeDocument = {
 
 export type CompanyType = "individual" | "cv" | "pt";
 export type CompanyStatus = "active" | "inactive";
+
+export type CompanyOrderBy = "code" | "name" | "owner_name" | "status" | "city" | "created_at";
 
 export type CompanyMarketplace =
   | "shopee"

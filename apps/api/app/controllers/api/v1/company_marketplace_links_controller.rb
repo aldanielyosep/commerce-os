@@ -6,8 +6,8 @@ module Api
       before_action :set_marketplace_link, only: %i[update destroy]
 
       def index
-        links = @company.company_marketplace_links.kept.order(:marketplace)
-        render_success(CompanyMarketplaceLinkBlueprint.render_as_hash(links))
+        pagy_record, links = paginate_collection(@company.company_marketplace_links.kept.order(:marketplace))
+        render_success(CompanyMarketplaceLinkBlueprint.render_as_hash(links), meta: pagination_meta(pagy_record))
       end
 
       def create

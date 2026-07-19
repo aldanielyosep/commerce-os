@@ -7,8 +7,8 @@ module Api
       def index
         authorize SalaryRecord
 
-        records = @employee.salary_records.order(effective_date: :desc, id: :desc)
-        render_success(SalaryRecordBlueprint.render_as_hash(records))
+        pagy_record, records = paginate_collection(@employee.salary_records.order(effective_date: :desc, id: :desc))
+        render_success(SalaryRecordBlueprint.render_as_hash(records), meta: pagination_meta(pagy_record))
       end
 
       def create

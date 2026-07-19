@@ -8,10 +8,15 @@ RSpec.describe "Departments" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+
       response "200", "departments listed" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:department_one) { create(:department, code: "HR", name: "Human Resources") }
         let!(:department_two) { create(:department, code: "ENG", name: "Engineering") }
+        let(:page) { 1 }
+        let(:per_page) { 1 }
 
         # rubocop:disable RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
@@ -20,7 +25,13 @@ RSpec.describe "Departments" do
         run_test! do |response|
           body = JSON.parse(response.body)
           expect(body["success"]).to be(true)
-          expect(body["data"].size).to eq(2)
+          expect(body["data"].size).to eq(1)
+          expect(body["meta"]).to include(
+            "page" => 1,
+            "per_page" => 1,
+            "total_count" => 2,
+            "total_pages" => 2
+          )
         end
       end
 

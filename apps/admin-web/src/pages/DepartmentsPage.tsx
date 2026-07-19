@@ -1,8 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import { DataState } from "../components/DataState";
 import { useAuth } from "../contexts/AuthContext";
-import { createDepartment, deleteDepartment, getDepartment, listDepartments, updateDepartment } from "../lib/api";
-import type { Department, DepartmentPayload } from "../lib/types";
+import { createDepartment, deleteDepartment, getDepartment, listDepartmentsPage, updateDepartment } from "../lib/api";
+import type { Department, DepartmentPayload, PaginationMeta } from "../lib/types";
 
 type DrawerState =
   | { mode: "none" }
@@ -14,12 +14,21 @@ const EMPTY_FORM: DepartmentPayload = {
   name: ""
 };
 
+const DEFAULT_PAGINATION_META: PaginationMeta = {
+  page: 1,
+  per_page: 20,
+  total_count: 0,
+  total_pages: 0
+};
+
 export function DepartmentsPage() {
   const { token } = useAuth();
   const [rows, setRows] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationMeta>(DEFAULT_PAGINATION_META);
+  const [currentPage, setCurrentPage] = useState(1);
   const [drawer, setDrawer] = useState<DrawerState>({ mode: "none" });
   const [form, setForm] = useState<DepartmentPayload>(EMPTY_FORM);
 
@@ -29,16 +38,31 @@ export function DepartmentsPage() {
     setLoading(true);
     setError(null);
 
-    listDepartments(token)
-      .then(setRows)
+    listDepartmentsPage(token, { page: currentPage })
+      .then((result) => {
+        setRows(result.items);
+        setPagination(result.meta);
+      })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, currentPage]);
 
   async function refreshDepartments() {
     if (!token) return;
-    const nextRows = await listDepartments(token);
-    setRows(nextRows);
+    const nextRows = await listDepartmentsPage(token, { page: currentPage });
+    setRows(nextRows.items);
+    setPagination(nextRows.meta);
+  }
+
+  function goToPreviousPage() {
+    setCurrentPage((page) => Math.max(1, page - 1));
+  }
+
+  function goToNextPage() {
+    setCurrentPage((page) => {
+      if (pagination.total_pages <= 0) return page;
+      return Math.min(pagination.total_pages, page + 1);
+    });
   }
 
   function closeDrawer() {
@@ -121,6 +145,24 @@ export function DepartmentsPage() {
       </div>
 
       <DataState loading={loading} error={error} empty={rows.length === 0} emptyLabel="No departments found.">
+        <div className="actions" style={{ marginBottom: 12, justifyContent: "space-between" }}>
+          <span>
+            Page {pagination.page} of {Math.max(pagination.total_pages, 1)} ({pagination.total_count} total)
+          </span>
+          <div className="actions">
+            <button className="ghost" type="button" onClick={goToPreviousPage} disabled={busy || loading || currentPage <= 1}>
+              Previous
+            </button>
+            <button
+              className="ghost"
+              type="button"
+              onClick={goToNextPage}
+              disabled={busy || loading || pagination.total_pages <= 1 || currentPage >= pagination.total_pages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
         <table>
           <thead>
             <tr>

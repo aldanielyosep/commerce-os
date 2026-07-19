@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { UsersPage } from "./UsersPage";
 
 const {
-  listUsersMock,
+  listUsersPageMock,
   listEmployeesMock,
   listCompaniesMock,
   listUserCompanyAssignmentsMock,
@@ -18,7 +18,7 @@ const {
   changeUserRoleMock,
   resetUserPasswordMock
 } = vi.hoisted(() => ({
-  listUsersMock: vi.fn(),
+  listUsersPageMock: vi.fn(),
   listEmployeesMock: vi.fn(),
   listCompaniesMock: vi.fn(),
   listUserCompanyAssignmentsMock: vi.fn(),
@@ -35,7 +35,7 @@ const {
 }));
 
 vi.mock("../lib/api", () => ({
-  listUsers: listUsersMock,
+  listUsersPage: listUsersPageMock,
   listEmployees: listEmployeesMock,
   listCompanies: listCompaniesMock,
   listUserCompanyAssignments: listUserCompanyAssignmentsMock,
@@ -66,7 +66,7 @@ vi.mock("../contexts/AuthContext", () => ({
 
 describe("UsersPage assignment management", () => {
   beforeEach(() => {
-    listUsersMock.mockReset();
+    listUsersPageMock.mockReset();
     listEmployeesMock.mockReset();
     listCompaniesMock.mockReset();
     listUserCompanyAssignmentsMock.mockReset();
@@ -81,26 +81,34 @@ describe("UsersPage assignment management", () => {
     changeUserRoleMock.mockReset();
     resetUserPasswordMock.mockReset();
 
-    listUsersMock.mockResolvedValue([
-      {
-        id: 1,
-        email: "admin1@example.com",
-        username: null,
-        role: "admin_company",
-        status: "active",
-        employee_id: null,
-        reset_password_sent_at: null
-      },
-      {
-        id: 2,
-        email: "admin2@example.com",
-        username: "admin2",
-        role: "admin_storefront_ops",
-        status: "disabled",
-        employee_id: 7,
-        reset_password_sent_at: null
+    listUsersPageMock.mockResolvedValue({
+      items: [
+        {
+          id: 1,
+          email: "admin1@example.com",
+          username: null,
+          role: "admin_company",
+          status: "active",
+          employee_id: null,
+          reset_password_sent_at: null
+        },
+        {
+          id: 2,
+          email: "admin2@example.com",
+          username: "admin2",
+          role: "admin_storefront_ops",
+          status: "disabled",
+          employee_id: 7,
+          reset_password_sent_at: null
+        }
+      ],
+      meta: {
+        page: 1,
+        per_page: 20,
+        total_count: 2,
+        total_pages: 1
       }
-    ]);
+    });
 
     listEmployeesMock.mockResolvedValue([
       {

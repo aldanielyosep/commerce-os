@@ -16,10 +16,16 @@ import type {
   EmployeeDepartmentAssignmentPayload,
   EmployeeDocument,
   EmployeeListFilters,
+  EmployeeOrderBy,
   EmployeePayload,
   EmployeeUpdatePayload,
+  PaginatedResult,
+  PaginationMeta,
+  PaginationParams,
+  CompanyOrderBy,
   PositionHistory,
   SalaryRecord,
+  SortDirection,
   UserCompanyAssignment,
   UserCompanyAssignmentPayload,
   UserRole,
@@ -60,6 +66,13 @@ export class ApiError extends Error {
   }
 }
 
+const DEFAULT_PAGINATION_META: PaginationMeta = {
+  page: 1,
+  per_page: 20,
+  total_count: 0,
+  total_pages: 0
+};
+
 type RequestOptions = {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
   token?: string;
@@ -77,6 +90,34 @@ function buildQueryString(filters: Record<string, string | number | undefined>):
 
   const stringified = query.toString();
   return stringified ? `?${stringified}` : "";
+}
+
+function normalizePaginationMeta(meta?: Record<string, unknown>): PaginationMeta {
+  const page = Number(meta?.page);
+  const perPage = Number(meta?.per_page);
+  const totalCount = Number(meta?.total_count);
+  const totalPages = Number(meta?.total_pages);
+
+  return {
+    page: Number.isFinite(page) && page > 0 ? page : DEFAULT_PAGINATION_META.page,
+    per_page: Number.isFinite(perPage) && perPage > 0 ? perPage : DEFAULT_PAGINATION_META.per_page,
+    total_count: Number.isFinite(totalCount) && totalCount >= 0 ? totalCount : DEFAULT_PAGINATION_META.total_count,
+    total_pages: Number.isFinite(totalPages) && totalPages >= 0 ? totalPages : DEFAULT_PAGINATION_META.total_pages
+  };
+}
+
+async function collectAllPages<T>(
+  fetchPage: (page: number) => Promise<PaginatedResult<T>>
+): Promise<T[]> {
+  const firstPage = await fetchPage(1);
+  const items = [ ...firstPage.items ];
+
+  for (let page = 2; page <= firstPage.meta.total_pages; page += 1) {
+    const nextPage = await fetchPage(page);
+    items.push(...nextPage.items);
+  }
+
+  return items;
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -145,13 +186,24 @@ export async function signOut(token: string): Promise<void> {
 }
 
 export async function listEmployees(token: string, filters: EmployeeListFilters = {}): Promise<Employee[]> {
+  return collectAllPages((page) => listEmployeesPage(token, { ...filters, page }));
+}
+
+export async function listEmployeesPage(
+  token: string,
+  filters: EmployeeListFilters & PaginationParams & { order_by?: EmployeeOrderBy; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<Employee>> {
   const query = buildQueryString({
     status: filters.status,
     department_id: filters.department_id,
-    q: filters.q
+    q: filters.q,
+    page: filters.page,
+    per_page: filters.per_page,
+    order_by: filters.order_by,
+    order_dir: filters.order_dir
   });
   const envelope = await request<ApiEnvelope<Employee[]>>(`/api/v1/employees${query}`, { token });
-  return envelope.data;
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
 }
 
 export async function getEmployee(token: string, employeeId: number): Promise<Employee> {
@@ -238,8 +290,19 @@ export async function removeEmployeeDepartment(
 }
 
 export async function listDepartments(token: string): Promise<Department[]> {
-  const envelope = await request<ApiEnvelope<Department[]>>("/api/v1/departments", { token });
-  return envelope.data;
+  return collectAllPages((page) => listDepartmentsPage(token, { page }));
+}
+
+export async function listDepartmentsPage(
+  token: string,
+  pagination: PaginationParams = {}
+): Promise<PaginatedResult<Department>> {
+  const query = buildQueryString({
+    page: pagination.page,
+    per_page: pagination.per_page
+  });
+  const envelope = await request<ApiEnvelope<Department[]>>(`/api/v1/departments${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
 }
 
 export async function getDepartment(token: string, departmentId: number): Promise<Department> {
@@ -277,8 +340,19 @@ export async function deleteDepartment(token: string, departmentId: number): Pro
 }
 
 export async function listUsers(token: string): Promise<UserRecord[]> {
-  const envelope = await request<ApiEnvelope<UserRecord[]>>("/api/v1/users", { token });
-  return envelope.data;
+  return collectAllPages((page) => listUsersPage(token, { page }));
+}
+
+export async function listUsersPage(
+  token: string,
+  pagination: PaginationParams = {}
+): Promise<PaginatedResult<UserRecord>> {
+  const query = buildQueryString({
+    page: pagination.page,
+    per_page: pagination.per_page
+  });
+  const envelope = await request<ApiEnvelope<UserRecord[]>>(`/api/v1/users${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
 }
 
 export async function getUser(token: string, userId: number): Promise<UserRecord> {
@@ -465,8 +539,21 @@ function appendCompanyFormData(form: FormData, payload: CompanyPayload | Company
 }
 
 export async function listCompanies(token: string): Promise<Company[]> {
-  const envelope = await request<ApiEnvelope<Company[]>>("/api/v1/companies", { token });
-  return envelope.data;
+  return collectAllPages((page) => listCompaniesPage(token, { page }));
+}
+
+export async function listCompaniesPage(
+  token: string,
+  pagination: PaginationParams & { order_by?: CompanyOrderBy; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<Company>> {
+  const query = buildQueryString({
+    page: pagination.page,
+    per_page: pagination.per_page,
+    order_by: pagination.order_by,
+    order_dir: pagination.order_dir
+  });
+  const envelope = await request<ApiEnvelope<Company[]>>(`/api/v1/companies${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
 }
 
 export async function getCompany(token: string, companyId: number): Promise<Company> {
