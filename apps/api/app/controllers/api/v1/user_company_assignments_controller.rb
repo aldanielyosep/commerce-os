@@ -68,31 +68,50 @@ module Api
       end
 
       def normalize_company_ids(raw_ids)
-        Array(raw_ids).map { |id| id.to_i }.reject(&:zero?).uniq
+        Array(raw_ids).map(&:to_i).reject(&:zero?).uniq
       end
 
       def upsert_assignments!(company_ids:, role_in_company:)
         created_count = 0
         updated_count = 0
+        existing_by_company = @user.company_assignments.kept.where(company_id: company_ids).index_by(&:company_id)
 
         ActiveRecord::Base.transaction do
-          existing_by_company = @user.company_assignments.kept.where(company_id: company_ids).index_by(&:company_id)
-
           company_ids.each do |company_id|
-            assignment = existing_by_company[company_id] || @user.company_assignments.new(company_id: company_id)
-
-            assignment.role_in_company = role_in_company
-
-            if assignment.new_record?
-              assignment.save!
+            created, updated = upsert_single_assignment!(
+              existing_by_company: existing_by_company,
+              company_id: company_id,
+              role_in_company: role_in_company
+            )
+            if created
               created_count += 1
-            elsif assignment.changed?
-              assignment.save!
+            elsif updated
               updated_count += 1
             end
           end
         end
 
+        assignment_summary(created_count: created_count, updated_count: updated_count)
+      end
+
+      def upsert_single_assignment!(existing_by_company:, company_id:, role_in_company:)
+        assignment = existing_by_company[company_id] || @user.company_assignments.new(company_id: company_id)
+        assignment.role_in_company = role_in_company
+
+        if assignment.new_record?
+          assignment.save!
+          return [true, false]
+        end
+
+        if assignment.changed?
+          assignment.save!
+          return [false, true]
+        end
+
+        [false, false]
+      end
+
+      def assignment_summary(created_count:, updated_count:)
         {
           user_id: @user.id,
           created_count: created_count,

@@ -10,13 +10,17 @@ RSpec.describe CompanyPolicy, type: :policy do
       let(:user) { create(:user, :super_admin) }
 
       it "allows all company actions" do
-        expect(policy.index?).to be(true)
-        expect(policy.show?).to be(true)
-        expect(policy.create?).to be(true)
-        expect(policy.update?).to be(true)
-        expect(policy.destroy?).to be(true)
-        expect(policy.upload_logo?).to be(true)
-        expect(policy.manage_marketplaces?).to be(true)
+        expect(permission_map(policy)).to eq(
+          {
+            index: true,
+            show: true,
+            create: true,
+            update: true,
+            destroy: true,
+            upload_logo: true,
+            manage_marketplaces: true
+          }
+        )
       end
     end
 
@@ -28,13 +32,17 @@ RSpec.describe CompanyPolicy, type: :policy do
       end
 
       it "allows scoped access" do
-        expect(policy.index?).to be(true)
-        expect(policy.show?).to be(true)
-        expect(policy.create?).to be(true)
-        expect(policy.update?).to be(true)
-        expect(policy.destroy?).to be(true)
-        expect(policy.upload_logo?).to be(true)
-        expect(policy.manage_marketplaces?).to be(true)
+        expect(permission_map(policy)).to eq(
+          {
+            index: true,
+            show: true,
+            create: true,
+            update: true,
+            destroy: true,
+            upload_logo: true,
+            manage_marketplaces: true
+          }
+        )
       end
     end
 
@@ -42,13 +50,17 @@ RSpec.describe CompanyPolicy, type: :policy do
       let(:user) { create(:user) }
 
       it "denies company-scoped actions" do
-        expect(policy.index?).to be(true)
-        expect(policy.show?).to be(false)
-        expect(policy.create?).to be(true)
-        expect(policy.update?).to be(false)
-        expect(policy.destroy?).to be(false)
-        expect(policy.upload_logo?).to be(false)
-        expect(policy.manage_marketplaces?).to be(false)
+        expect(permission_map(policy)).to eq(
+          {
+            index: true,
+            show: false,
+            create: true,
+            update: false,
+            destroy: false,
+            upload_logo: false,
+            manage_marketplaces: false
+          }
+        )
       end
     end
   end
@@ -63,7 +75,7 @@ RSpec.describe CompanyPolicy, type: :policy do
       it "returns all companies" do
         scope = described_class.new(user, Company.kept)
 
-        expect(scope.resolve).to match_array([company_one, company_two])
+        expect(scope.resolve).to contain_exactly(company_one, company_two)
       end
     end
 
@@ -77,8 +89,20 @@ RSpec.describe CompanyPolicy, type: :policy do
       it "returns only assigned companies" do
         scope = described_class.new(user, Company.kept)
 
-        expect(scope.resolve).to match_array([company_one])
+        expect(scope.resolve).to contain_exactly(company_one)
       end
     end
+  end
+
+  def permission_map(policy)
+    {
+      index: policy.index?,
+      show: policy.show?,
+      create: policy.create?,
+      update: policy.update?,
+      destroy: policy.destroy?,
+      upload_logo: policy.upload_logo?,
+      manage_marketplaces: policy.manage_marketplaces?
+    }
   end
 end

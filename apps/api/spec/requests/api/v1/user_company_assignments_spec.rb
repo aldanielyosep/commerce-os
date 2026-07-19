@@ -27,8 +27,10 @@ RSpec.describe "User Company Assignments" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
+          assignment_ids = body["data"].pluck("id")
           company_names = body["data"].map { |row| row.dig("company", "name") }
 
+          expect(assignment_ids).to contain_exactly(assignment_one.id, assignment_two.id)
           expect(company_names).to contain_exactly("Alpha Store", "Beta Store")
         end
       end
@@ -143,7 +145,6 @@ RSpec.describe "User Company Assignments" do
         run_test!
       end
     end
-
   end
 
   path "/api/v1/users/{user_id}/company_assignments/bulk_upsert" do
@@ -200,6 +201,7 @@ RSpec.describe "User Company Assignments" do
         run_test! do |response|
           body = JSON.parse(response.body)
 
+          expect(existing_assignment.reload.role_in_company).to eq("manager")
           expect(body.dig("data", "created_count")).to eq(1)
           expect(body.dig("data", "updated_count")).to eq(1)
           expect(body.dig("data", "total_assigned_companies")).to eq(2)
