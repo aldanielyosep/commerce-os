@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import type { UserRole } from "../lib/types";
 
 export function ProtectedRoute() {
   const { token, user } = useAuth();
@@ -11,7 +12,7 @@ export function ProtectedRoute() {
   return <Outlet />;
 }
 
-export function RoleRoute({ allowed }: { allowed: Array<"super_admin" | "admin"> }) {
+export function RoleRoute({ allowed }: { allowed: UserRole[] }) {
   const { user } = useAuth();
 
   if (!user || !allowed.includes(user.role)) {

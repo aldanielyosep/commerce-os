@@ -63,7 +63,7 @@ RSpec.describe "Users" do
               username: { type: :string },
               password: { type: :string },
               password_confirmation: { type: :string },
-              role: { type: :string, enum: %w[admin super_admin] },
+              role: { type: :string, enum: %w[admin admin_company admin_storefront_ops super_admin] },
               status: { type: :string, enum: %w[active disabled] }
             },
             required: %w[email password password_confirmation role status]
@@ -83,7 +83,7 @@ RSpec.describe "Users" do
               username: "phaseeadmin",
               password: "Password123!",
               password_confirmation: "Password123!",
-              role: "admin",
+              role: "admin_company",
               status: "active"
             }
           }
@@ -95,7 +95,7 @@ RSpec.describe "Users" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(body["data"]["role"]).to eq("admin")
+          expect(body["data"]["role"]).to eq("admin_company")
         end
       end
 
@@ -408,7 +408,7 @@ RSpec.describe "Users" do
           user: {
             type: :object,
             properties: {
-              role: { type: :string, enum: %w[admin super_admin] }
+              role: { type: :string, enum: %w[admin admin_company admin_storefront_ops super_admin] }
             },
             required: [ "role" ]
           }

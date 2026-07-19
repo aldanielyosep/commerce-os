@@ -20,6 +20,8 @@ import type {
   EmployeeUpdatePayload,
   PositionHistory,
   SalaryRecord,
+  UserCompanyAssignment,
+  UserCompanyAssignmentPayload,
   UserRole,
   UserPayload,
   UserUpdatePayload,
@@ -339,6 +341,47 @@ export async function resetUserPassword(token: string, userId: number): Promise<
     method: "POST",
     token
   });
+}
+
+export async function listUserCompanyAssignments(
+  token: string,
+  userId: number
+): Promise<UserCompanyAssignment[]> {
+  const envelope = await request<ApiEnvelope<UserCompanyAssignment[]>>(
+    `/api/v1/users/${userId}/company_assignments`,
+    { token }
+  );
+  return envelope.data;
+}
+
+export async function createUserCompanyAssignment(
+  token: string,
+  userId: number,
+  payload: UserCompanyAssignmentPayload
+): Promise<UserCompanyAssignment> {
+  const envelope = await request<ApiEnvelope<UserCompanyAssignment>>(
+    `/api/v1/users/${userId}/company_assignments`,
+    {
+      method: "POST",
+      token,
+      body: { company_assignment: payload }
+    }
+  );
+  return envelope.data;
+}
+
+export async function deleteUserCompanyAssignment(
+  token: string,
+  userId: number,
+  assignmentId: number
+): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(
+    `/api/v1/users/${userId}/company_assignments/${assignmentId}`,
+    {
+      method: "DELETE",
+      token
+    }
+  );
 }
 
 export async function listPositionTimeline(token: string, employeeId: number): Promise<PositionHistory[]> {

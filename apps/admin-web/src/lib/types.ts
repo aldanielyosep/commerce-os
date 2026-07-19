@@ -1,4 +1,4 @@
-export type UserRole = "super_admin" | "admin";
+export type UserRole = "super_admin" | "admin" | "admin_company" | "admin_storefront_ops";
 export type UserStatus = "active" | "disabled";
 
 export type AuthUser = {
@@ -111,6 +111,27 @@ export type UserUpdatePayload = {
   email?: string;
   username?: string;
   employee_id?: number | null;
+};
+
+export type CompanyAssignmentCompanyRef = {
+  id: number;
+  code: string;
+  name: string;
+};
+
+export type UserCompanyAssignment = {
+  id: number;
+  user_id: number;
+  company_id: number;
+  role_in_company: string | null;
+  company: CompanyAssignmentCompanyRef;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type UserCompanyAssignmentPayload = {
+  company_id: number;
+  role_in_company?: string;
 };
 
 export type PositionHistory = {

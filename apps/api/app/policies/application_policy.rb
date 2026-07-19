@@ -44,9 +44,15 @@ class ApplicationPolicy
 
     def resolve
       return scope.none unless user
-      return scope.all if user.super_admin? || user.admin?
+      return scope.all if company_admin_or_super_admin?
 
       scope.none
+    end
+
+    private
+
+    def company_admin_or_super_admin?
+      user&.super_admin? || user&.admin? || user&.admin_company?
     end
   end
 
@@ -57,6 +63,14 @@ class ApplicationPolicy
   end
 
   def admin_or_super_admin?
-    !!(user&.admin? || user&.super_admin?)
+    company_admin_or_super_admin?
+  end
+
+  def company_admin?
+    !!(user&.admin? || user&.admin_company?)
+  end
+
+  def company_admin_or_super_admin?
+    !!(super_admin? || company_admin?)
   end
 end

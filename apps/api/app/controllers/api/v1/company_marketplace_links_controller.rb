@@ -40,7 +40,7 @@ module Api
       private
 
       def set_company
-        @company = scoped_records(Company.kept).find(params.expect(:company_id))
+        @company = Company.kept.find(params.expect(:company_id))
       end
 
       def set_marketplace_link

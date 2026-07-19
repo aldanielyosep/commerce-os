@@ -23,6 +23,19 @@ RSpec.describe "Departments" do
           expect(body["data"].size).to eq(2)
         end
       end
+
+      response "403", "departments list forbidden for storefront ops" do
+        let!(:user) do
+          create(:user, :admin_storefront_ops, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:department) { create(:department, code: "HR", name: "Human Resources") }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test!
+      end
     end
 
     post "Create department" do

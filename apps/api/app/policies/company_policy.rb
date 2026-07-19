@@ -31,7 +31,7 @@ class CompanyPolicy < ApplicationPolicy
     def resolve
       return scope.none unless user
       return scope.all if user.super_admin?
-      return scope.none unless user.admin?
+      return scope.none unless user.admin? || user.admin_company?
 
       scope.joins(:company_assignments).where(company_assignments: { user_id: user.id }).distinct
     end
@@ -41,7 +41,7 @@ class CompanyPolicy < ApplicationPolicy
 
   def company_in_scope?
     return false unless record.is_a?(Company)
-    return false unless user&.admin?
+    return false unless company_admin?
 
     user.company_assignments.kept.exists?(company_id: record.id)
   end
