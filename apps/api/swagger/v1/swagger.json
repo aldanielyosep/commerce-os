@@ -156,6 +156,14 @@
             }
           },
           {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "order_by",
             "in": "query",
             "required": false,
@@ -174,7 +182,7 @@
         ],
         "responses": {
           "200": {
-            "description": "companies ordered by code descending"
+            "description": "companies filtered by query"
           }
         }
       },
@@ -633,6 +641,14 @@
             }
           },
           {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "order_by",
             "in": "query",
             "required": false,
@@ -651,7 +667,7 @@
         ],
         "responses": {
           "200": {
-            "description": "departments ordered by code descending"
+            "description": "departments filtered by query"
           },
           "403": {
             "description": "departments list forbidden for storefront ops"
@@ -2039,6 +2055,14 @@
             }
           },
           {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "order_by",
             "in": "query",
             "required": false,
@@ -2057,7 +2081,7 @@
         ],
         "responses": {
           "200": {
-            "description": "users ordered by email descending"
+            "description": "users filtered by query"
           },
           "403": {
             "description": "forbidden for admin"

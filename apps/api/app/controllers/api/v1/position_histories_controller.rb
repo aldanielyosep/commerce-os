@@ -2,9 +2,9 @@ module Api
   module V1
     class PositionHistoriesController < BaseController
       ORDERABLE_FIELDS = {
-        "effective_date" => "position_histories.effective_date",
-        "position" => "position_histories.position",
-        "created_at" => "position_histories.created_at"
+        "effective_date" => :effective_date,
+        "position" => :position,
+        "created_at" => :created_at
       }.freeze
 
       before_action :set_employee
@@ -73,7 +73,7 @@ module Api
         )
         order_direction = params.key?(:order_dir) ? normalized_order_direction(params[:order_dir]) : :desc
 
-        scope.order(Arel.sql("#{order_column} #{order_direction}, position_histories.id desc"))
+        scope.order(order_column => order_direction, id: :desc)
       end
     end
   end

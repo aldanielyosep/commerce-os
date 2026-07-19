@@ -2,9 +2,9 @@ module Api
   module V1
     class UserCompanyAssignmentsController < BaseController
       ORDERABLE_FIELDS = {
-        "id" => "company_assignments.id",
-        "role_in_company" => "company_assignments.role_in_company",
-        "created_at" => "company_assignments.created_at"
+        "id" => :id,
+        "role_in_company" => :role_in_company,
+        "created_at" => :created_at
       }.freeze
 
       before_action :authorize_company_assignment_access!
@@ -130,7 +130,7 @@ module Api
         order_column = ORDERABLE_FIELDS.fetch(params.fetch(:order_by, "id"), ORDERABLE_FIELDS.fetch("id"))
         order_direction = normalized_order_direction(params[:order_dir])
 
-        scope.order(Arel.sql("#{order_column} #{order_direction}, company_assignments.id asc"))
+        scope.order(order_column => order_direction, id: :asc)
       end
     end
   end

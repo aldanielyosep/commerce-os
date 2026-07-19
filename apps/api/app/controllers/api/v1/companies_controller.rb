@@ -2,12 +2,12 @@ module Api
   module V1
     class CompaniesController < BaseController
       ORDERABLE_FIELDS = {
-        "code" => "companies.code",
-        "name" => "companies.name",
-        "owner_name" => "companies.owner_name",
-        "status" => "companies.status",
-        "city" => "companies.city",
-        "created_at" => "companies.created_at"
+        "code" => :code,
+        "name" => :name,
+        "owner_name" => :owner_name,
+        "status" => :status,
+        "city" => :city,
+        "created_at" => :created_at
       }.freeze
 
       before_action :set_company, only: %i[show update destroy]
@@ -112,7 +112,7 @@ module Api
       end
 
       def filtered_companies
-        scope = scoped_records(Company.kept)
+        scope = scoped_records(Company.kept.with_attached_logo)
         scope = filter_by_query(scope)
         apply_order(scope)
       end
@@ -140,7 +140,7 @@ module Api
         order_column = ORDERABLE_FIELDS.fetch(params.fetch(:order_by, "name"), ORDERABLE_FIELDS.fetch("name"))
         order_direction = normalized_order_direction(params[:order_dir])
 
-        scope.order(Arel.sql("#{order_column} #{order_direction}, companies.id asc"))
+        scope.order(order_column => order_direction, id: :asc)
       end
 
       def valid_logo_mutation_request?

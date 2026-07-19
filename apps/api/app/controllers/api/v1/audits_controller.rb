@@ -2,10 +2,10 @@ module Api
   module V1
     class AuditsController < BaseController
       ORDERABLE_FIELDS = {
-        "created_at" => "audits.created_at",
-        "action" => "audits.action",
-        "auditable_type" => "audits.auditable_type",
-        "user_id" => "audits.user_id"
+        "created_at" => :created_at,
+        "action" => :action,
+        "auditable_type" => :auditable_type,
+        "user_id" => :user_id
       }.freeze
 
       before_action :set_audit, only: :show
@@ -46,7 +46,7 @@ module Api
         )
         order_direction = params.key?(:order_dir) ? normalized_order_direction(params[:order_dir]) : :desc
 
-        scope.order(Arel.sql("#{order_column} #{order_direction}, audits.id desc"))
+        scope.order(order_column => order_direction, id: :desc)
       end
     end
   end

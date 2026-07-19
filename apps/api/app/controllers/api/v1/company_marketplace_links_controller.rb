@@ -2,11 +2,11 @@ module Api
   module V1
     class CompanyMarketplaceLinksController < BaseController
       ORDERABLE_FIELDS = {
-        "marketplace" => "company_marketplace_links.marketplace",
-        "store_name" => "company_marketplace_links.store_name",
-        "store_url" => "company_marketplace_links.store_url",
-        "is_active" => "company_marketplace_links.is_active",
-        "created_at" => "company_marketplace_links.created_at"
+        "marketplace" => :marketplace,
+        "store_name" => :store_name,
+        "store_url" => :store_url,
+        "is_active" => :is_active,
+        "created_at" => :created_at
       }.freeze
 
       before_action :set_company
@@ -70,7 +70,7 @@ module Api
         )
         order_direction = normalized_order_direction(params[:order_dir])
 
-        scope.order(Arel.sql("#{order_column} #{order_direction}, company_marketplace_links.id asc"))
+        scope.order(order_column => order_direction, id: :asc)
       end
     end
   end

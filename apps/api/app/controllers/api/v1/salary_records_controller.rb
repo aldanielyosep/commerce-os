@@ -2,9 +2,9 @@ module Api
   module V1
     class SalaryRecordsController < BaseController
       ORDERABLE_FIELDS = {
-        "effective_date" => "salary_records.effective_date",
-        "basic_salary_cents" => "salary_records.basic_salary_cents",
-        "created_at" => "salary_records.created_at"
+        "effective_date" => :effective_date,
+        "basic_salary_cents" => :basic_salary_cents,
+        "created_at" => :created_at
       }.freeze
 
       before_action :set_employee
@@ -60,7 +60,7 @@ module Api
         )
         order_direction = params.key?(:order_dir) ? normalized_order_direction(params[:order_dir]) : :desc
 
-        scope.order(Arel.sql("#{order_column} #{order_direction}, salary_records.id desc"))
+        scope.order(order_column => order_direction, id: :desc)
       end
     end
   end
