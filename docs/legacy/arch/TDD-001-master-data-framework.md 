@@ -1,0 +1,393 @@
+# TDD-001 - Master Data Framework
+
+## Document Information
+
+| Item       | Value                 |
+| ---------- | --------------------- |
+| Document   | TDD-001               |
+| Title      | Master Data Framework |
+| Version    | 1.0                   |
+| Status     | Approved              |
+| Depends On | TDD-000               |
+
+---
+
+# 1. Objective
+
+Dokumen ini mendefinisikan standar implementasi seluruh Master Data pada Commerce OS.
+
+Tujuan utama:
+
+* Konsistensi implementasi
+* Mengurangi duplikasi kode
+* Menjadi acuan AI Agent
+* Memudahkan penambahan master baru
+
+Master Data yang mengikuti dokumen ini:
+
+* Department
+* Category
+* Sub Category
+* Product Type
+* Theme
+* Occasion
+* Collection
+* Marketplace
+
+---
+
+# 2. Business Context
+
+Master Data adalah data referensi yang digunakan oleh module lain.
+
+Karakteristik:
+
+* Perubahan relatif jarang.
+* Digunakan sebagai referensi oleh Product.
+* Memiliki CRUD sederhana.
+* Mendukung pencarian dan filter.
+* Mendukung soft delete.
+
+Master Data **tidak** menyimpan transaksi.
+
+---
+
+# 3. Architecture
+
+```text
+Admin Web
+     │
+REST API
+     │
+Controller
+     │
+Service
+     │
+Model
+     │
+Database
+```
+
+Semua Master Data mengikuti arsitektur yang sama.
+
+---
+
+# 4. Database Standard
+
+Seluruh Master Data memiliki struktur minimal berikut.
+
+| Column       | Type            | Required |
+| ------------ | --------------- | -------- |
+| id           | bigint          | ✅        |
+| code         | string          | ✅        |
+| name         | string          | ✅        |
+| description  | text            | ❌        |
+| status       | enum            | ✅        |
+| sort_order   | integer         | ❌        |
+| created_by   | reference(User) | ✅        |
+| updated_by   | reference(User) | ✅        |
+| discarded_at | datetime        | ❌        |
+| created_at   | datetime        | ✅        |
+| updated_at   | datetime        | ✅        |
+
+---
+
+# 5. Status Standard
+
+Semua Master Data menggunakan enum yang sama.
+
+| Status   |
+| -------- |
+| active   |
+| inactive |
+
+Status **archived** tidak digunakan pada Master Data.
+
+Soft delete menggunakan `discard`.
+
+---
+
+# 6. Code Standard
+
+Field `code` digunakan sebagai business identifier.
+
+Contoh:
+
+| Master       | Code         |
+| ------------ | ------------ |
+| Department   | PKG          |
+| Category     | GIFT         |
+| Sub Category | GOODIE_BAG   |
+| Product Type | GOODIE_BAG   |
+| Theme        | DINO         |
+| Occasion     | RAMADAN      |
+| Collection   | RAMADAN_2027 |
+
+Aturan:
+
+* Uppercase
+* Snake Case
+* Tidak mengandung spasi
+* Bersifat unik
+
+---
+
+# 7. CRUD Standard
+
+Semua Master Data memiliki endpoint yang sama.
+
+| Method | Endpoint               |
+| ------ | ---------------------- |
+| GET    | /api/v1/{resource}     |
+| GET    | /api/v1/{resource}/:id |
+| POST   | /api/v1/{resource}     |
+| PATCH  | /api/v1/{resource}/:id |
+| DELETE | /api/v1/{resource}/:id |
+
+DELETE menggunakan soft delete.
+
+---
+
+# 8. Search Standard
+
+Parameter:
+
+```text
+q
+```
+
+Pencarian dilakukan pada:
+
+* code
+* name
+
+---
+
+# 9. Filter Standard
+
+Semua Master Data mendukung filter:
+
+* status
+
+Jika relevan dapat ditambahkan filter lain, misalnya:
+
+* department_id (Category)
+* category_id (Sub Category)
+
+---
+
+# 10. Sorting
+
+Default:
+
+```text
+sort=sort_order
+order=asc
+```
+
+Jika `sort_order` sama, gunakan:
+
+```text
+name ASC
+```
+
+---
+
+# 11. Pagination
+
+Menggunakan Pagy.
+
+Default:
+
+* page = 1
+* per_page = 20
+
+Maximum:
+
+* per_page = 100
+
+---
+
+# 12. Validation
+
+Seluruh Master Data wajib memiliki validasi berikut.
+
+| Field  | Validation       |
+| ------ | ---------------- |
+| code   | required, unique |
+| name   | required         |
+| status | required         |
+
+---
+
+# 13. Association Rules
+
+Contoh relasi:
+
+```text
+Department
+    │
+    └── Category
+            │
+            └── Sub Category
+```
+
+Product Type berdiri sendiri.
+
+Theme, Occasion, Collection, Marketplace tidak memiliki parent.
+
+---
+
+# 14. Backend Standard
+
+Setiap Master Data wajib memiliki:
+
+* Migration
+* Model
+* Policy
+* Blueprint
+* Query Object
+* Service Object
+* Controller
+* Routes
+* FactoryBot
+* Model Spec
+* Request Spec
+* Policy Spec
+* Swagger
+
+---
+
+# 15. Frontend Standard
+
+Setiap Master Data wajib memiliki:
+
+## List Page
+
+* Search
+* Status Filter
+* Pagination
+* Sort
+* Create Button
+* Edit Button
+* Delete Button
+
+---
+
+## Form
+
+* Code
+* Name
+* Description
+* Status
+
+---
+
+# 16. UX Standard
+
+* Code otomatis diubah menjadi uppercase.
+* Trim whitespace pada semua input text.
+* Validasi ditampilkan secara inline.
+* Tombol Save dinonaktifkan saat request berjalan.
+* Konfirmasi sebelum Delete.
+
+---
+
+# 17. Authorization
+
+Semua endpoint menggunakan Pundit.
+
+Policy minimal:
+
+* index?
+* show?
+* create?
+* update?
+* destroy?
+
+---
+
+# 18. Error Handling
+
+Gunakan standar dari TDD-000.
+
+Semua validation error menggunakan format response yang sama.
+
+---
+
+# 19. Testing Standard
+
+Minimal test:
+
+## Backend
+
+* Model Spec
+* Request Spec
+* Policy Spec
+
+Coverage:
+
+* ≥80% per file
+* Total project ≥90%
+
+## Frontend
+
+* Component Test
+* Page Test
+* Composable Test
+
+Coverage:
+
+* ≥80% per file
+* Total project ≥90%
+
+---
+
+# 20. Definition of Done
+
+Module dianggap selesai apabila:
+
+* Migration berhasil dijalankan.
+* CRUD lengkap.
+* Search berfungsi.
+* Filter berfungsi.
+* Pagination berfungsi.
+* Sort berfungsi.
+* Authorization aktif.
+* Blueprint tersedia.
+* Swagger diperbarui.
+* Factory tersedia.
+* Test memenuhi standar coverage.
+* RuboCop, Brakeman, ESLint, dan TypeScript lulus.
+
+---
+
+# 21. AI Agent Prompt
+
+Implement Master Data module following:
+
+* TDD-000 Engineering Standards
+* TDD-001 Master Data Framework
+
+Generate:
+
+* Migration
+* Model
+* Query Object
+* Service Object
+* Policy
+* Blueprint
+* Controller
+* Routes
+* FactoryBot
+* RSpec
+* Swagger Documentation
+
+Business rules:
+
+* Soft delete menggunakan Discard.
+* Response menggunakan Blueprinter.
+* Search berdasarkan `code` dan `name`.
+* Pagination menggunakan Pagy.
+* Authorization menggunakan Pundit.
+* Tidak menaruh business logic di Controller.
