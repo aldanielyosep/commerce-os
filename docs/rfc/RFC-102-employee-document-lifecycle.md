@@ -60,6 +60,7 @@ Target enum:
 - `passport`
 - `driver_license`
 - `education_certificate`
+- `profile_photo`
 - `other`
 
 Catatan: enum aktif saat ini perlu delta implementasi untuk tipe BPJS eksplisit.
