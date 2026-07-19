@@ -57,7 +57,7 @@ RSpec.describe "Companies" do
           body = JSON.parse(response.body)
 
           expect(body["success"]).to be(true)
-          expect(body["data"].map { |row| row["name"] }).to contain_exactly("Alpha Store")
+          expect(body["data"].pluck("name")).to contain_exactly("Alpha Store")
         end
       end
     end
