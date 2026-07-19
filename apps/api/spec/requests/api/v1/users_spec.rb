@@ -71,13 +71,16 @@ RSpec.describe "Users" do
 
       response "200", "users filtered by query" do
         let!(:super_admin) do
-          create(:user, :super_admin, email: "root@example.com", password: "Password123!", password_confirmation: "Password123!")
+          create(:user, :super_admin, email: "root@example.com", password: "Password123!",
+                                      password_confirmation: "Password123!")
         end
         let!(:user_one) do
-          create(:user, email: "alpha@example.com", username: "alphaadmin", password: "Password123!", password_confirmation: "Password123!")
+          create(:user, email: "alpha@example.com", username: "alphaadmin", password: "Password123!",
+                        password_confirmation: "Password123!")
         end
         let!(:user_two) do
-          create(:user, email: "zeta@example.com", username: "zetaadmin", password: "Password123!", password_confirmation: "Password123!")
+          create(:user, email: "zeta@example.com", username: "zetaadmin", password: "Password123!",
+                        password_confirmation: "Password123!")
         end
         let(:q) { "alpha" }
 

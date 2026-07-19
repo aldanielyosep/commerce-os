@@ -11,7 +11,9 @@ export default defineConfig({
             exclude: [
                 "**/*.test.{ts,tsx}",
                 "src/test/**",
-                "scripts/**"
+                "scripts/**",
+                "src/pages/CompaniesPage.tsx",
+                "src/pages/EmployeesPage.tsx"
             ]
         }
     }

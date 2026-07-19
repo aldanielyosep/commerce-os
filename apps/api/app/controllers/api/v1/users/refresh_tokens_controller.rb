@@ -19,7 +19,8 @@ module Api
           jwt_token, = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil)
 
           response.set_header("Authorization", "Bearer #{jwt_token}")
-          render json: auth_success_payload(user, raw_refresh_token: raw_token, refresh_token: issued_token), status: :ok
+          render json: auth_success_payload(user, raw_refresh_token: raw_token, refresh_token: issued_token),
+                 status: :ok
         end
 
         private

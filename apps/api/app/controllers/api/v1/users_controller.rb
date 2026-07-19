@@ -140,8 +140,15 @@ module Api
         return scope if query_term.blank?
 
         query = "%#{query_term.strip}%"
+        search_clause = [
+          "users.email ILIKE :query",
+          "users.username ILIKE :query",
+          "employees.employee_id ILIKE :query",
+          "employees.full_name ILIKE :query"
+        ].join(" OR ")
+
         scope.left_joins(:employee).where(
-          "users.email ILIKE :query OR users.username ILIKE :query OR employees.employee_id ILIKE :query OR employees.full_name ILIKE :query",
+          search_clause,
           query: query
         )
       end

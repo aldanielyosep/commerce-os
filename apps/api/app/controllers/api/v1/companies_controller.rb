@@ -122,8 +122,16 @@ module Api
         return scope if query_term.blank?
 
         query = "%#{query_term.strip}%"
+        search_clause = [
+          "companies.code ILIKE :query",
+          "companies.name ILIKE :query",
+          "companies.owner_name ILIKE :query",
+          "companies.email ILIKE :query",
+          "companies.city ILIKE :query"
+        ].join(" OR ")
+
         scope.where(
-          "companies.code ILIKE :query OR companies.name ILIKE :query OR companies.owner_name ILIKE :query OR companies.email ILIKE :query OR companies.city ILIKE :query",
+          search_clause,
           query: query
         )
       end

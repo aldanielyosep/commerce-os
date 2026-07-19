@@ -1,5 +1,6 @@
 require "swagger_helper"
 
+# rubocop:disable RSpec/MultipleMemoizedHelpers
 RSpec.describe "Authentication" do
   path "/api/v1/users/sign_in" do
     post "Sign in user" do
@@ -144,3 +145,4 @@ RSpec.describe "Authentication" do
     end
   end
 end
+# rubocop:enable RSpec/MultipleMemoizedHelpers

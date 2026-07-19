@@ -1,4 +1,4 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:disable RSpec/MultipleMemoizedHelpers
 require "swagger_helper"
 
 RSpec.describe "Departments" do
@@ -235,4 +235,4 @@ RSpec.describe "Departments" do
   end
 end
 
-# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:enable RSpec/MultipleMemoizedHelpers

@@ -14,17 +14,19 @@ if ENV["COVERAGE"] == "true"
 
   SimpleCov.start("rails") do
     minimum_coverage line: 90
-    minimum_coverage_by_file 90
+    coverage :line do
+      minimum_per_file 90
+    end
 
-    add_filter "/spec/"
-    add_filter "/config/"
-    add_filter "/db/"
-    add_filter "/bin/"
-    add_filter "/vendor/"
-    add_filter "app/controllers/application_controller.rb"
-    add_filter "app/jobs/application_job.rb"
-    add_filter "app/mailers/application_mailer.rb"
-    add_filter "app/models/application_record.rb"
+    skip "/spec/"
+    skip "/config/"
+    skip "/db/"
+    skip "/bin/"
+    skip "/vendor/"
+    skip "app/controllers/application_controller.rb"
+    skip "app/jobs/application_job.rb"
+    skip "app/mailers/application_mailer.rb"
+    skip "app/models/application_record.rb"
   end
 end
 
