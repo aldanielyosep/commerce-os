@@ -19,6 +19,10 @@ class CompanyAssignmentPolicy < ApplicationPolicy
     super_admin?
   end
 
+  def bulk_upsert?
+    super_admin?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       return scope.none unless user&.super_admin?

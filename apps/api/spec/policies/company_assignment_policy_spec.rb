@@ -14,6 +14,7 @@ RSpec.describe CompanyAssignmentPolicy, type: :policy do
       expect(policy.create?).to be(true)
       expect(policy.update?).to be(true)
       expect(policy.destroy?).to be(true)
+      expect(policy.bulk_upsert?).to be(true)
     end
   end
 
@@ -26,6 +27,7 @@ RSpec.describe CompanyAssignmentPolicy, type: :policy do
       expect(policy.create?).to be(false)
       expect(policy.update?).to be(false)
       expect(policy.destroy?).to be(false)
+      expect(policy.bulk_upsert?).to be(false)
     end
   end
 

@@ -29,7 +29,11 @@ Rails.application.routes.draw do
 
         resources :company_assignments,
                   controller: "user_company_assignments",
-                  only: %i[index create destroy]
+                  only: %i[index create destroy] do
+          collection do
+            post :bulk_upsert
+          end
+        end
       end
       resources :audits, only: %i[index show]
 
