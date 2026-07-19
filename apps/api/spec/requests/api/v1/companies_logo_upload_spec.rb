@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Companies logo upload flow", type: :request do
   let(:user) do
-    create(:user, password: "Password123!", password_confirmation: "Password123!")
+    create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!")
   end
 
   let(:headers) do

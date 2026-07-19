@@ -26,6 +26,14 @@ Rails.application.routes.draw do
           patch :change_role
           post :reset_password
         end
+
+        resources :company_assignments,
+                  controller: "user_company_assignments",
+                  only: %i[index create destroy] do
+          collection do
+            post :bulk_upsert
+          end
+        end
       end
       resources :audits, only: %i[index show]
 

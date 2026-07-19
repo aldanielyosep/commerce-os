@@ -9,7 +9,7 @@ RSpec.describe "Companies" do
       security [ { bearerAuth: [] } ]
 
       response "200", "companies listed" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_one) { create(:company, name: "Alpha Store") }
         let!(:company_two) { create(:company, name: "Beta Store") }
         let!(:company_one_link) do
@@ -40,6 +40,24 @@ RSpec.describe "Companies" do
 
           expect(alpha_row.fetch("marketplace_links").size).to eq(1)
           expect(alpha_row.fetch("marketplace_links").first.fetch("marketplace")).to eq("shopee")
+        end
+      end
+
+      response "200", "admin sees only assigned companies" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company_one) { create(:company, name: "Alpha Store") }
+        let!(:company_two) { create(:company, name: "Beta Store") }
+        let!(:company_assignment) { create(:company_assignment, user: user, company: company_one) }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+
+          expect(body["success"]).to be(true)
+          expect(body["data"].pluck("name")).to contain_exactly("Alpha Store")
         end
       end
     end
@@ -76,7 +94,7 @@ RSpec.describe "Companies" do
       }
 
       response "201", "individual company created" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let(:company) do
           {
             company: {
@@ -102,7 +120,7 @@ RSpec.describe "Companies" do
       end
 
       response "201", "pt company created" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let(:company) do
           {
             company: {
@@ -131,7 +149,7 @@ RSpec.describe "Companies" do
       end
 
       response "422", "individual company rejects business fields" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let(:company) do
           {
             company: {
@@ -159,7 +177,7 @@ RSpec.describe "Companies" do
       end
 
       response "422", "pt company requires business fields" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let(:company) do
           {
             company: {
@@ -196,7 +214,7 @@ RSpec.describe "Companies" do
       security [ { bearerAuth: [] } ]
 
       response "200", "company shown" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company, name: "Alpha Store") }
         let!(:marketplace_link) do
           create(
@@ -217,6 +235,21 @@ RSpec.describe "Companies" do
           expect(body["data"]["id"]).to eq(company_record.id)
           expect(body["data"]["marketplace_links"].size).to eq(1)
           expect(body["data"]["marketplace_links"].first["marketplace"]).to eq("tokopedia")
+        end
+      end
+
+      response "404", "admin cannot show company outside scope" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company_record) { create(:company, name: "Alpha Store") }
+        let(:id) { company_record.id }
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response.status).to eq(404)
+          expect(body["success"]).to be(false)
         end
       end
     end
@@ -245,7 +278,7 @@ RSpec.describe "Companies" do
       }
 
       response "200", "company updated" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company, name: "Alpha Store") }
         let(:id) { company_record.id }
         let(:company) do
@@ -268,7 +301,7 @@ RSpec.describe "Companies" do
       end
 
       response "422", "company invalid coordinates" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company, name: "Alpha Store") }
         let(:id) { company_record.id }
         let(:company) do
@@ -288,6 +321,28 @@ RSpec.describe "Companies" do
           expect(body["message"]).to eq("Unable to update company")
         end
       end
+
+      response "404", "admin cannot update company outside scope" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company_record) { create(:company, name: "Alpha Store") }
+        let(:id) { company_record.id }
+        let(:company) do
+          {
+            company: {
+              name: "Should Not Update"
+            }
+          }
+        end
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response.status).to eq(404)
+          expect(body["success"]).to be(false)
+        end
+      end
     end
 
     delete "Delete company" do
@@ -296,7 +351,7 @@ RSpec.describe "Companies" do
       security [ { bearerAuth: [] } ]
 
       response "200", "company discarded" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company) }
         let(:id) { company_record.id }
         # rubocop:disable RSpec/VariableName
@@ -306,6 +361,21 @@ RSpec.describe "Companies" do
         run_test! do |response|
           body = JSON.parse(response.body)
           expect(body["data"]["discarded"]).to be(true)
+        end
+      end
+
+      response "404", "admin cannot delete company outside scope" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company_record) { create(:company) }
+        let(:id) { company_record.id }
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response.status).to eq(404)
+          expect(body["success"]).to be(false)
         end
       end
     end

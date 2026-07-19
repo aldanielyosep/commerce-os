@@ -15,6 +15,8 @@ class Company < ApplicationRecord
 
   has_one_attached :logo
   has_many :company_marketplace_links, dependent: :destroy
+  has_many :company_assignments, dependent: :destroy
+  has_many :assigned_users, through: :company_assignments, source: :user
 
   phony_normalize :phone, default_country_code: "ID"
 

@@ -2,18 +2,15 @@ module Api
   module V1
     class CompanyMarketplaceLinksController < BaseController
       before_action :set_company
+      before_action :authorize_company_marketplace_management!
       before_action :set_marketplace_link, only: %i[update destroy]
 
       def index
-        authorize CompanyMarketplaceLink
-
         links = @company.company_marketplace_links.kept.order(:marketplace)
         render_success(CompanyMarketplaceLinkBlueprint.render_as_hash(links))
       end
 
       def create
-        authorize CompanyMarketplaceLink
-
         link = @company.company_marketplace_links.new(company_marketplace_link_params)
 
         if link.save
@@ -48,6 +45,10 @@ module Api
 
       def set_marketplace_link
         @marketplace_link = @company.company_marketplace_links.kept.find(params.expect(:id))
+      end
+
+      def authorize_company_marketplace_management!
+        authorize @company, :manage_marketplaces?
       end
 
       def company_marketplace_link_params

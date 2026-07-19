@@ -156,6 +156,19 @@ bin/jobs
 bundle exec rspec
 ```
 
+Backfill company assignments for RFC-111 rollout:
+
+```bash
+bundle exec rake company_scope:backfill_assignments USER_IDS=1,2 COMPANY_IDS=10,11
+```
+
+Options:
+
+```text
+ALL_ADMINS=true            # assign selected companies to every admin user
+ROLE_IN_COMPANY=manager    # optional metadata
+```
+
 Generate coverage reports locally:
 
 ```bash

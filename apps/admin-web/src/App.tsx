@@ -29,6 +29,9 @@ export default function App() {
 
           <Route element={<RoleRoute allowed={["super_admin"]} />}>
             <Route path="/users" element={<UsersPage />} />
+          </Route>
+
+          <Route element={<RoleRoute allowed={["super_admin", "admin"]} />}>
             <Route path="/companies" element={<CompaniesPage />} />
           </Route>
         </Route>

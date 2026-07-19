@@ -14,6 +14,18 @@ class User < ApplicationRecord
   enum :status, { active: 0, disabled: 1 }, default: :active
 
   belongs_to :employee, optional: true
+  has_many :company_assignments, dependent: :destroy
+  has_many :assigned_companies, through: :company_assignments, source: :company
+  has_many :created_company_assignments,
+           class_name: "CompanyAssignment",
+           foreign_key: :created_by_id,
+           inverse_of: :created_by,
+           dependent: :nullify
+  has_many :updated_company_assignments,
+           class_name: "CompanyAssignment",
+           foreign_key: :updated_by_id,
+           inverse_of: :updated_by,
+           dependent: :nullify
   has_many :uploaded_documents,
            class_name: "EmployeeDocument",
            foreign_key: :uploaded_by_id,
