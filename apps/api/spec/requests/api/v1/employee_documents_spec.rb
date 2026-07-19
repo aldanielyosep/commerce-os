@@ -28,6 +28,24 @@ RSpec.describe "Employee Documents" do
           expect(body["data"].first["document_type"]).to eq("national_id")
         end
       end
+
+      response "403", "documents list forbidden for storefront ops" do
+        let!(:uploader) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) do
+          create(:user, :admin_storefront_ops, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:employee) { create(:employee, full_name: "Alice Johnson") }
+        let!(:document) do
+          create(:employee_document, employee: employee, uploaded_by: uploader, document_type: :national_id)
+        end
+        let(:employee_id) { employee.id }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test!
+      end
     end
 
     post "Upload employee document" do

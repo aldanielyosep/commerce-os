@@ -95,7 +95,7 @@ module Api
       private
 
       def set_company
-        @company = scoped_records(Company.kept).find(params.expect(:id))
+        @company = Company.kept.find(params.expect(:id))
       end
 
       def company_params

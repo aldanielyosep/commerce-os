@@ -34,6 +34,22 @@ RSpec.describe "Position Histories" do
           expect(body["data"].first["position"]).to eq("Lead")
         end
       end
+
+      response "403", "position histories list forbidden for storefront ops" do
+        let!(:user) do
+          create(:user, :admin_storefront_ops, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:employee) { create(:employee, full_name: "Alice Johnson") }
+        let!(:department) { create(:department, code: "ENG", name: "Engineering") }
+        let!(:history) { create(:position_history, employee: employee, department: department, position: "Lead") }
+        let(:employee_id) { employee.id }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test!
+      end
     end
 
     post "Create position timeline entry" do

@@ -10,6 +10,14 @@ FactoryBot.define do
       role { :super_admin }
     end
 
+    trait :admin_company do
+      role { :admin_company }
+    end
+
+    trait :admin_storefront_ops do
+      role { :admin_storefront_ops }
+    end
+
     trait :disabled do
       status { :disabled }
     end

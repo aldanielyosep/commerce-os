@@ -238,7 +238,7 @@ RSpec.describe "Companies" do
         end
       end
 
-      response "404", "admin cannot show company outside scope" do
+      response "403", "admin cannot show company outside scope" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company, name: "Alpha Store") }
         let(:id) { company_record.id }
@@ -248,7 +248,7 @@ RSpec.describe "Companies" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(response.status).to eq(404)
+          expect(response.status).to eq(403)
           expect(body["success"]).to be(false)
         end
       end
@@ -322,7 +322,7 @@ RSpec.describe "Companies" do
         end
       end
 
-      response "404", "admin cannot update company outside scope" do
+      response "403", "admin cannot update company outside scope" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company, name: "Alpha Store") }
         let(:id) { company_record.id }
@@ -339,7 +339,7 @@ RSpec.describe "Companies" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(response.status).to eq(404)
+          expect(response.status).to eq(403)
           expect(body["success"]).to be(false)
         end
       end
@@ -364,7 +364,7 @@ RSpec.describe "Companies" do
         end
       end
 
-      response "404", "admin cannot delete company outside scope" do
+      response "403", "admin cannot delete company outside scope" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company) }
         let(:id) { company_record.id }
@@ -374,7 +374,7 @@ RSpec.describe "Companies" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(response.status).to eq(404)
+          expect(response.status).to eq(403)
           expect(body["success"]).to be(false)
         end
       end

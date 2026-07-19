@@ -43,6 +43,22 @@ RSpec.describe "Employee Departments" do
           expect(body["data"].map { |assignment| assignment["department"]["code"] }).to contain_exactly("HR", "ENG")
         end
       end
+
+      response "403", "assignment list forbidden for storefront ops" do
+        let!(:user) do
+          create(:user, :admin_storefront_ops, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:employee) { create(:employee, full_name: "Alice Johnson") }
+        let!(:department) { create(:department, code: "HR", name: "Human Resources") }
+        let!(:assignment) { create(:employee_department, employee: employee, department: department) }
+        let(:employee_id) { employee.id }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test!
+      end
     end
 
     post "Assign department to employee" do

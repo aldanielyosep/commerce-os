@@ -45,7 +45,7 @@ module Api
       private
 
       def set_employee
-        @employee = scoped_records(Employee.kept).find(params.expect(:employee_id))
+        @employee = Employee.kept.find(params.expect(:employee_id))
       end
 
       def set_position_history

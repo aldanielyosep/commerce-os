@@ -21,17 +21,20 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/employees" element={<EmployeesPage />} />
-          <Route path="/departments" element={<DepartmentsPage />} />
-          <Route path="/career" element={<CareerPage />} />
-          <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/password" element={<PasswordPage />} />
+
+          <Route element={<RoleRoute allowed={["super_admin", "admin", "admin_company"]} />}>
+            <Route path="/employees" element={<EmployeesPage />} />
+            <Route path="/departments" element={<DepartmentsPage />} />
+            <Route path="/career" element={<CareerPage />} />
+            <Route path="/documents" element={<DocumentsPage />} />
+          </Route>
 
           <Route element={<RoleRoute allowed={["super_admin"]} />}>
             <Route path="/users" element={<UsersPage />} />
           </Route>
 
-          <Route element={<RoleRoute allowed={["super_admin", "admin"]} />}>
+          <Route element={<RoleRoute allowed={["super_admin", "admin", "admin_company"]} />}>
             <Route path="/companies" element={<CompaniesPage />} />
           </Route>
         </Route>

@@ -26,7 +26,7 @@ RSpec.describe "Company Marketplace Links" do
         end
       end
 
-      response "404", "admin cannot list links outside scope" do
+      response "403", "admin cannot list links outside scope" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
         let!(:link_one) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
@@ -37,7 +37,7 @@ RSpec.describe "Company Marketplace Links" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(response.status).to eq(404)
+          expect(response.status).to eq(403)
           expect(body["success"]).to be(false)
         end
       end
@@ -144,7 +144,7 @@ RSpec.describe "Company Marketplace Links" do
         end
       end
 
-      response "404", "admin cannot create link outside scope" do
+      response "403", "admin cannot create link outside scope" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
         let(:company_id) { company.id }
@@ -165,7 +165,7 @@ RSpec.describe "Company Marketplace Links" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(response.status).to eq(404)
+          expect(response.status).to eq(403)
           expect(body["success"]).to be(false)
         end
       end
@@ -223,7 +223,7 @@ RSpec.describe "Company Marketplace Links" do
         end
       end
 
-      response "404", "admin cannot update link outside scope" do
+      response "403", "admin cannot update link outside scope" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
         let!(:marketplace_link) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
@@ -243,7 +243,7 @@ RSpec.describe "Company Marketplace Links" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(response.status).to eq(404)
+          expect(response.status).to eq(403)
           expect(body["success"]).to be(false)
         end
       end
@@ -271,7 +271,7 @@ RSpec.describe "Company Marketplace Links" do
         end
       end
 
-      response "404", "admin cannot delete link outside scope" do
+      response "403", "admin cannot delete link outside scope" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
         let!(:marketplace_link) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
@@ -284,7 +284,7 @@ RSpec.describe "Company Marketplace Links" do
 
         run_test! do |response|
           body = JSON.parse(response.body)
-          expect(response.status).to eq(404)
+          expect(response.status).to eq(403)
           expect(body["success"]).to be(false)
         end
       end

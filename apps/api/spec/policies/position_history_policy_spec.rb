@@ -27,6 +27,30 @@ RSpec.describe PositionHistoryPolicy, type: :policy do
     end
   end
 
+  context "when user is admin_company" do
+    let(:user) { build(:user, :admin_company) }
+
+    it "blocks destroy but allows other actions" do
+      expect(policy.index?).to be(true)
+      expect(policy.show?).to be(true)
+      expect(policy.create?).to be(true)
+      expect(policy.update?).to be(true)
+      expect(policy.destroy?).to be(false)
+    end
+  end
+
+  context "when user is admin_storefront_ops" do
+    let(:user) { build(:user, :admin_storefront_ops) }
+
+    it "denies all actions" do
+      expect(policy.index?).to be(false)
+      expect(policy.show?).to be(false)
+      expect(policy.create?).to be(false)
+      expect(policy.update?).to be(false)
+      expect(policy.destroy?).to be(false)
+    end
+  end
+
   context "when user is nil" do
     let(:user) { nil }
 

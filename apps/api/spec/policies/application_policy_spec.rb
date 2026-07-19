@@ -42,6 +42,16 @@ RSpec.describe ApplicationPolicy, type: :policy do
       end
     end
 
+    context "when user is admin_company" do
+      let(:user) { create(:user, :admin_company) }
+
+      it "returns full scope" do
+        scope = described_class.new(user, User.all)
+
+        expect(scope.resolve.to_sql).to eq(User.all.to_sql)
+      end
+    end
+
     context "when user is super admin" do
       let(:user) { create(:user, :super_admin) }
 
@@ -59,6 +69,16 @@ RSpec.describe ApplicationPolicy, type: :policy do
         scope = described_class.new(user, User.all)
 
         expect(scope.resolve.to_sql).to eq(User.all.to_sql)
+      end
+    end
+
+    context "when user is admin_storefront_ops" do
+      let(:user) { create(:user, :admin_storefront_ops) }
+
+      it "returns empty scope" do
+        scope = described_class.new(user, User.all)
+
+        expect(scope.resolve).to be_empty
       end
     end
   end

@@ -10,7 +10,12 @@ class User < ApplicationRecord
          :jwt_authenticatable,
          jwt_revocation_strategy: self
 
-  enum :role, { super_admin: 0, admin: 1 }, default: :admin
+  enum :role, {
+    super_admin: 0,
+    admin: 1,
+    admin_company: 2,
+    admin_storefront_ops: 3
+  }, default: :admin
   enum :status, { active: 0, disabled: 1 }, default: :active
 
   belongs_to :employee, optional: true

@@ -31,6 +31,19 @@ RSpec.describe "Employees" do
           expect(body["data"].first["full_name"]).to eq("Alice Johnson")
         end
       end
+
+      response "403", "employees list forbidden for storefront ops" do
+        let!(:user) do
+          create(:user, :admin_storefront_ops, password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:employee) { create(:employee, full_name: "Alice Johnson") }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test!
+      end
     end
 
     post "Create employee" do

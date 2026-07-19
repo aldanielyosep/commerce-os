@@ -11,7 +11,7 @@ RSpec.describe "Salary Records" do
       security [ { bearerAuth: [] } ]
 
       response "200", "salary records listed" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
         let!(:latest_record) do
           create(:salary_record, employee: employee, basic_salary_cents: 8_000_000,
@@ -33,6 +33,19 @@ RSpec.describe "Salary Records" do
           expect(body["data"].size).to eq(2)
           expect(body["data"].first["basic_salary_cents"]).to eq(8_000_000)
         end
+      end
+
+      response "403", "salary list forbidden for admin" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:employee) { create(:employee, full_name: "Alice Johnson") }
+        let!(:record) { create(:salary_record, employee: employee, basic_salary_cents: 8_000_000) }
+        let(:employee_id) { employee.id }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test!
       end
     end
 
@@ -62,7 +75,7 @@ RSpec.describe "Salary Records" do
       }
 
       response "201", "salary record created" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
         let(:employee_id) { employee.id }
         let(:salary_record) do
@@ -88,7 +101,7 @@ RSpec.describe "Salary Records" do
       end
 
       response "422", "salary overlap rejected" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
         let!(:existing_record) do
           create(:salary_record, employee: employee,
@@ -151,7 +164,7 @@ RSpec.describe "Salary Records" do
       }
 
       response "200", "salary record updated" do
-        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
         let!(:record) { create(:salary_record, employee: employee, basic_salary_cents: 8_000_000) }
         let(:employee_id) { employee.id }
