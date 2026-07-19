@@ -12,7 +12,7 @@ module Api
       def index
         authorize Department
 
-        pagy_record, departments = paginate_collection(apply_order(scoped_records(Department.kept)))
+        pagy_record, departments = paginate_collection(filtered_departments)
         render_success(DepartmentBlueprint.render_as_hash(departments), meta: pagination_meta(pagy_record))
       end
 
@@ -59,6 +59,20 @@ module Api
 
       def department_params
         params.expect(department: %i[code name])
+      end
+
+      def filtered_departments
+        scope = scoped_records(Department.kept)
+        scope = filter_by_query(scope)
+        apply_order(scope)
+      end
+
+      def filter_by_query(scope)
+        query_term = params.fetch(:q, nil)
+        return scope if query_term.blank?
+
+        query = "%#{query_term.strip}%"
+        scope.where("departments.code ILIKE :query OR departments.name ILIKE :query", query: query)
       end
 
       def apply_order(scope)

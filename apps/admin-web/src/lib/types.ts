@@ -9,6 +9,13 @@ export type AuthUser = {
   status: UserStatus;
 };
 
+export type AuthSession = {
+  token: string;
+  refresh_token: string;
+  refresh_token_expires_at: string;
+  user: AuthUser;
+};
+
 export type ApiEnvelope<T> = {
   success: boolean;
   data: T;

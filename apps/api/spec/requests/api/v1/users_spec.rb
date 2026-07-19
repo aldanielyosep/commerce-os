@@ -20,6 +20,7 @@ RSpec.describe "Users" do
 
       parameter name: :page, in: :query, type: :integer, required: false
       parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :q, in: :query, type: :string, required: false
       parameter name: :order_by, in: :query, type: :string, required: false
       parameter name: :order_dir, in: :query, type: :string, required: false
 
@@ -65,6 +66,28 @@ RSpec.describe "Users" do
           emails = body["data"].pluck("email")
 
           expect(emails.index(user_two.email)).to be < emails.index(user_one.email)
+        end
+      end
+
+      response "200", "users filtered by query" do
+        let!(:super_admin) do
+          create(:user, :super_admin, email: "root@example.com", password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:user_one) do
+          create(:user, email: "alpha@example.com", username: "alphaadmin", password: "Password123!", password_confirmation: "Password123!")
+        end
+        let!(:user_two) do
+          create(:user, email: "zeta@example.com", username: "zetaadmin", password: "Password123!", password_confirmation: "Password123!")
+        end
+        let(:q) { "alpha" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(super_admin) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          emails = JSON.parse(response.body)["data"].pluck("email")
+          expect(emails).to contain_exactly(user_one.email)
         end
       end
 

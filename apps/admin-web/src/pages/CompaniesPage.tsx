@@ -209,6 +209,8 @@ export function CompaniesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<CompanyOrderBy>("name");
   const [sortDir, setSortDir] = useState<SortDirection>("asc");
+  const [queryFilter, setQueryFilter] = useState("");
+  const [appliedQuery, setAppliedQuery] = useState<string | undefined>();
   const [drawer, setDrawer] = useState<DrawerState>({ mode: "none" });
   const [form, setForm] = useState<CompanyFormState>(EMPTY_COMPANY_FORM);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
@@ -248,6 +250,7 @@ export function CompaniesPage() {
 
     listCompaniesPage(token, {
       page: currentPage,
+      q: appliedQuery,
       order_by: sortBy === "name" ? undefined : sortBy,
       order_dir: sortDir === "asc" ? undefined : sortDir
     })
@@ -261,7 +264,7 @@ export function CompaniesPage() {
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [token, currentPage, sortBy, sortDir]);
+  }, [token, currentPage, sortBy, sortDir, appliedQuery]);
 
   useEffect(() => {
     if (!token || !selectedCompanyId) {
@@ -282,6 +285,7 @@ export function CompaniesPage() {
 
     const companiesPage = await listCompaniesPage(token, {
       page: currentPage,
+      q: appliedQuery,
       order_by: sortBy === "name" ? undefined : sortBy,
       order_dir: sortDir === "asc" ? undefined : sortDir
     });
@@ -316,6 +320,17 @@ export function CompaniesPage() {
   function onChangeSortDir(value: SortDirection) {
     setCurrentPage(1);
     setSortDir(value);
+  }
+
+  function applyQuery() {
+    setCurrentPage(1);
+    setAppliedQuery(queryFilter.trim() || undefined);
+  }
+
+  function resetQuery() {
+    setQueryFilter("");
+    setCurrentPage(1);
+    setAppliedQuery(undefined);
   }
 
   async function refreshMarketplaceLinks(companyId: number) {
@@ -555,6 +570,10 @@ export function CompaniesPage() {
 
       <div className="card inline-form">
         <label>
+          Search
+          <input value={queryFilter} onChange={(event) => setQueryFilter(event.target.value)} placeholder="Code, name, owner, email, city" />
+        </label>
+        <label>
           Sort By
           <select value={sortBy} onChange={(event) => onChangeSortBy(event.target.value as CompanyOrderBy)}>
             {COMPANY_SORT_FIELDS.map((field) => (
@@ -571,6 +590,12 @@ export function CompaniesPage() {
             <option value="desc">desc</option>
           </select>
         </label>
+        <button className="primary" type="button" onClick={applyQuery} disabled={loading || busy}>
+          Apply
+        </button>
+        <button className="ghost" type="button" onClick={resetQuery} disabled={loading || busy}>
+          Reset
+        </button>
       </div>
 
       <DataState loading={loading} error={errorDetails.length === 0 ? error : null} empty={rows.length === 0} emptyLabel="No companies found.">

@@ -104,6 +104,8 @@ export function UsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<UserOrderBy>("id");
   const [sortDir, setSortDir] = useState<SortDirection>("asc");
+  const [queryFilter, setQueryFilter] = useState("");
+  const [appliedQuery, setAppliedQuery] = useState<string | undefined>();
   const [drawer, setDrawer] = useState<DrawerState>({ mode: "none" });
   const [createForm, setCreateForm] = useState<CreateFormState>(EMPTY_CREATE_FORM);
   const [editForm, setEditForm] = useState<EditFormState>(EMPTY_EDIT_FORM);
@@ -132,6 +134,7 @@ export function UsersPage() {
     Promise.all([
       listUsersPage(token, {
         page: currentPage,
+        q: appliedQuery,
         order_by: sortBy === "id" ? undefined : sortBy,
         order_dir: sortDir === "asc" ? undefined : sortDir
       }),
@@ -146,12 +149,13 @@ export function UsersPage() {
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [token, currentPage, sortBy, sortDir]);
+  }, [token, currentPage, sortBy, sortDir, appliedQuery]);
 
   async function refreshUsers() {
     if (!token) return;
     const usersPage = await listUsersPage(token, {
       page: currentPage,
+      q: appliedQuery,
       order_by: sortBy === "id" ? undefined : sortBy,
       order_dir: sortDir === "asc" ? undefined : sortDir
     });
@@ -170,6 +174,17 @@ export function UsersPage() {
   function onChangeSortDir(value: SortDirection) {
     setCurrentPage(1);
     setSortDir(value);
+  }
+
+  function applyQuery() {
+    setCurrentPage(1);
+    setAppliedQuery(queryFilter.trim() || undefined);
+  }
+
+  function resetQuery() {
+    setQueryFilter("");
+    setCurrentPage(1);
+    setAppliedQuery(undefined);
   }
 
   function goToPreviousPage() {
@@ -418,6 +433,10 @@ export function UsersPage() {
         <div className="actions" style={{ marginBottom: 12, justifyContent: "space-between" }}>
           <div className="actions">
             <label>
+              Search
+              <input value={queryFilter} onChange={(event) => setQueryFilter(event.target.value)} placeholder="Email, username, employee" />
+            </label>
+            <label>
               Sort By
               <select value={sortBy} onChange={(event) => onChangeSortBy(event.target.value as UserOrderBy)}>
                 {USER_SORT_FIELDS.map((field) => (
@@ -434,6 +453,12 @@ export function UsersPage() {
                 <option value="desc">desc</option>
               </select>
             </label>
+            <button className="primary" type="button" onClick={applyQuery} disabled={busy || loading}>
+              Apply
+            </button>
+            <button className="ghost" type="button" onClick={resetQuery} disabled={busy || loading}>
+              Reset
+            </button>
           </div>
           <div className="actions">
             <span>

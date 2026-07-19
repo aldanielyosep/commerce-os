@@ -19,6 +19,7 @@ class User < ApplicationRecord
   enum :status, { active: 0, disabled: 1 }, default: :active
 
   belongs_to :employee, optional: true
+  has_many :refresh_tokens, dependent: :destroy
   has_many :company_assignments, dependent: :destroy
   has_many :assigned_companies, through: :company_assignments, source: :company
   has_many :created_company_assignments,

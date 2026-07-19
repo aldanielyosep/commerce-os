@@ -9,7 +9,12 @@ const { loginMock, navigateMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("../lib/api", () => ({
-  ApiError: class ApiError extends Error {}
+  ApiError: class ApiError extends Error {},
+  refreshAccessToken: vi.fn(),
+  setRefreshSessionHandler: vi.fn(),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+  UNAUTHORIZED_EVENT: "commerce_os:unauthorized"
 }));
 
 vi.mock("../contexts/AuthContext", () => ({

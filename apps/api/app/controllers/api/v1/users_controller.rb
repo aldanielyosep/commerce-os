@@ -15,7 +15,7 @@ module Api
       def index
         authorize User
 
-        pagy_record, users = paginate_collection(apply_order(scoped_records(User.includes(:employee))))
+        pagy_record, users = paginate_collection(filtered_users)
         render_success(UserBlueprint.render_as_hash(users), meta: pagination_meta(pagy_record))
       end
 
@@ -127,6 +127,23 @@ module Api
 
       def change_role_params
         params.expect(user: [ :role ])
+      end
+
+      def filtered_users
+        scope = scoped_records(User.includes(:employee))
+        scope = filter_by_query(scope)
+        apply_order(scope)
+      end
+
+      def filter_by_query(scope)
+        query_term = params.fetch(:q, nil)
+        return scope if query_term.blank?
+
+        query = "%#{query_term.strip}%"
+        scope.left_joins(:employee).where(
+          "users.email ILIKE :query OR users.username ILIKE :query OR employees.employee_id ILIKE :query OR employees.full_name ILIKE :query",
+          query: query
+        )
       end
 
       def apply_order(scope)

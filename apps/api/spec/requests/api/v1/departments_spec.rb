@@ -10,6 +10,7 @@ RSpec.describe "Departments" do
 
       parameter name: :page, in: :query, type: :integer, required: false
       parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :q, in: :query, type: :string, required: false
       parameter name: :order_by, in: :query, type: :string, required: false
       parameter name: :order_dir, in: :query, type: :string, required: false
 
@@ -68,6 +69,22 @@ RSpec.describe "Departments" do
           codes = body["data"].pluck("code")
 
           expect(codes.index(department_two.code)).to be < codes.index(department_one.code)
+        end
+      end
+
+      response "200", "departments filtered by query" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:department_one) { create(:department, code: "OPS", name: "Operations") }
+        let!(:department_two) { create(:department, code: "ENG", name: "Engineering") }
+        let(:q) { "Oper" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          names = JSON.parse(response.body)["data"].pluck("name")
+          expect(names).to contain_exactly(department_one.name)
         end
       end
     end

@@ -10,6 +10,7 @@ RSpec.describe "Companies" do
 
       parameter name: :page, in: :query, type: :integer, required: false
       parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :q, in: :query, type: :string, required: false
       parameter name: :order_by, in: :query, type: :string, required: false
       parameter name: :order_dir, in: :query, type: :string, required: false
 
@@ -83,6 +84,22 @@ RSpec.describe "Companies" do
           body = JSON.parse(response.body)
           expect(body["data"].first["code"]).to eq(company_two.code)
           expect(body["data"].second["code"]).to eq(company_one.code)
+        end
+      end
+
+      response "200", "companies filtered by query" do
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company_one) { create(:company, code: "ALPHA", name: "Alpha Store", owner_name: "Daniel Alpha") }
+        let!(:company_two) { create(:company, code: "BETA", name: "Beta Store", owner_name: "Daniel Beta") }
+        let(:q) { "Alpha" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          names = JSON.parse(response.body)["data"].pluck("name")
+          expect(names).to contain_exactly(company_one.name)
         end
       end
     end

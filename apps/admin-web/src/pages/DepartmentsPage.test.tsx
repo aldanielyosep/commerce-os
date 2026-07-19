@@ -82,4 +82,23 @@ describe("DepartmentsPage sorting", () => {
       });
     });
   });
+
+  it("applies search query to the paginated departments request", async () => {
+    const user = userEvent.setup();
+
+    render(<DepartmentsPage />);
+
+    await screen.findByRole("heading", { name: "Departments" });
+    await user.type(screen.getByLabelText("Search"), "ops");
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+
+    await waitFor(() => {
+      expect(listDepartmentsPageMock).toHaveBeenNthCalledWith(2, "Bearer test-token", {
+        page: 1,
+        q: "ops",
+        order_by: undefined,
+        order_dir: undefined
+      });
+    });
+  });
 });

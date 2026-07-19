@@ -1,5 +1,6 @@
 import type {
   ApiEnvelope,
+  AuthSession,
   AuthUser,
   Company,
   CompanyMarketplaceLink,
@@ -52,6 +53,12 @@ function resolveApiBaseUrl(): string {
 
 export const API_BASE_URL = resolveApiBaseUrl();
 export const UNAUTHORIZED_EVENT = "commerce_os:unauthorized";
+
+let refreshSessionHandler: ((refreshToken: string) => Promise<AuthSession | null>) | null = null;
+
+export function setRefreshSessionHandler(handler: ((refreshToken: string) => Promise<AuthSession | null>) | null) {
+  refreshSessionHandler = handler;
+}
 
 function notifyUnauthorized() {
   window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT));
@@ -125,6 +132,12 @@ async function collectAllPages<T>(
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", token, body, headers = {} } = options;
 
+  return performRequest<T>(path, { method, token, body, headers }, true);
+}
+
+async function performRequest<T>(path: string, options: RequestOptions, allowRefresh: boolean): Promise<T> {
+  const { method = "GET", token, body, headers = {} } = options;
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers: {
@@ -144,6 +157,15 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   if (!response.ok) {
     const envelope = payload as Partial<ApiEnvelope<unknown>> | null;
+    if (response.status === 401 && token && allowRefresh && refreshSessionHandler) {
+      const currentRefreshToken = localStorage.getItem("commerce_os_web_refresh_token");
+      const refreshedSession = currentRefreshToken ? await refreshSessionHandler(currentRefreshToken) : null;
+
+      if (refreshedSession) {
+        return performRequest<T>(path, { ...options, token: refreshedSession.token }, false);
+      }
+    }
+
     if (response.status === 401 && token) {
       notifyUnauthorized();
     }
@@ -158,7 +180,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   return payload as T;
 }
 
-export async function signIn(email: string, password: string): Promise<{ token: string; user: AuthUser }> {
+export async function signIn(email: string, password: string): Promise<AuthSession> {
   const response = await fetch(`${API_BASE_URL}/api/v1/users/sign_in`, {
     method: "POST",
     headers: {
@@ -176,7 +198,49 @@ export async function signIn(email: string, password: string): Promise<{ token: 
 
   return {
     token: authHeader,
-    user: payload.data
+    refresh_token: String((payload.data as AuthUser & { refresh_token?: string }).refresh_token ?? ""),
+    refresh_token_expires_at: String(
+      (payload.data as AuthUser & { refresh_token_expires_at?: string }).refresh_token_expires_at ?? ""
+    ),
+    user: {
+      id: payload.data.id,
+      email: payload.data.email,
+      username: payload.data.username,
+      role: payload.data.role,
+      status: payload.data.status
+    }
+  };
+}
+
+export async function refreshAccessToken(refreshToken: string): Promise<AuthSession> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/users/refresh_token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ refresh_token: { token: refreshToken } })
+  });
+
+  const payload = (await response.json()) as ApiEnvelope<AuthUser>;
+  const authHeader = response.headers.get("Authorization") ?? response.headers.get("authorization");
+
+  if (!response.ok || !payload.success || !payload.data || !authHeader) {
+    throw new ApiError(payload.message ?? "Unable to refresh session", response.status, payload.errors);
+  }
+
+  return {
+    token: authHeader,
+    refresh_token: String((payload.data as AuthUser & { refresh_token?: string }).refresh_token ?? ""),
+    refresh_token_expires_at: String(
+      (payload.data as AuthUser & { refresh_token_expires_at?: string }).refresh_token_expires_at ?? ""
+    ),
+    user: {
+      id: payload.data.id,
+      email: payload.data.email,
+      username: payload.data.username,
+      role: payload.data.role,
+      status: payload.data.status
+    }
   };
 }
 
@@ -297,11 +361,12 @@ export async function listDepartments(token: string): Promise<Department[]> {
 
 export async function listDepartmentsPage(
   token: string,
-  pagination: PaginationParams & { order_by?: DepartmentOrderBy; order_dir?: SortDirection } = {}
+  pagination: PaginationParams & { q?: string; order_by?: DepartmentOrderBy; order_dir?: SortDirection } = {}
 ): Promise<PaginatedResult<Department>> {
   const query = buildQueryString({
     page: pagination.page,
     per_page: pagination.per_page,
+    q: pagination.q,
     order_by: pagination.order_by,
     order_dir: pagination.order_dir
   });
@@ -349,11 +414,12 @@ export async function listUsers(token: string): Promise<UserRecord[]> {
 
 export async function listUsersPage(
   token: string,
-  pagination: PaginationParams & { order_by?: UserOrderBy; order_dir?: SortDirection } = {}
+  pagination: PaginationParams & { q?: string; order_by?: UserOrderBy; order_dir?: SortDirection } = {}
 ): Promise<PaginatedResult<UserRecord>> {
   const query = buildQueryString({
     page: pagination.page,
     per_page: pagination.per_page,
+    q: pagination.q,
     order_by: pagination.order_by,
     order_dir: pagination.order_dir
   });
@@ -550,11 +616,12 @@ export async function listCompanies(token: string): Promise<Company[]> {
 
 export async function listCompaniesPage(
   token: string,
-  pagination: PaginationParams & { order_by?: CompanyOrderBy; order_dir?: SortDirection } = {}
+  pagination: PaginationParams & { q?: string; order_by?: CompanyOrderBy; order_dir?: SortDirection } = {}
 ): Promise<PaginatedResult<Company>> {
   const query = buildQueryString({
     page: pagination.page,
     per_page: pagination.per_page,
+    q: pagination.q,
     order_by: pagination.order_by,
     order_dir: pagination.order_dir
   });

@@ -298,6 +298,24 @@ describe("UsersPage assignment management", () => {
     });
   });
 
+  it("applies search query to the paginated users request", async () => {
+    const user = userEvent.setup();
+    render(<UsersPage />);
+
+    await screen.findByRole("heading", { name: "Users" });
+    await user.type(screen.getByLabelText("Search"), "alpha");
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+
+    await waitFor(() => {
+      expect(listUsersPageMock).toHaveBeenNthCalledWith(2, "Bearer test-token", {
+        page: 1,
+        q: "alpha",
+        order_by: undefined,
+        order_dir: undefined
+      });
+    });
+  });
+
   it("creates and removes assignment for selected user", async () => {
     listUserCompanyAssignmentsMock
       .mockResolvedValueOnce([])

@@ -128,4 +128,23 @@ describe("CompaniesPage sorting", () => {
       });
     });
   });
+
+  it("applies search query to the paginated companies request", async () => {
+    const user = userEvent.setup();
+
+    render(<CompaniesPage />);
+
+    await screen.findByRole("heading", { name: "Companies" });
+    await user.type(screen.getByLabelText("Search"), "alpha");
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+
+    await waitFor(() => {
+      expect(listCompaniesPageMock).toHaveBeenNthCalledWith(2, "Bearer test-token", {
+        page: 1,
+        q: "alpha",
+        order_by: undefined,
+        order_dir: undefined
+      });
+    });
+  });
 });

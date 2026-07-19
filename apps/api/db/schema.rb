@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_19_132046) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_19_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -330,6 +330,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_132046) do
     t.index ["updated_by_id"], name: "index_position_histories_on_updated_by_id"
   end
 
+  create_table "refresh_tokens", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "revoked_at"
+    t.string "token_digest", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["expires_at"], name: "index_refresh_tokens_on_expires_at"
+    t.index ["revoked_at"], name: "index_refresh_tokens_on_revoked_at"
+    t.index ["token_digest"], name: "index_refresh_tokens_on_token_digest", unique: true
+    t.index ["user_id"], name: "index_refresh_tokens_on_user_id"
+  end
+
   create_table "salary_records", force: :cascade do |t|
     t.integer "allowance_cents", default: 0, null: false
     t.integer "basic_salary_cents", null: false
@@ -398,6 +411,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_132046) do
   add_foreign_key "position_histories", "employees"
   add_foreign_key "position_histories", "users", column: "created_by_id"
   add_foreign_key "position_histories", "users", column: "updated_by_id"
+  add_foreign_key "refresh_tokens", "users"
   add_foreign_key "salary_records", "employees"
   add_foreign_key "salary_records", "users", column: "created_by_id"
   add_foreign_key "salary_records", "users", column: "updated_by_id"

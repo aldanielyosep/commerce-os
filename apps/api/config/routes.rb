@@ -13,6 +13,10 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      namespace :users do
+        resource :refresh_token, only: :create, controller: "refresh_tokens"
+      end
+
       resources :companies do
         resources :marketplace_links,
                   controller: "company_marketplace_links",

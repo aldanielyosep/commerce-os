@@ -55,11 +55,43 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "audits filtered by actor user"
+            "description": "audits ordered by action ascending"
           },
           "403": {
             "description": "forbidden for admin"
@@ -106,9 +138,43 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "admin sees only assigned companies"
+            "description": "companies ordered by code descending"
           }
         }
       },
@@ -231,7 +297,7 @@
           "200": {
             "description": "company shown"
           },
-          "404": {
+          "403": {
             "description": "admin cannot show company outside scope"
           }
         }
@@ -254,7 +320,7 @@
           "422": {
             "description": "company invalid coordinates"
           },
-          "404": {
+          "403": {
             "description": "admin cannot update company outside scope"
           }
         },
@@ -311,7 +377,7 @@
           "200": {
             "description": "company discarded"
           },
-          "404": {
+          "403": {
             "description": "admin cannot delete company outside scope"
           }
         }
@@ -338,11 +404,45 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "links listed"
+            "description": "links ordered by store name descending"
           },
-          "404": {
+          "403": {
             "description": "admin cannot list links outside scope"
           }
         }
@@ -365,7 +465,7 @@
           "422": {
             "description": "non-https url rejected"
           },
-          "404": {
+          "403": {
             "description": "admin cannot create link outside scope"
           }
         },
@@ -451,7 +551,7 @@
           "200": {
             "description": "link updated"
           },
-          "404": {
+          "403": {
             "description": "admin cannot update link outside scope"
           }
         },
@@ -498,7 +598,7 @@
           "200": {
             "description": "link discarded"
           },
-          "404": {
+          "403": {
             "description": "admin cannot delete link outside scope"
           }
         }
@@ -515,9 +615,46 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "departments listed"
+            "description": "departments ordered by code descending"
+          },
+          "403": {
+            "description": "departments list forbidden for storefront ops"
           }
         }
       },
@@ -678,9 +815,46 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "assignments listed"
+            "description": "assignments ordered by assigned date ascending"
+          },
+          "403": {
+            "description": "assignment list forbidden for storefront ops"
           }
         }
       },
@@ -789,9 +963,46 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "documents listed"
+            "description": "documents ordered by document type ascending"
+          },
+          "403": {
+            "description": "documents list forbidden for storefront ops"
           }
         }
       },
@@ -929,11 +1140,46 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "employees listed"
+            "description": "employees ordered by employee id descending"
+          },
+          "403": {
+            "description": "employees list forbidden for storefront ops"
           }
         }
       },
@@ -1169,9 +1415,46 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "position histories listed"
+            "description": "position histories ordered by position ascending"
+          },
+          "403": {
+            "description": "position histories list forbidden for storefront ops"
           }
         }
       },
@@ -1319,9 +1602,46 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "salary records listed"
+            "description": "salary records ordered by basic salary ascending"
+          },
+          "403": {
+            "description": "salary list forbidden for admin"
           }
         }
       },
@@ -1490,9 +1810,43 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "assignments listed"
+            "description": "assignments ordered by role in company descending"
           },
           "403": {
             "description": "forbidden for admin"
@@ -1667,9 +2021,43 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "users listed"
+            "description": "users ordered by email descending"
           },
           "403": {
             "description": "forbidden for admin"
@@ -1720,6 +2108,8 @@
                         "type": "string",
                         "enum": [
                           "admin",
+                          "admin_company",
+                          "admin_storefront_ops",
                           "super_admin"
                         ]
                       },
@@ -1943,6 +2333,8 @@
                         "type": "string",
                         "enum": [
                           "admin",
+                          "admin_company",
+                          "admin_storefront_ops",
                           "super_admin"
                         ]
                       }
@@ -2029,6 +2421,48 @@
                 },
                 "required": [
                   "user"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/refresh_token": {
+      "post": {
+        "summary": "Refresh access token",
+        "tags": [
+          "Authentication"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "token refreshed"
+          },
+          "401": {
+            "description": "invalid refresh token"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refresh_token": {
+                    "type": "object",
+                    "properties": {
+                      "token": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "token"
+                    ]
+                  }
+                },
+                "required": [
+                  "refresh_token"
                 ]
               }
             }

@@ -51,7 +51,7 @@ module Api
       def index
         authorize Company
 
-        pagy_record, companies = paginate_collection(apply_order(scoped_records(Company.kept)))
+        pagy_record, companies = paginate_collection(filtered_companies)
         render_success(CompanyBlueprint.render_as_hash(companies), meta: pagination_meta(pagy_record))
       end
 
@@ -109,6 +109,23 @@ module Api
 
       def company_params
         params.expect(company: COMPANY_PARAMS).except(:remove_logo)
+      end
+
+      def filtered_companies
+        scope = scoped_records(Company.kept)
+        scope = filter_by_query(scope)
+        apply_order(scope)
+      end
+
+      def filter_by_query(scope)
+        query_term = params.fetch(:q, nil)
+        return scope if query_term.blank?
+
+        query = "%#{query_term.strip}%"
+        scope.where(
+          "companies.code ILIKE :query OR companies.name ILIKE :query OR companies.owner_name ILIKE :query OR companies.email ILIKE :query OR companies.city ILIKE :query",
+          query: query
+        )
       end
 
       def apply_order(scope)
