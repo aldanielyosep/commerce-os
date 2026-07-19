@@ -40,5 +40,14 @@ module Api
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # GoodJob dashboard renders regular Rails views and depends on flash/session.
+    # API-only apps must opt back into these middlewares explicitly.
+    if ENV["GOOD_JOB_DASHBOARD_ENABLED"] == "true"
+      config.session_store :cookie_store, key: "_commerce_os_api_session"
+      config.middleware.use ActionDispatch::Cookies
+      config.middleware.use config.session_store, config.session_options
+      config.middleware.use ActionDispatch::Flash
+    end
   end
 end
