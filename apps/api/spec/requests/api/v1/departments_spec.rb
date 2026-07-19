@@ -10,6 +10,8 @@ RSpec.describe "Departments" do
 
       parameter name: :page, in: :query, type: :integer, required: false
       parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
 
       response "200", "departments listed" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
@@ -46,6 +48,27 @@ RSpec.describe "Departments" do
         # rubocop:enable RSpec/VariableName
 
         run_test!
+      end
+
+      response "200", "departments ordered by code descending" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:department_one) { create(:department, code: "AAA", name: "Alpha") }
+        let!(:department_two) { create(:department, code: "ZZZ", name: "Zulu") }
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "code" }
+        let(:order_dir) { "desc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          codes = body["data"].pluck("code")
+
+          expect(codes.index(department_two.code)).to be < codes.index(department_one.code)
+        end
       end
     end
 

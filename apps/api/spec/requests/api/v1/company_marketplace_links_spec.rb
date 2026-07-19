@@ -10,6 +10,11 @@ RSpec.describe "Company Marketplace Links" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
+
       response "200", "links listed" do
         let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company) { create(:company, :pt) }
@@ -39,6 +44,31 @@ RSpec.describe "Company Marketplace Links" do
           body = JSON.parse(response.body)
           expect(response.status).to eq(403)
           expect(body["success"]).to be(false)
+        end
+      end
+
+      response "200", "links ordered by store name descending" do
+        let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:company) { create(:company, :pt) }
+        let!(:link_one) do
+          create(:company_marketplace_link, company: company, store_name: "Alpha Storefront", marketplace: :shopee)
+        end
+        let!(:link_two) do
+          create(:company_marketplace_link, company: company, store_name: "Zulu Storefront", marketplace: :tokopedia)
+        end
+        let(:company_id) { company.id }
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "store_name" }
+        let(:order_dir) { "desc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          names = JSON.parse(response.body)["data"].pluck("store_name")
+          expect(names.index(link_two.store_name)).to be < names.index(link_one.store_name)
         end
       end
     end

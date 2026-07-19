@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { DataState } from "../components/DataState";
 import { useAuth } from "../contexts/AuthContext";
 import { createDepartment, deleteDepartment, getDepartment, listDepartmentsPage, updateDepartment } from "../lib/api";
-import type { Department, DepartmentPayload, PaginationMeta } from "../lib/types";
+import type { Department, DepartmentOrderBy, DepartmentPayload, PaginationMeta, SortDirection } from "../lib/types";
 
 type DrawerState =
   | { mode: "none" }
@@ -13,6 +13,7 @@ const EMPTY_FORM: DepartmentPayload = {
   code: "",
   name: ""
 };
+const DEPARTMENT_SORT_FIELDS: DepartmentOrderBy[] = ["name", "code", "created_at"];
 
 const DEFAULT_PAGINATION_META: PaginationMeta = {
   page: 1,
@@ -29,6 +30,8 @@ export function DepartmentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<PaginationMeta>(DEFAULT_PAGINATION_META);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState<DepartmentOrderBy>("name");
+  const [sortDir, setSortDir] = useState<SortDirection>("asc");
   const [drawer, setDrawer] = useState<DrawerState>({ mode: "none" });
   const [form, setForm] = useState<DepartmentPayload>(EMPTY_FORM);
 
@@ -38,18 +41,26 @@ export function DepartmentsPage() {
     setLoading(true);
     setError(null);
 
-    listDepartmentsPage(token, { page: currentPage })
+    listDepartmentsPage(token, {
+      page: currentPage,
+      order_by: sortBy === "name" ? undefined : sortBy,
+      order_dir: sortDir === "asc" ? undefined : sortDir
+    })
       .then((result) => {
         setRows(result.items);
         setPagination(result.meta);
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [token, currentPage]);
+  }, [token, currentPage, sortBy, sortDir]);
 
   async function refreshDepartments() {
     if (!token) return;
-    const nextRows = await listDepartmentsPage(token, { page: currentPage });
+    const nextRows = await listDepartmentsPage(token, {
+      page: currentPage,
+      order_by: sortBy === "name" ? undefined : sortBy,
+      order_dir: sortDir === "asc" ? undefined : sortDir
+    });
     setRows(nextRows.items);
     setPagination(nextRows.meta);
   }
@@ -63,6 +74,16 @@ export function DepartmentsPage() {
       if (pagination.total_pages <= 0) return page;
       return Math.min(pagination.total_pages, page + 1);
     });
+  }
+
+  function onChangeSortBy(value: DepartmentOrderBy) {
+    setCurrentPage(1);
+    setSortBy(value);
+  }
+
+  function onChangeSortDir(value: SortDirection) {
+    setCurrentPage(1);
+    setSortDir(value);
   }
 
   function closeDrawer() {
@@ -146,10 +167,29 @@ export function DepartmentsPage() {
 
       <DataState loading={loading} error={error} empty={rows.length === 0} emptyLabel="No departments found.">
         <div className="actions" style={{ marginBottom: 12, justifyContent: "space-between" }}>
-          <span>
-            Page {pagination.page} of {Math.max(pagination.total_pages, 1)} ({pagination.total_count} total)
-          </span>
           <div className="actions">
+            <label>
+              Sort By
+              <select value={sortBy} onChange={(event) => onChangeSortBy(event.target.value as DepartmentOrderBy)}>
+                {DEPARTMENT_SORT_FIELDS.map((field) => (
+                  <option key={field} value={field}>
+                    {field}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Direction
+              <select value={sortDir} onChange={(event) => onChangeSortDir(event.target.value as SortDirection)}>
+                <option value="asc">asc</option>
+                <option value="desc">desc</option>
+              </select>
+            </label>
+          </div>
+          <div className="actions">
+            <span>
+              Page {pagination.page} of {Math.max(pagination.total_pages, 1)} ({pagination.total_count} total)
+            </span>
             <button className="ghost" type="button" onClick={goToPreviousPage} disabled={busy || loading || currentPage <= 1}>
               Previous
             </button>

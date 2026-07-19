@@ -10,6 +10,11 @@ RSpec.describe "Employee Documents" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
+
       response "200", "documents listed" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:employee) { create(:employee, full_name: "Alice Johnson") }
@@ -45,6 +50,32 @@ RSpec.describe "Employee Documents" do
         # rubocop:enable RSpec/VariableName
 
         run_test!
+      end
+
+      response "200", "documents ordered by document type ascending" do
+        let!(:uploader) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:employee) { create(:employee, full_name: "Alice Johnson") }
+        let!(:document_one) do
+          create(:employee_document, employee: employee, uploaded_by: uploader, document_type: :passport)
+        end
+        let!(:document_two) do
+          create(:employee_document, employee: employee, uploaded_by: uploader, document_type: :national_id)
+        end
+        let(:employee_id) { employee.id }
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "document_type" }
+        let(:order_dir) { "asc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          ids = JSON.parse(response.body)["data"].pluck("id")
+          expect(ids.index(document_two.id)).to be < ids.index(document_one.id)
+        end
       end
     end
 

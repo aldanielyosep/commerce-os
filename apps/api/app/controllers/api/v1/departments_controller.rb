@@ -1,12 +1,18 @@
 module Api
   module V1
     class DepartmentsController < BaseController
+      ORDERABLE_FIELDS = {
+        "code" => "departments.code",
+        "name" => "departments.name",
+        "created_at" => "departments.created_at"
+      }.freeze
+
       before_action :set_department, only: %i[show update destroy]
 
       def index
         authorize Department
 
-        pagy_record, departments = paginate_collection(scoped_records(Department.kept).order(:name))
+        pagy_record, departments = paginate_collection(apply_order(scoped_records(Department.kept)))
         render_success(DepartmentBlueprint.render_as_hash(departments), meta: pagination_meta(pagy_record))
       end
 
@@ -53,6 +59,13 @@ module Api
 
       def department_params
         params.expect(department: %i[code name])
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(params.fetch(:order_by, "name"), ORDERABLE_FIELDS.fetch("name"))
+        order_direction = normalized_order_direction(params[:order_dir])
+
+        scope.order(Arel.sql("#{order_column} #{order_direction}, departments.id asc"))
       end
     end
   end

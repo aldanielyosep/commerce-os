@@ -211,6 +211,93 @@ describe("UsersPage assignment management", () => {
     expect(screen.getByText("manager")).toBeInTheDocument();
   });
 
+  it("applies sorting controls to the paginated users request", async () => {
+    listUsersPageMock.mockReset();
+    listUsersPageMock
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: 1,
+            email: "admin1@example.com",
+            username: null,
+            role: "admin_company",
+            status: "active",
+            employee_id: null,
+            reset_password_sent_at: null
+          }
+        ],
+        meta: {
+          page: 1,
+          per_page: 20,
+          total_count: 1,
+          total_pages: 1
+        }
+      })
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: 1,
+            email: "admin1@example.com",
+            username: null,
+            role: "admin_company",
+            status: "active",
+            employee_id: null,
+            reset_password_sent_at: null
+          }
+        ],
+        meta: {
+          page: 1,
+          per_page: 20,
+          total_count: 1,
+          total_pages: 1
+        }
+      })
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: 1,
+            email: "admin1@example.com",
+            username: null,
+            role: "admin_company",
+            status: "active",
+            employee_id: null,
+            reset_password_sent_at: null
+          }
+        ],
+        meta: {
+          page: 1,
+          per_page: 20,
+          total_count: 1,
+          total_pages: 1
+        }
+      });
+
+    const user = userEvent.setup();
+    render(<UsersPage />);
+
+    await screen.findByRole("heading", { name: "Users" });
+
+    await user.selectOptions(screen.getByLabelText("Sort By"), "email");
+
+    await waitFor(() => {
+      expect(listUsersPageMock).toHaveBeenNthCalledWith(2, "Bearer test-token", {
+        page: 1,
+        order_by: "email",
+        order_dir: undefined
+      });
+    });
+
+    await user.selectOptions(screen.getByLabelText("Direction"), "desc");
+
+    await waitFor(() => {
+      expect(listUsersPageMock).toHaveBeenNthCalledWith(3, "Bearer test-token", {
+        page: 1,
+        order_by: "email",
+        order_dir: "desc"
+      });
+    });
+  });
+
   it("creates and removes assignment for selected user", async () => {
     listUserCompanyAssignmentsMock
       .mockResolvedValueOnce([])

@@ -1,4 +1,4 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:disable RSpec/MultipleMemoizedHelpers
 require "swagger_helper"
 
 RSpec.describe "Employee Departments" do
@@ -9,6 +9,11 @@ RSpec.describe "Employee Departments" do
       tags "Employee Departments"
       produces "application/json"
       security [ { bearerAuth: [] } ]
+
+      parameter name: :page, in: :query, type: :integer, required: false
+      parameter name: :per_page, in: :query, type: :integer, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
 
       response "200", "assignments listed" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
@@ -58,6 +63,38 @@ RSpec.describe "Employee Departments" do
         # rubocop:enable RSpec/VariableName
 
         run_test!
+      end
+
+      response "200", "assignments ordered by assigned date ascending" do
+        let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
+        let!(:employee) { create(:employee, full_name: "Alice Johnson") }
+        let!(:department_one) { create(:department, code: "HR", name: "Human Resources") }
+        let!(:department_two) { create(:department, code: "ENG", name: "Engineering") }
+        let!(:assignment_one) do
+          create(
+            :employee_department,
+            employee: employee,
+            department: department_one,
+            assigned_date: Date.current - 2.days
+          )
+        end
+        let!(:assignment_two) do
+          create(:employee_department, employee: employee, department: department_two, assigned_date: Date.current)
+        end
+        let(:employee_id) { employee.id }
+        let(:page) { 1 }
+        let(:per_page) { 20 }
+        let(:order_by) { "assigned_date" }
+        let(:order_dir) { "asc" }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do |response|
+          ids = JSON.parse(response.body)["data"].pluck("id")
+          expect(ids.index(assignment_one.id)).to be < ids.index(assignment_two.id)
+        end
       end
     end
 
@@ -138,4 +175,4 @@ RSpec.describe "Employee Departments" do
   end
 end
 
-# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:enable RSpec/MultipleMemoizedHelpers

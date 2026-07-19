@@ -2,6 +2,11 @@ module Api
   module V1
     class EmployeeDocumentsController < BaseController
       SIGNED_URL_TTL = ENV.fetch("DOCUMENT_SIGNED_URL_TTL", 600).to_i.seconds
+      ORDERABLE_FIELDS = {
+        "created_at" => "employee_documents.created_at",
+        "document_type" => "employee_documents.document_type",
+        "expiry_date" => "employee_documents.expiry_date"
+      }.freeze
 
       before_action :set_employee
       before_action :set_employee_document, only: %i[download archive]
@@ -9,7 +14,7 @@ module Api
       def index
         authorize EmployeeDocument
 
-        pagy_record, documents = paginate_collection(@employee.employee_documents.kept.order(created_at: :desc))
+        pagy_record, documents = paginate_collection(apply_order(@employee.employee_documents.kept))
         render_success(EmployeeDocumentBlueprint.render_as_hash(documents), meta: pagination_meta(pagy_record))
       end
 
@@ -106,6 +111,16 @@ module Api
           host: request.host,
           port: request.optional_port
         }
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(
+          params.fetch(:order_by, "created_at"),
+          ORDERABLE_FIELDS.fetch("created_at")
+        )
+        order_direction = params.key?(:order_dir) ? normalized_order_direction(params[:order_dir]) : :desc
+
+        scope.order(Arel.sql("#{order_column} #{order_direction}, employee_documents.id desc"))
       end
     end
   end

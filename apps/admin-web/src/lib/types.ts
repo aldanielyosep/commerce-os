@@ -93,6 +93,8 @@ export type DepartmentPayload = {
   name: string;
 };
 
+export type DepartmentOrderBy = "code" | "name" | "created_at";
+
 export type DepartmentUpdatePayload = Partial<DepartmentPayload>;
 
 export type EmployeeDepartmentAssignment = {
@@ -117,6 +119,8 @@ export type UserRecord = {
   created_at?: string;
   updated_at?: string;
 };
+
+export type UserOrderBy = "id" | "email" | "username" | "role" | "status" | "created_at";
 
 export type UserPayload = {
   email: string;

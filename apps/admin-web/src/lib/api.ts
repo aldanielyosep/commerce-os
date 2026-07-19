@@ -9,6 +9,7 @@ import type {
   CompanyPayload,
   CompanyUpdatePayload,
   Department,
+  DepartmentOrderBy,
   DepartmentPayload,
   DepartmentUpdatePayload,
   Employee,
@@ -26,6 +27,7 @@ import type {
   PositionHistory,
   SalaryRecord,
   SortDirection,
+  UserOrderBy,
   UserCompanyAssignment,
   UserCompanyAssignmentPayload,
   UserRole,
@@ -295,11 +297,13 @@ export async function listDepartments(token: string): Promise<Department[]> {
 
 export async function listDepartmentsPage(
   token: string,
-  pagination: PaginationParams = {}
+  pagination: PaginationParams & { order_by?: DepartmentOrderBy; order_dir?: SortDirection } = {}
 ): Promise<PaginatedResult<Department>> {
   const query = buildQueryString({
     page: pagination.page,
-    per_page: pagination.per_page
+    per_page: pagination.per_page,
+    order_by: pagination.order_by,
+    order_dir: pagination.order_dir
   });
   const envelope = await request<ApiEnvelope<Department[]>>(`/api/v1/departments${query}`, { token });
   return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
@@ -345,11 +349,13 @@ export async function listUsers(token: string): Promise<UserRecord[]> {
 
 export async function listUsersPage(
   token: string,
-  pagination: PaginationParams = {}
+  pagination: PaginationParams & { order_by?: UserOrderBy; order_dir?: SortDirection } = {}
 ): Promise<PaginatedResult<UserRecord>> {
   const query = buildQueryString({
     page: pagination.page,
-    per_page: pagination.per_page
+    per_page: pagination.per_page,
+    order_by: pagination.order_by,
+    order_dir: pagination.order_dir
   });
   const envelope = await request<ApiEnvelope<UserRecord[]>>(`/api/v1/users${query}`, { token });
   return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };

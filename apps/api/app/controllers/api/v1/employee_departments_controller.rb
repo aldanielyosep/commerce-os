@@ -1,6 +1,11 @@
 module Api
   module V1
     class EmployeeDepartmentsController < BaseController
+      ORDERABLE_FIELDS = {
+        "assigned_date" => "employee_departments.assigned_date",
+        "created_at" => "employee_departments.created_at"
+      }.freeze
+
       before_action :set_employee
       before_action :set_employee_department, only: :destroy
 
@@ -8,7 +13,7 @@ module Api
         authorize EmployeeDepartment
 
         pagy_record, assignments = paginate_collection(
-          @employee.employee_departments.kept.includes(:department).order(assigned_date: :desc)
+          apply_order(@employee.employee_departments.kept.includes(:department))
         )
         render_success(EmployeeDepartmentBlueprint.render_as_hash(assignments), meta: pagination_meta(pagy_record))
       end
@@ -45,6 +50,16 @@ module Api
 
       def employee_department_params
         params.expect(employee_department: %i[department_id assigned_date])
+      end
+
+      def apply_order(scope)
+        order_column = ORDERABLE_FIELDS.fetch(
+          params.fetch(:order_by, "assigned_date"),
+          ORDERABLE_FIELDS.fetch("assigned_date")
+        )
+        order_direction = params.key?(:order_dir) ? normalized_order_direction(params[:order_dir]) : :desc
+
+        scope.order(Arel.sql("#{order_column} #{order_direction}, employee_departments.id asc"))
       end
     end
   end
