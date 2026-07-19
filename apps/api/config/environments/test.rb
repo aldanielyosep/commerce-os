@@ -50,17 +50,4 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
-
-  if ENV["BULLET_ENABLED"] == "true"
-    config.after_initialize do
-      next unless defined?(Bullet)
-
-      Bullet.enable = true
-      Bullet.bullet_logger = true
-      Bullet.rails_logger = true
-      Bullet.alert = false
-      Bullet.console = false
-      Bullet.raise = true
-    end
-  end
 end
