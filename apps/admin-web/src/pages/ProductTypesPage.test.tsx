@@ -159,4 +159,122 @@ describe("ProductTypesPage", () => {
 
     expect(await screen.findByText("Network error")).toBeInTheDocument();
   });
+
+  it("applies search, sort, and reset filters", async () => {
+
+    const user = userEvent.setup();
+    render(<ProductTypesPage />);
+
+    await screen.findByText("Laptop Backpack");
+
+    await user.selectOptions(screen.getByLabelText("Sort By"), "created_at");
+    await waitFor(() => {
+      expect(listProductTypesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 1,
+        sub_category_id: undefined,
+        q: undefined,
+        order_by: "created_at",
+        order_dir: undefined
+      });
+    });
+
+    await user.selectOptions(screen.getByLabelText("Direction"), "desc");
+    await waitFor(() => {
+      expect(listProductTypesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 1,
+        sub_category_id: undefined,
+        q: undefined,
+        order_by: "created_at",
+        order_dir: "desc"
+      });
+    });
+
+    await user.type(screen.getByLabelText("Search"), "  travel  ");
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+    await waitFor(() => {
+      expect(listProductTypesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 1,
+        sub_category_id: undefined,
+        q: "travel",
+        order_by: "created_at",
+        order_dir: "desc"
+      });
+    });
+
+    await user.selectOptions(screen.getByLabelText("Department"), "10");
+    await user.selectOptions(screen.getByLabelText("Category"), "21");
+    await user.selectOptions(screen.getByLabelText("Sub Category"), "31");
+    await user.click(screen.getByRole("button", { name: "Reset" }));
+    await waitFor(() => {
+      expect(listProductTypesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 1,
+        sub_category_id: undefined,
+        q: undefined,
+        order_by: "created_at",
+        order_dir: "desc"
+      });
+    });
+  });
+
+  it("navigates next and previous pages", async () => {
+    listProductTypesPageMock.mockResolvedValue({
+      items: [{ id: 41, sub_category_id: 31, name: "Laptop Backpack" }],
+      meta: { page: 1, per_page: 20, total_count: 2, total_pages: 2 }
+    });
+
+    const user = userEvent.setup();
+    render(<ProductTypesPage />);
+
+    await screen.findByText("Laptop Backpack");
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() => {
+      expect(listProductTypesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 2,
+        sub_category_id: undefined,
+        q: undefined,
+        order_by: undefined,
+        order_dir: undefined
+      });
+    });
+
+    await user.click(screen.getByRole("button", { name: "Previous" }));
+    await waitFor(() => {
+      expect(listProductTypesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 1,
+        sub_category_id: undefined,
+        q: undefined,
+        order_by: undefined,
+        order_dir: undefined
+      });
+    });
+  });
+
+  it("does not delete when confirm is canceled", async () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValueOnce(false);
+    const user = userEvent.setup();
+
+    render(<ProductTypesPage />);
+    await screen.findByText("Laptop Backpack");
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(deleteProductTypeMock).not.toHaveBeenCalled();
+  });
+
+  it("shows submit error and stays in modal", async () => {
+    createProductTypeMock.mockRejectedValue(new Error("Create failed"));
+    const user = userEvent.setup();
+
+    render(<ProductTypesPage />);
+    await screen.findByRole("heading", { name: "Product Types" });
+
+    await user.click(screen.getByRole("button", { name: "Add Product Type" }));
+    await user.selectOptions(screen.getByLabelText("Sub Category (Form)"), "31");
+    await user.type(screen.getByLabelText("Product Type Name"), "Travel Backpack");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(await screen.findByText("Create failed")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Create Product Type" })).toBeInTheDocument();
+  });
 });

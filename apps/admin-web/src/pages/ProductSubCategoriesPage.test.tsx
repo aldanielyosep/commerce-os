@@ -153,4 +153,121 @@ describe("ProductSubCategoriesPage", () => {
 
     expect(await screen.findByText("Network error")).toBeInTheDocument();
   });
+
+  it("applies search, sort, and reset filters", async () => {
+
+    const user = userEvent.setup();
+    render(<ProductSubCategoriesPage />);
+
+    await screen.findByText("Backpack");
+
+    await user.selectOptions(screen.getByLabelText("Sort By"), "created_at");
+    await waitFor(() => {
+      expect(listSubCategoriesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 1,
+        category_id: undefined,
+        q: undefined,
+        order_by: "created_at",
+        order_dir: undefined
+      });
+    });
+
+    await user.selectOptions(screen.getByLabelText("Direction"), "desc");
+    await waitFor(() => {
+      expect(listSubCategoriesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 1,
+        category_id: undefined,
+        q: undefined,
+        order_by: "created_at",
+        order_dir: "desc"
+      });
+    });
+
+    await user.type(screen.getByLabelText("Search"), "  duf  ");
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+    await waitFor(() => {
+      expect(listSubCategoriesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 1,
+        category_id: undefined,
+        q: "duf",
+        order_by: "created_at",
+        order_dir: "desc"
+      });
+    });
+
+    await user.selectOptions(screen.getByLabelText("Department"), "10");
+    await user.selectOptions(screen.getByLabelText("Category"), "21");
+    await user.click(screen.getByRole("button", { name: "Reset" }));
+    await waitFor(() => {
+      expect(listSubCategoriesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 1,
+        category_id: undefined,
+        q: undefined,
+        order_by: "created_at",
+        order_dir: "desc"
+      });
+    });
+  });
+
+  it("navigates next and previous pages", async () => {
+    listSubCategoriesPageMock.mockResolvedValue({
+      items: [{ id: 31, category_id: 21, name: "Backpack" }],
+      meta: { page: 1, per_page: 20, total_count: 2, total_pages: 2 }
+    });
+
+    const user = userEvent.setup();
+    render(<ProductSubCategoriesPage />);
+
+    await screen.findByText("Backpack");
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() => {
+      expect(listSubCategoriesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 2,
+        category_id: undefined,
+        q: undefined,
+        order_by: undefined,
+        order_dir: undefined
+      });
+    });
+
+    await user.click(screen.getByRole("button", { name: "Previous" }));
+    await waitFor(() => {
+      expect(listSubCategoriesPageMock).toHaveBeenLastCalledWith("Bearer test-token", {
+        page: 1,
+        category_id: undefined,
+        q: undefined,
+        order_by: undefined,
+        order_dir: undefined
+      });
+    });
+  });
+
+  it("does not delete when confirm is canceled", async () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValueOnce(false);
+    const user = userEvent.setup();
+
+    render(<ProductSubCategoriesPage />);
+    await screen.findByText("Backpack");
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(deleteSubCategoryMock).not.toHaveBeenCalled();
+  });
+
+  it("shows submit error and stays in modal", async () => {
+    createSubCategoryMock.mockRejectedValue(new Error("Create failed"));
+    const user = userEvent.setup();
+
+    render(<ProductSubCategoriesPage />);
+    await screen.findByRole("heading", { name: "Product Sub Categories" });
+
+    await user.click(screen.getByRole("button", { name: "Add Sub Category" }));
+    await user.selectOptions(screen.getByLabelText("Category (Form)"), "21");
+    await user.type(screen.getByLabelText("Sub Category Name"), "Duffel");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(await screen.findByText("Create failed")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Create Sub Category" })).toBeInTheDocument();
+  });
 });
