@@ -1,15 +1,15 @@
 FactoryBot.define do
   factory :product do
-    association :company
+    company
+    product_type
 
     sequence(:product_code) { |n| "P#{n.to_s.rjust(7, '0')}" }
     sequence(:slug) { |n| "product-#{n}" }
     sequence(:product_name) { |n| "Product #{n}" }
 
-    department_id { 10 }
-    category_id { 20 }
-    sub_category_id { 30 }
-    product_type_id { 40 }
+    product_department { product_type.sub_category.category.product_department }
+    category { product_type.sub_category.category }
+    sub_category { product_type.sub_category }
     short_description { "Product short description" }
     description_richtext do
       {

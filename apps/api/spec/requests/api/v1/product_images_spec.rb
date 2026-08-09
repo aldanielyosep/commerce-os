@@ -1,6 +1,7 @@
 require "swagger_helper"
 require "stringio"
 
+# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
 RSpec.describe "Product Images" do
   let(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
   let(:company) { create(:company) }
@@ -40,9 +41,10 @@ RSpec.describe "Product Images" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
-      parameter name: :alt_text, in: :query, type: :string, required: false
-      parameter name: :is_cover, in: :query, type: :boolean, required: false
-      parameter name: :position, in: :query, type: :integer, required: false
+      parameter name: :image, in: :formData, type: :file
+      parameter name: :alt_text, in: :formData, type: :string, required: false
+      parameter name: :is_cover, in: :formData, type: :boolean, required: false
+      parameter name: :position, in: :formData, type: :integer, required: false
 
       response "201", "image uploaded" do
         let(:product_id) { product.id }
@@ -157,3 +159,4 @@ RSpec.describe "Product Images" do
     end
   end
 end
+# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup

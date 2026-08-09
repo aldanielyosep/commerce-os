@@ -42,7 +42,9 @@ class ProductImage < ApplicationRecord
   def unset_other_cover_images
     return if new_record? && product_id.blank?
 
-    self.class.kept.where(product_id: product_id).where.not(id: id).update_all(is_cover: false)
+    self.class.kept.where(product_id: product_id).where.not(id: id).find_each do |record|
+      record.update!(is_cover: false)
+    end
   end
 
   def image_attached
@@ -52,9 +54,9 @@ class ProductImage < ApplicationRecord
   def image_content_type
     return unless image.attached?
 
-    unless ALLOWED_CONTENT_TYPES.include?(image.blob.content_type)
-      errors.add(:image, "extension is not allowed (jpg, jpeg, png, webp)")
-    end
+    return if ALLOWED_CONTENT_TYPES.include?(image.blob.content_type)
+
+    errors.add(:image, "extension is not allowed (jpg, jpeg, png, webp)")
   end
 
   def image_size_within_limit
@@ -69,9 +71,9 @@ class ProductImage < ApplicationRecord
     width, height = read_dimensions
     return if width <= 0 || height <= 0
 
-    if width < MIN_WIDTH || height < MIN_HEIGHT
-      errors.add(:image, "minimum dimension is 1000x1000")
-    end
+    return unless width < MIN_WIDTH || height < MIN_HEIGHT
+
+    errors.add(:image, "minimum dimension is 1000x1000")
   end
 
   def read_dimensions

@@ -62,14 +62,14 @@ module Api
 
       def product_image_attributes
         if params[:product_image].present?
-          return params.expect(product_image: %i[alt_text is_cover position]).to_h
+          return params.expect(product_image: %i[alt_text is_cover position]).to_h.compact
         end
 
         ActionController::Parameters.new(
           alt_text: params[:alt_text],
           is_cover: params[:is_cover],
           position: params[:position]
-        ).permit(:alt_text, :is_cover, :position).to_h
+        ).permit(:alt_text, :is_cover, :position).to_h.compact
       end
 
       def product_image_file

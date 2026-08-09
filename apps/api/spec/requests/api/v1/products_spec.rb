@@ -1,5 +1,6 @@
 require "swagger_helper"
 
+# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
 RSpec.describe "Products" do
   let(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
   let(:company) { create(:company) }
@@ -23,8 +24,12 @@ RSpec.describe "Products" do
       parameter name: :order_dir, in: :query, type: :string, required: false
 
       response "200", "products listed" do
-        let!(:product_one) { create(:product, company: company, product_name: "Alpha Product", product_code: "P0000001") }
-        let!(:product_two) { create(:product, company: company, product_name: "Beta Product", product_code: "P0000002", status: :inactive) }
+        let!(:product_one) do
+          create(:product, company: company, product_name: "Alpha Product", product_code: "P0000001")
+        end
+        let!(:product_two) do
+          create(:product, company: company, product_name: "Beta Product", product_code: "P0000002", status: :inactive)
+        end
         let!(:out_of_scope) { create(:product, company: other_company, product_name: "Gamma Product") }
         let(:q) { "Alpha" }
         let(:status) { "draft" }
@@ -42,7 +47,9 @@ RSpec.describe "Products" do
       end
 
       response "401", "unauthorized" do
+        # rubocop:disable RSpec/VariableName
         let(:Authorization) { nil }
+        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           expect(response).to have_http_status(:unauthorized)
@@ -72,22 +79,27 @@ RSpec.describe "Products" do
               description_richtext: { type: :object },
               status: { type: :string }
             },
-            required: %w[company_id product_name department_id category_id sub_category_id product_type_id short_description description_richtext status]
+            required: %w[company_id product_name department_id category_id sub_category_id product_type_id
+                         short_description description_richtext status]
           }
         },
         required: ["product"]
       }
 
       response "201", "product created" do
+        let!(:product_department) { create(:product_department) }
+        let!(:category) { create(:category, product_department: product_department) }
+        let!(:sub_category) { create(:sub_category, category: category) }
+        let!(:product_type) { create(:product_type, sub_category: sub_category) }
         let(:product) do
           {
             product: {
               company_id: company.id,
               product_name: "Goodie Bag Dino",
-              department_id: 10,
-              category_id: 22,
-              sub_category_id: 37,
-              product_type_id: 5,
+              department_id: product_department.id,
+              category_id: category.id,
+              sub_category_id: sub_category.id,
+              product_type_id: product_type.id,
               short_description: "Goodie bag premium",
               description_richtext: { type: "doc", content: [] },
               status: "draft"
@@ -107,16 +119,20 @@ RSpec.describe "Products" do
       end
 
       response "422", "rejects product code override" do
+        let!(:product_department) { create(:product_department) }
+        let!(:category) { create(:category, product_department: product_department) }
+        let!(:sub_category) { create(:sub_category, category: category) }
+        let!(:product_type) { create(:product_type, sub_category: sub_category) }
         let(:product) do
           {
             product: {
               company_id: company.id,
               product_name: "Goodie Bag Dino",
               product_code: "P9999999",
-              department_id: 10,
-              category_id: 22,
-              sub_category_id: 37,
-              product_type_id: 5,
+              department_id: product_department.id,
+              category_id: category.id,
+              sub_category_id: sub_category.id,
+              product_type_id: product_type.id,
               short_description: "Goodie bag premium",
               description_richtext: { type: "doc", content: [] },
               status: "draft"
@@ -303,4 +319,28 @@ RSpec.describe "Products" do
       end
     end
   end
+
+  path "/api/v1/products/{id}/deactivate" do
+    parameter name: :id, in: :path, type: :string
+
+    post "Deactivate product" do
+      tags "Products"
+      produces "application/json"
+      security [ { bearerAuth: [] } ]
+
+      response "200", "deactivation succeeds" do
+        let!(:record) { create(:product, company: company, status: :active) }
+        let(:id) { record.id }
+
+        # rubocop:disable RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        # rubocop:enable RSpec/VariableName
+
+        run_test! do
+          expect(record.reload.inactive?).to be(true)
+        end
+      end
+    end
+  end
 end
+# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup

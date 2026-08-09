@@ -28,17 +28,28 @@ class DescriptionSanitizer
 
   def extract_text(node)
     return "" if node.nil?
-
-    if node.is_a?(Array)
-      return node.map { |item| extract_text(item) }.reject(&:blank?).join(" ")
-    end
-
+    return extract_text_from_array(node) if node.is_a?(Array)
     return "" unless node.is_a?(Hash)
 
-    text_value = node["text"] || node[:text]
+    extract_text_from_hash(node)
+  end
+
+  def extract_text_from_array(node)
+    node.map { |item| extract_text(item) }.compact_blank.join(" ")
+  end
+
+  def extract_text_from_hash(node)
+    text_value = fetch_text_value(node)
     return text_value.to_s if text_value.present?
 
-    content = node["content"] || node[:content]
-    extract_text(content)
+    extract_text(fetch_content_value(node))
+  end
+
+  def fetch_text_value(node)
+    node["text"] || node[:text]
+  end
+
+  def fetch_content_value(node)
+    node["content"] || node[:content]
   end
 end

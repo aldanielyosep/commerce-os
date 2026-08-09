@@ -11,11 +11,7 @@ class ProductPolicy < ApplicationPolicy
     return false unless admin_or_super_admin?
     return true if super_admin?
 
-    company_id = if record.respond_to?(:company_id)
-                   record.company_id
-                 else
-                   nil
-                 end
+    company_id = (record.company_id if record.respond_to?(:company_id))
 
     return false if company_id.blank?
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_19_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_09_101003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -62,6 +62,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_160000) do
     t.index ["created_at"], name: "index_audits_on_created_at"
     t.index ["request_uuid"], name: "index_audits_on_request_uuid"
     t.index ["user_id", "user_type"], name: "user_index"
+  end
+
+  create_table "categories", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.datetime "discarded_at"
+    t.string "name", null: false
+    t.bigint "product_department_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["created_by_id"], name: "index_categories_on_created_by_id"
+    t.index ["discarded_at"], name: "index_categories_on_discarded_at"
+    t.index ["product_department_id", "name"], name: "index_categories_on_product_department_id_and_name", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["product_department_id"], name: "index_categories_on_product_department_id"
+    t.index ["updated_by_id"], name: "index_categories_on_updated_by_id"
   end
 
   create_table "companies", force: :cascade do |t|
@@ -330,6 +345,85 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_160000) do
     t.index ["updated_by_id"], name: "index_position_histories_on_updated_by_id"
   end
 
+  create_table "product_departments", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.datetime "discarded_at"
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["code"], name: "index_product_departments_on_code", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["created_by_id"], name: "index_product_departments_on_created_by_id"
+    t.index ["discarded_at"], name: "index_product_departments_on_discarded_at"
+    t.index ["updated_by_id"], name: "index_product_departments_on_updated_by_id"
+  end
+
+  create_table "product_images", force: :cascade do |t|
+    t.text "alt_text"
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.datetime "discarded_at"
+    t.boolean "is_cover", default: false, null: false
+    t.integer "position", default: 1, null: false
+    t.bigint "product_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["created_by_id"], name: "index_product_images_on_created_by_id"
+    t.index ["discarded_at"], name: "index_product_images_on_discarded_at"
+    t.index ["product_id", "is_cover"], name: "index_product_images_unique_cover_per_product", unique: true, where: "((is_cover = true) AND (discarded_at IS NULL))"
+    t.index ["product_id", "position"], name: "index_product_images_on_product_id_and_position"
+    t.index ["product_id"], name: "index_product_images_on_product_id"
+    t.index ["updated_by_id"], name: "index_product_images_on_updated_by_id"
+  end
+
+  create_table "product_types", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.datetime "discarded_at"
+    t.string "name", null: false
+    t.bigint "sub_category_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["created_by_id"], name: "index_product_types_on_created_by_id"
+    t.index ["discarded_at"], name: "index_product_types_on_discarded_at"
+    t.index ["sub_category_id", "name"], name: "index_product_types_on_sub_category_id_and_name", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["sub_category_id"], name: "index_product_types_on_sub_category_id"
+    t.index ["updated_by_id"], name: "index_product_types_on_updated_by_id"
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.bigint "category_id", null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.bigint "department_id", null: false
+    t.text "description_html"
+    t.jsonb "description_richtext", default: {}, null: false
+    t.text "description_text"
+    t.datetime "discarded_at"
+    t.string "product_code", null: false
+    t.string "product_name", null: false
+    t.bigint "product_type_id", null: false
+    t.text "short_description", null: false
+    t.string "slug", null: false
+    t.integer "status", default: 0, null: false
+    t.bigint "sub_category_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["category_id"], name: "index_products_on_category_id"
+    t.index ["company_id", "product_code"], name: "index_products_on_company_id_and_product_code", unique: true
+    t.index ["company_id", "slug"], name: "index_products_on_company_id_and_slug", unique: true
+    t.index ["company_id"], name: "index_products_on_company_id"
+    t.index ["created_by_id"], name: "index_products_on_created_by_id"
+    t.index ["department_id"], name: "index_products_on_department_id"
+    t.index ["discarded_at"], name: "index_products_on_discarded_at"
+    t.index ["product_type_id"], name: "index_products_on_product_type_id"
+    t.index ["status"], name: "index_products_on_status"
+    t.index ["sub_category_id"], name: "index_products_on_sub_category_id"
+    t.index ["updated_by_id"], name: "index_products_on_updated_by_id"
+  end
+
   create_table "refresh_tokens", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "expires_at", null: false
@@ -362,6 +456,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_160000) do
     t.index ["updated_by_id"], name: "index_salary_records_on_updated_by_id"
   end
 
+  create_table "sub_categories", force: :cascade do |t|
+    t.bigint "category_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.datetime "discarded_at"
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.index ["category_id", "name"], name: "index_sub_categories_on_category_id_and_name", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["category_id"], name: "index_sub_categories_on_category_id"
+    t.index ["created_by_id"], name: "index_sub_categories_on_created_by_id"
+    t.index ["discarded_at"], name: "index_sub_categories_on_discarded_at"
+    t.index ["updated_by_id"], name: "index_sub_categories_on_updated_by_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
@@ -386,6 +495,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_160000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "categories", "product_departments"
+  add_foreign_key "categories", "users", column: "created_by_id"
+  add_foreign_key "categories", "users", column: "updated_by_id"
   add_foreign_key "companies", "users", column: "created_by_id"
   add_foreign_key "companies", "users", column: "updated_by_id"
   add_foreign_key "company_assignments", "companies"
@@ -411,9 +523,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_160000) do
   add_foreign_key "position_histories", "employees"
   add_foreign_key "position_histories", "users", column: "created_by_id"
   add_foreign_key "position_histories", "users", column: "updated_by_id"
+  add_foreign_key "product_departments", "users", column: "created_by_id"
+  add_foreign_key "product_departments", "users", column: "updated_by_id"
+  add_foreign_key "product_images", "products"
+  add_foreign_key "product_images", "users", column: "created_by_id"
+  add_foreign_key "product_images", "users", column: "updated_by_id"
+  add_foreign_key "product_types", "sub_categories"
+  add_foreign_key "product_types", "users", column: "created_by_id"
+  add_foreign_key "product_types", "users", column: "updated_by_id"
+  add_foreign_key "products", "categories"
+  add_foreign_key "products", "companies"
+  add_foreign_key "products", "product_departments", column: "department_id"
+  add_foreign_key "products", "product_types"
+  add_foreign_key "products", "sub_categories"
+  add_foreign_key "products", "users", column: "created_by_id"
+  add_foreign_key "products", "users", column: "updated_by_id"
   add_foreign_key "refresh_tokens", "users"
   add_foreign_key "salary_records", "employees"
   add_foreign_key "salary_records", "users", column: "created_by_id"
   add_foreign_key "salary_records", "users", column: "updated_by_id"
+  add_foreign_key "sub_categories", "categories"
+  add_foreign_key "sub_categories", "users", column: "created_by_id"
+  add_foreign_key "sub_categories", "users", column: "updated_by_id"
   add_foreign_key "users", "employees"
 end

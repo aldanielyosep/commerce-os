@@ -10,17 +10,19 @@ class Product < ApplicationRecord
   }, default: :draft
 
   belongs_to :company
+  belongs_to :product_department, foreign_key: :department_id, inverse_of: :products
+  belongs_to :category
+  belongs_to :sub_category
+  belongs_to :product_type
   has_many :product_images, dependent: :destroy
 
   before_validation :assign_product_code, on: :create
   before_validation :assign_slug
   before_validation :derive_description_fields
 
-  validates :company_id, presence: true
   validates :product_code, presence: true, uniqueness: { scope: :company_id }
   validates :slug, presence: true, uniqueness: { scope: :company_id }
   validates :product_name, presence: true, length: { maximum: 255 }
-  validates :department_id, :category_id, :sub_category_id, :product_type_id, presence: true
   validates :short_description, presence: true
   validates :status, presence: true
 

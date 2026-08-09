@@ -318,6 +318,39 @@ export type ProductPayload = {
 
 export type ProductUpdatePayload = Partial<Omit<ProductPayload, "company_id">>;
 
+export type ProductDepartment = {
+  id: number;
+  code: string;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProductCategory = {
+  id: number;
+  department_id: number;
+  product_department_id?: number;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProductSubCategory = {
+  id: number;
+  category_id: number;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProductTaxonomyType = {
+  id: number;
+  sub_category_id: number;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type ProductListFilters = {
   q?: string;
   status?: ProductStatus;

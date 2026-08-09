@@ -1,5 +1,6 @@
 require "rails_helper"
 
+# rubocop:disable RSpec/MultipleMemoizedHelpers
 RSpec.describe ProductPolicy, type: :policy do
   subject(:policy) { described_class.new(user, product) }
 
@@ -11,6 +12,7 @@ RSpec.describe ProductPolicy, type: :policy do
     context "when user is super admin" do
       let(:user) { create(:user, :super_admin) }
 
+      # rubocop:disable RSpec/MultipleExpectations
       it "allows all actions" do
         expect(policy.index?).to be(true)
         expect(policy.show?).to be(true)
@@ -21,6 +23,7 @@ RSpec.describe ProductPolicy, type: :policy do
         expect(policy.activate?).to be(true)
         expect(policy.deactivate?).to be(true)
       end
+      # rubocop:enable RSpec/MultipleExpectations
     end
 
     context "when user is assigned to company" do
@@ -48,9 +51,12 @@ RSpec.describe ProductPolicy, type: :policy do
       end
     end
 
-    context "for create with explicit company" do
+    context "when creating with explicit company" do
       let(:user) { create(:user) }
-      let(:product) { Product.new(company: company, product_name: "New", short_description: "Desc", department_id: 1, category_id: 1, sub_category_id: 1, product_type_id: 1, description_richtext: { type: "doc", content: [] }) }
+      let(:product) do
+        Product.new(company: company, product_name: "New", short_description: "Desc", department_id: 1, category_id: 1,
+                    sub_category_id: 1, product_type_id: 1, description_richtext: { type: "doc", content: [] })
+      end
 
       it "allows create only for assigned company" do
         create(:company_assignment, user: user, company: company)
@@ -89,3 +95,4 @@ RSpec.describe ProductPolicy, type: :policy do
     end
   end
 end
+# rubocop:enable RSpec/MultipleMemoizedHelpers

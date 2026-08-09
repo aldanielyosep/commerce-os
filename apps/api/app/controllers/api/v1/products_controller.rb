@@ -104,15 +104,15 @@ module Api
       private
 
       def set_product
-        @product = Product.kept.includes(:product_images).find(params.expect(:id))
+        @product = Product.kept.find(params.expect(:id))
       end
 
       def set_product_with_discarded
-        @product = Product.with_discarded.includes(:product_images).find(params.expect(:id))
+        @product = Product.with_discarded.find(params.expect(:id))
       end
 
       def filtered_products
-        scope = scoped_records(Product.kept.includes(:product_images))
+        scope = scoped_records(Product.kept)
         scope = filter_by_status(scope)
         scope = filter_by_query(scope)
         apply_order(scope)
@@ -147,19 +147,18 @@ module Api
       end
 
       def product_params
-        params.expect(
-          product: %i[
-            company_id
-            product_code
-            product_name
-            department_id
-            category_id
-            sub_category_id
-            product_type_id
-            short_description
-            status
-          ] + [ :description_richtext ]
-        )
+        params.expect(product: [
+                        :company_id,
+                        :product_code,
+                        :product_name,
+                        :department_id,
+                        :category_id,
+                        :sub_category_id,
+                        :product_type_id,
+                        :short_description,
+                        :status,
+                        { description_richtext: {} }
+                      ])
       end
 
       def product_code_override_payload?

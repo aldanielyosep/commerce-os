@@ -27,11 +27,15 @@ import type {
   CompanyOrderBy,
   PositionHistory,
   Product,
+  ProductCategory,
+  ProductDepartment,
   ProductImage,
   ProductImageUpdatePayload,
   ProductImageUploadPayload,
   ProductListFilters,
   ProductOrderBy,
+  ProductSubCategory,
+  ProductTaxonomyType,
   ProductPayload,
   ProductUpdatePayload,
   SalaryRecord,
@@ -287,6 +291,94 @@ export async function getEmployee(token: string, employeeId: number): Promise<Em
 
 export async function listProducts(token: string, filters: ProductListFilters = {}): Promise<Product[]> {
   return collectAllPages((page) => listProductsPage(token, { ...filters, page }));
+}
+
+export async function listProductDepartments(token: string): Promise<ProductDepartment[]> {
+  return collectAllPages((page) => listProductDepartmentsPage(token, { page }));
+}
+
+export async function listProductDepartmentsPage(
+  token: string,
+  pagination: PaginationParams & { q?: string; order_by?: "code" | "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<ProductDepartment>> {
+  const query = buildQueryString({
+    page: pagination.page,
+    per_page: pagination.per_page,
+    q: pagination.q,
+    order_by: pagination.order_by,
+    order_dir: pagination.order_dir
+  });
+  const envelope = await request<ApiEnvelope<ProductDepartment[]>>(`/api/v1/product_departments${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
+}
+
+export async function listCategories(
+  token: string,
+  filters: PaginationParams & { department_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<ProductCategory[]> {
+  return collectAllPages((page) => listCategoriesPage(token, { ...filters, page }));
+}
+
+export async function listCategoriesPage(
+  token: string,
+  filters: PaginationParams & { department_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<ProductCategory>> {
+  const query = buildQueryString({
+    page: filters.page,
+    per_page: filters.per_page,
+    department_id: filters.department_id,
+    q: filters.q,
+    order_by: filters.order_by,
+    order_dir: filters.order_dir
+  });
+  const envelope = await request<ApiEnvelope<ProductCategory[]>>(`/api/v1/categories${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
+}
+
+export async function listSubCategories(
+  token: string,
+  filters: PaginationParams & { category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<ProductSubCategory[]> {
+  return collectAllPages((page) => listSubCategoriesPage(token, { ...filters, page }));
+}
+
+export async function listSubCategoriesPage(
+  token: string,
+  filters: PaginationParams & { category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<ProductSubCategory>> {
+  const query = buildQueryString({
+    page: filters.page,
+    per_page: filters.per_page,
+    category_id: filters.category_id,
+    q: filters.q,
+    order_by: filters.order_by,
+    order_dir: filters.order_dir
+  });
+  const envelope = await request<ApiEnvelope<ProductSubCategory[]>>(`/api/v1/sub_categories${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
+}
+
+export async function listProductTypes(
+  token: string,
+  filters: PaginationParams & { sub_category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<ProductTaxonomyType[]> {
+  return collectAllPages((page) => listProductTypesPage(token, { ...filters, page }));
+}
+
+export async function listProductTypesPage(
+  token: string,
+  filters: PaginationParams & { sub_category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<ProductTaxonomyType>> {
+  const query = buildQueryString({
+    page: filters.page,
+    per_page: filters.per_page,
+    sub_category_id: filters.sub_category_id,
+    q: filters.q,
+    order_by: filters.order_by,
+    order_dir: filters.order_dir
+  });
+  const envelope = await request<ApiEnvelope<ProductTaxonomyType[]>>(`/api/v1/product_types${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
 }
 
 export async function listProductsPage(

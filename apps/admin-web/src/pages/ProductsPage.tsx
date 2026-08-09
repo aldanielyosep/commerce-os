@@ -9,9 +9,13 @@ import {
   deleteProduct,
   deleteProductImage,
   getProduct,
+  listCategories,
   listCompanies,
+  listProductDepartments,
   listProductImages,
+  listProductTypes,
   listProductsPage,
+  listSubCategories,
   updateProduct,
   updateProductImage,
   uploadProductImage
@@ -19,9 +23,13 @@ import {
 import type {
   Company,
   PaginationMeta,
+  ProductCategory,
+  ProductDepartment,
   Product,
   ProductImage,
   ProductOrderBy,
+  ProductSubCategory,
+  ProductTaxonomyType,
   ProductPayload,
   ProductStatus,
   ProductUpdatePayload,
@@ -159,6 +167,10 @@ export function ProductsPage() {
   const [statusFilter, setStatusFilter] = useState<ProductStatus | "">("");
   const [drawer, setDrawer] = useState<DrawerState>({ mode: "none" });
   const [form, setForm] = useState<ProductFormState>(EMPTY_PRODUCT_FORM);
+  const [productDepartments, setProductDepartments] = useState<ProductDepartment[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [subCategories, setSubCategories] = useState<ProductSubCategory[]>([]);
+  const [productTypes, setProductTypes] = useState<ProductTaxonomyType[]>([]);
 
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [imageRows, setImageRows] = useState<ProductImage[]>([]);
@@ -182,15 +194,112 @@ export function ProductsPage() {
   useEffect(() => {
     if (!token) return;
 
-    listCompanies(token)
-      .then((nextCompanies) => {
+    Promise.all([listCompanies(token), listProductDepartments(token)])
+      .then(([nextCompanies, nextProductDepartments]) => {
         setCompanies(nextCompanies);
-        if (nextCompanies.length > 0) {
-          setForm((current) => ({ ...current, company_id: current.company_id || String(nextCompanies[0].id) }));
-        }
+        setProductDepartments(nextProductDepartments);
+
+        setForm((current) => ({
+          ...current,
+          company_id: current.company_id || String(nextCompanies[0]?.id ?? ""),
+          department_id: current.department_id || String(nextProductDepartments[0]?.id ?? "")
+        }));
       })
-      .catch((err) => setApiError(err, "Unable to load companies."));
+      .catch((err) => setApiError(err, "Unable to load product form references."));
   }, [token]);
+
+  useEffect(() => {
+    if (!token || !form.department_id) {
+      setCategories([]);
+      setSubCategories([]);
+      setProductTypes([]);
+      return;
+    }
+
+    const departmentId = Number(form.department_id);
+    if (Number.isNaN(departmentId)) return;
+
+    listCategories(token, { department_id: departmentId })
+      .then((items) => {
+        setCategories(items);
+
+        setForm((current) => {
+          if (current.department_id !== String(departmentId)) return current;
+
+          if (current.category_id && items.some((item) => String(item.id) === current.category_id)) {
+            return current;
+          }
+
+          return {
+            ...current,
+            category_id: String(items[0]?.id ?? ""),
+            sub_category_id: "",
+            product_type_id: ""
+          };
+        });
+      })
+      .catch((err) => setApiError(err, "Unable to load categories."));
+  }, [token, form.department_id]);
+
+  useEffect(() => {
+    if (!token || !form.category_id) {
+      setSubCategories([]);
+      setProductTypes([]);
+      return;
+    }
+
+    const categoryId = Number(form.category_id);
+    if (Number.isNaN(categoryId)) return;
+
+    listSubCategories(token, { category_id: categoryId })
+      .then((items) => {
+        setSubCategories(items);
+
+        setForm((current) => {
+          if (current.category_id !== String(categoryId)) return current;
+
+          if (current.sub_category_id && items.some((item) => String(item.id) === current.sub_category_id)) {
+            return current;
+          }
+
+          return {
+            ...current,
+            sub_category_id: String(items[0]?.id ?? ""),
+            product_type_id: ""
+          };
+        });
+      })
+      .catch((err) => setApiError(err, "Unable to load sub categories."));
+  }, [token, form.category_id]);
+
+  useEffect(() => {
+    if (!token || !form.sub_category_id) {
+      setProductTypes([]);
+      return;
+    }
+
+    const subCategoryId = Number(form.sub_category_id);
+    if (Number.isNaN(subCategoryId)) return;
+
+    listProductTypes(token, { sub_category_id: subCategoryId })
+      .then((items) => {
+        setProductTypes(items);
+
+        setForm((current) => {
+          if (current.sub_category_id !== String(subCategoryId)) return current;
+
+          if (current.product_type_id && items.some((item) => String(item.id) === current.product_type_id)) {
+            return current;
+          }
+
+          return {
+            ...current,
+            product_type_id: String(items[0]?.id ?? "")
+          };
+        });
+      })
+      .catch((err) => setApiError(err, "Unable to load product types."));
+  }, [token, form.sub_category_id]);
 
   useEffect(() => {
     if (!token) return;
@@ -269,7 +378,14 @@ export function ProductsPage() {
   function openCreate() {
     setError(null);
     setErrorDetails([]);
-    setForm((current) => ({ ...EMPTY_PRODUCT_FORM, company_id: current.company_id || String(companies[0]?.id ?? "") }));
+    setForm((current) => ({
+      ...EMPTY_PRODUCT_FORM,
+      company_id: current.company_id || String(companies[0]?.id ?? ""),
+      department_id: current.department_id || String(productDepartments[0]?.id ?? ""),
+      category_id: String(categories[0]?.id ?? ""),
+      sub_category_id: String(subCategories[0]?.id ?? ""),
+      product_type_id: String(productTypes[0]?.id ?? "")
+    }));
     setDrawer({ mode: "create" });
   }
 
@@ -294,7 +410,14 @@ export function ProductsPage() {
 
   function closeDrawer() {
     setDrawer({ mode: "none" });
-    setForm((current) => ({ ...EMPTY_PRODUCT_FORM, company_id: current.company_id || String(companies[0]?.id ?? "") }));
+    setForm((current) => ({
+      ...EMPTY_PRODUCT_FORM,
+      company_id: current.company_id || String(companies[0]?.id ?? ""),
+      department_id: current.department_id || String(productDepartments[0]?.id ?? ""),
+      category_id: String(categories[0]?.id ?? ""),
+      sub_category_id: String(subCategories[0]?.id ?? ""),
+      product_type_id: String(productTypes[0]?.id ?? "")
+    }));
   }
 
   async function onSubmitProduct(event: FormEvent<HTMLFormElement>) {
@@ -698,43 +821,99 @@ export function ProductsPage() {
               </label>
 
               <label>
-                Department ID
-                <input
+                Product Department
+                <select
                   required
-                  type="number"
                   value={form.department_id}
-                  onChange={(event) => setForm((current) => ({ ...current, department_id: event.target.value }))}
-                />
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      department_id: event.target.value,
+                      category_id: "",
+                      sub_category_id: "",
+                      product_type_id: ""
+                    }))
+                  }
+                >
+                  <option value="" disabled>
+                    Select department
+                  </option>
+                  {productDepartments.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.code} - {item.name}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label>
-                Category ID
-                <input
+                Category
+                <select
                   required
-                  type="number"
                   value={form.category_id}
-                  onChange={(event) => setForm((current) => ({ ...current, category_id: event.target.value }))}
-                />
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      category_id: event.target.value,
+                      sub_category_id: "",
+                      product_type_id: ""
+                    }))
+                  }
+                  disabled={!form.department_id || categories.length === 0}
+                >
+                  <option value="" disabled>
+                    Select category
+                  </option>
+                  {categories.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label>
-                Sub Category ID
-                <input
+                Sub Category
+                <select
                   required
-                  type="number"
                   value={form.sub_category_id}
-                  onChange={(event) => setForm((current) => ({ ...current, sub_category_id: event.target.value }))}
-                />
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      sub_category_id: event.target.value,
+                      product_type_id: ""
+                    }))
+                  }
+                  disabled={!form.category_id || subCategories.length === 0}
+                >
+                  <option value="" disabled>
+                    Select sub category
+                  </option>
+                  {subCategories.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label>
-                Product Type ID
-                <input
+                Product Type
+                <select
                   required
-                  type="number"
                   value={form.product_type_id}
                   onChange={(event) => setForm((current) => ({ ...current, product_type_id: event.target.value }))}
-                />
+                  disabled={!form.sub_category_id || productTypes.length === 0}
+                >
+                  <option value="" disabled>
+                    Select product type
+                  </option>
+                  {productTypes.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label className="span-2">

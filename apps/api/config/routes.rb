@@ -33,7 +33,11 @@ Rails.application.routes.draw do
                   controller: "product_images",
                   only: %i[index create update destroy]
       end
+      resources :product_departments
       resources :departments
+      resources :categories
+      resources :sub_categories
+      resources :product_types
       resources :users do
         member do
           patch :enable

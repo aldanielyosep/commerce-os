@@ -2,7 +2,7 @@ require "stringio"
 
 FactoryBot.define do
   factory :product_image do
-    association :product
+    product
     alt_text { "Product image" }
     is_cover { false }
     sequence(:position) { |n| n }
