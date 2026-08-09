@@ -279,3 +279,70 @@ export type CompanyMarketplaceLinkPayload = {
 };
 
 export type CompanyMarketplaceLinkUpdatePayload = Partial<CompanyMarketplaceLinkPayload>;
+
+export type ProductStatus = "draft" | "active" | "inactive" | "archived";
+
+export type ProductOrderBy = "created_at" | "product_name" | "product_code" | "status";
+
+export type Product = {
+  id: number;
+  company_id: number;
+  product_code: string;
+  slug: string;
+  product_name: string;
+  department_id: number;
+  category_id: number;
+  sub_category_id: number;
+  product_type_id: number;
+  short_description: string;
+  description_richtext: Record<string, unknown>;
+  description_html: string | null;
+  description_text: string | null;
+  status: ProductStatus;
+  images_count: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProductPayload = {
+  company_id: number;
+  product_name: string;
+  department_id: number;
+  category_id: number;
+  sub_category_id: number;
+  product_type_id: number;
+  short_description: string;
+  description_richtext: Record<string, unknown>;
+  status: ProductStatus;
+};
+
+export type ProductUpdatePayload = Partial<Omit<ProductPayload, "company_id">>;
+
+export type ProductListFilters = {
+  q?: string;
+  status?: ProductStatus;
+};
+
+export type ProductImage = {
+  id: number;
+  product_id: number;
+  alt_text: string | null;
+  is_cover: boolean;
+  position: number;
+  image_url: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProductImageUploadPayload = {
+  image: File;
+  alt_text?: string;
+  is_cover?: boolean;
+  position?: number;
+};
+
+export type ProductImageUpdatePayload = {
+  alt_text?: string;
+  is_cover?: boolean;
+  position?: number;
+};

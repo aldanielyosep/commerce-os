@@ -8,9 +8,9 @@
 | Module | Product SPU Foundation |
 | Platform | Admin Web + API |
 | Status | Draft |
-| Version | 1.0 |
+| Version | 1.1 |
 | Owner | Product + Engineering |
-| Date | 2026-07-16 |
+| Date | 2026-08-09 |
 | Depends On | ARCH-000, PRD-110 |
 
 ---
@@ -112,12 +112,14 @@ Transisi dilakukan via service layer agar side effect dapat dikontrol (audit/eve
 ## 7. Acceptance Criteria
 
 - Admin dapat membuat product SPU dengan product code auto-generated.
+- Create payload menyertakan `company_id` dan harus berada dalam scope akses user.
 - Product code tidak dapat diedit saat create maupun update.
 - Product code tetap sama meskipun nama/kategori berubah.
 - Admin dapat upload cover dan gallery dengan validasi extension/size.
 - Sistem menolak image yang tidak sesuai aturan.
 - Product hanya bisa diaktifkan jika syarat minimal terpenuhi (termasuk cover image).
-- Semua endpoint product patuh auth, pagination/search/order untuk list, dan policy-based authorization.
+- Semua endpoint product patuh auth, pagination/search/order untuk list (sorting memakai `order_by` + `order_dir`), dan policy-based authorization.
+- Akses resource product di luar scope company wajib menghasilkan `403 Forbidden`.
 
 ---
 

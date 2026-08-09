@@ -7,9 +7,9 @@
 | RFC | RFC-120 |
 | Module | Product SPU Foundation |
 | Status | Draft |
-| Version | 1.0 |
+| Version | 1.1 |
 | Owner | Engineering Team |
-| Date | 2026-07-16 |
+| Date | 2026-08-09 |
 | Depends On | ARCH-000, PRD-120, PRD-110, RFC-111 |
 
 ---
@@ -89,6 +89,7 @@ RFC ini mendefinisikan implementasi teknis Product pada level SPU sebagai source
 - Pada fase ini, image dimiliki Product (SPU).
 - Satu product memiliki cover image dan gallery.
 - Variant image akan ditambahkan pada RFC Variant.
+- Aktivasi product mensyaratkan minimal satu cover image aktif.
 
 ### 5.2 Validation Baseline
 
@@ -127,6 +128,8 @@ Perubahan state melalui service object, bukan direct event call di controller.
 
 - Semua endpoint wajib auth.
 - Authorization policy-based mengikuti baseline RFC-111 (scoped access per company).
+- Create product membawa `company_id` dan wajib diverifikasi in-scope terhadap assignment user.
+- Akses ke resource existing tetapi out-of-scope wajib `403 Forbidden`.
 - Audit trail untuk create/update/archive/restore.
 
 ---
@@ -134,6 +137,7 @@ Perubahan state melalui service object, bukan direct event call di controller.
 ## 8. API Baseline
 
 - Endpoint list wajib mendukung pagination/search/ordering.
+- Sorting list menggunakan parameter `order_by` dan `order_dir`.
 - Response envelope mengikuti standard API envelope lintas domain.
 - Soft delete untuk archive/restore behavior.
 
