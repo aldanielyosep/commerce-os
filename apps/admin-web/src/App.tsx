@@ -10,6 +10,7 @@ import { CompaniesPage } from "./pages/CompaniesPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { PasswordPage } from "./pages/PasswordPage";
+import { ProductsPage } from "./pages/ProductsPage";
 import { UsersPage } from "./pages/UsersPage";
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
 
           <Route element={<RoleRoute allowed={["super_admin", "admin", "admin_company"]} />}>
             <Route path="/companies" element={<CompaniesPage />} />
+            <Route path="/products" element={<ProductsPage />} />
           </Route>
         </Route>
       </Route>

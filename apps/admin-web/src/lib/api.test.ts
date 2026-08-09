@@ -15,8 +15,11 @@ import {
   deleteEmployee,
   deleteUser,
   deleteUserCompanyAssignment,
+  deleteProduct,
+  deleteProductImage,
   disableUser,
   enableUser,
+  getProduct,
   getCompany,
   getDepartment,
   getDocumentDownloadUrl,
@@ -28,14 +31,22 @@ import {
   listEmployeeDepartments,
   listEmployeeDocuments,
   listEmployeesPage,
+  listCategories,
+  listProductImages,
+  listProducts,
+  listProductsPage,
+  listProductDepartments,
+  listProductTypes,
   listPositionTimeline,
   listSalaryTimeline,
+  listSubCategories,
   listUserCompanyAssignments,
   listUsersPage,
   refreshAccessToken,
   removeEmployeeDepartment,
   requestPasswordReset,
   resetUserPassword,
+  restoreProduct,
   signIn,
   signOut,
   setRefreshSessionHandler,
@@ -46,7 +57,13 @@ import {
   updateCompanyMarketplaceLink,
   updateDepartment,
   updateEmployee,
+  updateProduct,
+  updateProductImage,
   updateUser,
+  activateProduct,
+  createProduct,
+  deactivateProduct,
+  uploadProductImage,
   uploadEmployeeDocument
 } from "./api";
 
@@ -414,6 +431,113 @@ describe("api refresh retry flow", () => {
     await expect(deleteCompanyMarketplaceLink("Bearer t", 9, 33)).resolves.toBeUndefined();
 
     await expect(requestPasswordReset("admin@example.com")).resolves.toBeUndefined();
+  });
+
+  it("covers product taxonomy wrappers", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(okResponse([{ id: 10, code: "BAG", name: "Bags" }], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }))
+      .mockResolvedValueOnce(okResponse([{ id: 21, department_id: 10, product_department_id: 10, name: "Travel Bag" }], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }))
+      .mockResolvedValueOnce(okResponse([{ id: 31, category_id: 21, name: "Backpack" }], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }))
+      .mockResolvedValueOnce(okResponse([{ id: 41, sub_category_id: 31, name: "Laptop Backpack" }], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }));
+
+    await expect(listProductDepartments("Bearer t")).resolves.toEqual([
+      { id: 10, code: "BAG", name: "Bags" }
+    ]);
+
+    await expect(listCategories("Bearer t", { department_id: 10 })).resolves.toEqual([
+      { id: 21, department_id: 10, product_department_id: 10, name: "Travel Bag" }
+    ]);
+
+    await expect(listSubCategories("Bearer t", { category_id: 21 })).resolves.toEqual([
+      { id: 31, category_id: 21, name: "Backpack" }
+    ]);
+
+    await expect(listProductTypes("Bearer t", { sub_category_id: 31 })).resolves.toEqual([
+      { id: 41, sub_category_id: 31, name: "Laptop Backpack" }
+    ]);
+  });
+
+  it("covers product and product image wrappers", async () => {
+    const product = {
+      id: 77,
+      company_id: 9,
+      product_code: "P0000077",
+      slug: "sample-product",
+      product_name: "Sample Product",
+      department_id: 10,
+      category_id: 21,
+      sub_category_id: 31,
+      product_type_id: 41,
+      short_description: "Sample",
+      description_richtext: { type: "doc", content: [] },
+      description_html: null,
+      description_text: "",
+      status: "draft",
+      images_count: 0
+    };
+
+    const image = {
+      id: 991,
+      product_id: 77,
+      alt_text: "main",
+      is_cover: true,
+      position: 1,
+      image_url: "https://img.example.com/1.png"
+    };
+
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(okResponse([product], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }))
+      .mockResolvedValueOnce(okResponse([product], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }))
+      .mockResolvedValueOnce(okResponse(product))
+      .mockResolvedValueOnce(okResponse(product))
+      .mockResolvedValueOnce(okResponse(product))
+      .mockResolvedValueOnce(okResponse({ id: 77, discarded: true }))
+      .mockResolvedValueOnce(okResponse(product))
+      .mockResolvedValueOnce(okResponse(product))
+      .mockResolvedValueOnce(okResponse(product))
+      .mockResolvedValueOnce(okResponse([image]))
+      .mockResolvedValueOnce(okResponse(image))
+      .mockResolvedValueOnce(okResponse(image))
+      .mockResolvedValueOnce(okResponse({ id: 991, discarded: true }));
+
+    const page = await listProductsPage("Bearer t", {
+      q: "sample",
+      status: "draft",
+      page: 1,
+      per_page: 20,
+      order_by: "created_at",
+      order_dir: "desc"
+    });
+    expect(page.items).toHaveLength(1);
+
+    await expect(listProducts("Bearer t", { status: "draft" })).resolves.toHaveLength(1);
+    await expect(getProduct("Bearer t", 77)).resolves.toMatchObject({ id: 77 });
+    await expect(createProduct("Bearer t", {
+      company_id: 9,
+      product_name: "Sample Product",
+      department_id: 10,
+      category_id: 21,
+      sub_category_id: 31,
+      product_type_id: 41,
+      short_description: "Sample",
+      description_richtext: { type: "doc", content: [] },
+      status: "draft"
+    })).resolves.toMatchObject({ id: 77 });
+    await expect(updateProduct("Bearer t", 77, { product_name: "Updated Product" })).resolves.toMatchObject({ id: 77 });
+    await expect(deleteProduct("Bearer t", 77)).resolves.toBeUndefined();
+    await expect(restoreProduct("Bearer t", 77)).resolves.toMatchObject({ id: 77 });
+    await expect(activateProduct("Bearer t", 77)).resolves.toMatchObject({ id: 77 });
+    await expect(deactivateProduct("Bearer t", 77)).resolves.toMatchObject({ id: 77 });
+
+    await expect(listProductImages("Bearer t", 77)).resolves.toHaveLength(1);
+    await expect(uploadProductImage("Bearer t", 77, {
+      image: new File(["abc"], "product.png", { type: "image/png" }),
+      alt_text: "main",
+      is_cover: true,
+      position: 1
+    })).resolves.toMatchObject({ id: 991 });
+    await expect(updateProductImage("Bearer t", 77, 991, { alt_text: "updated" })).resolves.toMatchObject({ id: 991 });
+    await expect(deleteProductImage("Bearer t", 77, 991)).resolves.toBeUndefined();
   });
 
   it("covers document and timeline wrappers", async () => {

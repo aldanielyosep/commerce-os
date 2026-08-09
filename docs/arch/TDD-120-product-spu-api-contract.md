@@ -7,9 +7,9 @@
 | Document | TDD-120 |
 | Title | Product SPU API Contract |
 | Status | Draft |
-| Version | 1.0 |
+| Version | 1.1 |
 | Owner | Engineering Team |
-| Date | 2026-07-16 |
+| Date | 2026-08-09 |
 | Depends On | ARCH-000, PRD-120, RFC-120, RFC-111 |
 
 ---
@@ -77,12 +77,16 @@ List query params:
 - `q` (product_code/product_name)
 - `status`
 - `order_by` (`created_at`, `product_name`, `product_code`, `status`)
-- `order` (`asc`/`desc`)
+- `order_dir` (`asc`/`desc`)
 
 ### 4.2 Product Lifecycle
 
 - `POST /api/v1/products/:id/activate`
 - `POST /api/v1/products/:id/deactivate`
+
+Rules:
+
+- Aktivasi product wajib memiliki minimal satu cover image.
 
 ### 4.3 Product Images
 
@@ -100,6 +104,7 @@ List query params:
 ```json
 {
   "product": {
+    "company_id": 1,
     "product_name": "Goodie Bag Dino",
     "department_id": 10,
     "category_id": 22,
@@ -117,8 +122,10 @@ List query params:
 
 Notes:
 
+- `company_id` wajib dikirim pada create payload dan harus berada dalam scope akses user.
 - `product_code` tidak diterima dari client.
 - `product_code` dihasilkan otomatis di backend saat create.
+- `slug` dihasilkan otomatis di backend saat create/update berdasarkan `product_name`.
 - `description_richtext` dikirim dari admin-web WYSIWYG editor.
 - `description_html` dan `description_text` adalah server-derived fields (read-only dari client).
 
@@ -150,6 +157,67 @@ Multipart form data:
 - `is_cover` (optional boolean)
 - `position` (optional integer)
 
+### 5.4 Product Response Shape (Current Serializer)
+
+Contoh response `GET /api/v1/products/:id`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 101,
+    "company_id": 1,
+    "product_code": "P0000001",
+    "slug": "goodie-bag-dino",
+    "product_name": "Goodie Bag Dino",
+    "department_id": 10,
+    "category_id": 22,
+    "sub_category_id": 37,
+    "product_type_id": 5,
+    "short_description": "Goodie bag premium",
+    "description_richtext": {
+      "type": "doc",
+      "content": []
+    },
+    "description_html": "",
+    "description_text": "",
+    "status": "draft",
+    "images_count": 0,
+    "created_at": "2026-08-09T10:30:45.000Z",
+    "updated_at": "2026-08-09T10:30:45.000Z"
+  },
+  "meta": {}
+}
+```
+
+### 5.5 Product Image Response Shape (Current Serializer)
+
+Contoh response `GET /api/v1/products/:product_id/images`:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 5001,
+      "product_id": 101,
+      "alt_text": "Front view",
+      "is_cover": true,
+      "position": 1,
+      "image_url": "/rails/active_storage/blobs/redirect/xyz/product.png",
+      "created_at": "2026-08-09T10:32:00.000Z",
+      "updated_at": "2026-08-09T10:32:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "per_page": 20,
+    "total_count": 1,
+    "total_pages": 1
+  }
+}
+```
+
 ---
 
 ## 6. Validation Rules
@@ -157,6 +225,7 @@ Multipart form data:
 ### 6.1 Product
 
 - `product_name` wajib.
+- `company_id` wajib dan harus in-scope policy user.
 - `product_code` unik per company.
 - `product_code` immutable setelah create.
 - `status` harus enum valid (`draft`, `active`, `inactive`, `archived`).
@@ -235,7 +304,7 @@ Invalid rich text payload:
 
 - `401 Unauthorized`: token tidak valid/tidak ada.
 - `403 Forbidden`: tidak punya scope akses.
-- `404 Not Found`: resource tidak ditemukan atau di luar scope.
+- `404 Not Found`: resource tidak ditemukan.
 - `422 Unprocessable Entity`: validasi payload gagal.
 
 ---

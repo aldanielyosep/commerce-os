@@ -26,6 +26,18 @@ import type {
   PaginationParams,
   CompanyOrderBy,
   PositionHistory,
+  Product,
+  ProductCategory,
+  ProductDepartment,
+  ProductImage,
+  ProductImageUpdatePayload,
+  ProductImageUploadPayload,
+  ProductListFilters,
+  ProductOrderBy,
+  ProductSubCategory,
+  ProductTaxonomyType,
+  ProductPayload,
+  ProductUpdatePayload,
   SalaryRecord,
   SortDirection,
   UserOrderBy,
@@ -275,6 +287,213 @@ export async function listEmployeesPage(
 export async function getEmployee(token: string, employeeId: number): Promise<Employee> {
   const envelope = await request<ApiEnvelope<Employee>>(`/api/v1/employees/${employeeId}`, { token });
   return envelope.data;
+}
+
+export async function listProducts(token: string, filters: ProductListFilters = {}): Promise<Product[]> {
+  return collectAllPages((page) => listProductsPage(token, { ...filters, page }));
+}
+
+export async function listProductDepartments(token: string): Promise<ProductDepartment[]> {
+  return collectAllPages((page) => listProductDepartmentsPage(token, { page }));
+}
+
+export async function listProductDepartmentsPage(
+  token: string,
+  pagination: PaginationParams & { q?: string; order_by?: "code" | "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<ProductDepartment>> {
+  const query = buildQueryString({
+    page: pagination.page,
+    per_page: pagination.per_page,
+    q: pagination.q,
+    order_by: pagination.order_by,
+    order_dir: pagination.order_dir
+  });
+  const envelope = await request<ApiEnvelope<ProductDepartment[]>>(`/api/v1/product_departments${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
+}
+
+export async function listCategories(
+  token: string,
+  filters: PaginationParams & { department_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<ProductCategory[]> {
+  return collectAllPages((page) => listCategoriesPage(token, { ...filters, page }));
+}
+
+export async function listCategoriesPage(
+  token: string,
+  filters: PaginationParams & { department_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<ProductCategory>> {
+  const query = buildQueryString({
+    page: filters.page,
+    per_page: filters.per_page,
+    department_id: filters.department_id,
+    q: filters.q,
+    order_by: filters.order_by,
+    order_dir: filters.order_dir
+  });
+  const envelope = await request<ApiEnvelope<ProductCategory[]>>(`/api/v1/categories${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
+}
+
+export async function listSubCategories(
+  token: string,
+  filters: PaginationParams & { category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<ProductSubCategory[]> {
+  return collectAllPages((page) => listSubCategoriesPage(token, { ...filters, page }));
+}
+
+export async function listSubCategoriesPage(
+  token: string,
+  filters: PaginationParams & { category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<ProductSubCategory>> {
+  const query = buildQueryString({
+    page: filters.page,
+    per_page: filters.per_page,
+    category_id: filters.category_id,
+    q: filters.q,
+    order_by: filters.order_by,
+    order_dir: filters.order_dir
+  });
+  const envelope = await request<ApiEnvelope<ProductSubCategory[]>>(`/api/v1/sub_categories${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
+}
+
+export async function listProductTypes(
+  token: string,
+  filters: PaginationParams & { sub_category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<ProductTaxonomyType[]> {
+  return collectAllPages((page) => listProductTypesPage(token, { ...filters, page }));
+}
+
+export async function listProductTypesPage(
+  token: string,
+  filters: PaginationParams & { sub_category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<ProductTaxonomyType>> {
+  const query = buildQueryString({
+    page: filters.page,
+    per_page: filters.per_page,
+    sub_category_id: filters.sub_category_id,
+    q: filters.q,
+    order_by: filters.order_by,
+    order_dir: filters.order_dir
+  });
+  const envelope = await request<ApiEnvelope<ProductTaxonomyType[]>>(`/api/v1/product_types${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
+}
+
+export async function listProductsPage(
+  token: string,
+  filters: ProductListFilters & PaginationParams & { order_by?: ProductOrderBy; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<Product>> {
+  const query = buildQueryString({
+    q: filters.q,
+    status: filters.status,
+    page: filters.page,
+    per_page: filters.per_page,
+    order_by: filters.order_by,
+    order_dir: filters.order_dir
+  });
+  const envelope = await request<ApiEnvelope<Product[]>>(`/api/v1/products${query}`, { token });
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
+}
+
+export async function getProduct(token: string, productId: number): Promise<Product> {
+  const envelope = await request<ApiEnvelope<Product>>(`/api/v1/products/${productId}`, { token });
+  return envelope.data;
+}
+
+export async function createProduct(token: string, payload: ProductPayload): Promise<Product> {
+  const envelope = await request<ApiEnvelope<Product>>("/api/v1/products", {
+    method: "POST",
+    token,
+    body: { product: payload }
+  });
+  return envelope.data;
+}
+
+export async function updateProduct(token: string, productId: number, payload: ProductUpdatePayload): Promise<Product> {
+  const envelope = await request<ApiEnvelope<Product>>(`/api/v1/products/${productId}`, {
+    method: "PATCH",
+    token,
+    body: { product: payload }
+  });
+  return envelope.data;
+}
+
+export async function deleteProduct(token: string, productId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(`/api/v1/products/${productId}`, {
+    method: "DELETE",
+    token
+  });
+}
+
+export async function restoreProduct(token: string, productId: number): Promise<Product> {
+  const envelope = await request<ApiEnvelope<Product>>(`/api/v1/products/${productId}/restore`, {
+    method: "POST",
+    token
+  });
+  return envelope.data;
+}
+
+export async function activateProduct(token: string, productId: number): Promise<Product> {
+  const envelope = await request<ApiEnvelope<Product>>(`/api/v1/products/${productId}/activate`, {
+    method: "POST",
+    token
+  });
+  return envelope.data;
+}
+
+export async function deactivateProduct(token: string, productId: number): Promise<Product> {
+  const envelope = await request<ApiEnvelope<Product>>(`/api/v1/products/${productId}/deactivate`, {
+    method: "POST",
+    token
+  });
+  return envelope.data;
+}
+
+export async function listProductImages(token: string, productId: number): Promise<ProductImage[]> {
+  const envelope = await request<ApiEnvelope<ProductImage[]>>(`/api/v1/products/${productId}/images`, { token });
+  return envelope.data;
+}
+
+export async function uploadProductImage(
+  token: string,
+  productId: number,
+  payload: ProductImageUploadPayload
+): Promise<ProductImage> {
+  const form = new FormData();
+  form.append("image", payload.image);
+  if (payload.alt_text) form.append("alt_text", payload.alt_text);
+  if (payload.is_cover !== undefined) form.append("is_cover", payload.is_cover ? "true" : "false");
+  if (payload.position !== undefined) form.append("position", String(payload.position));
+
+  const envelope = await request<ApiEnvelope<ProductImage>>(`/api/v1/products/${productId}/images`, {
+    method: "POST",
+    token,
+    body: form
+  });
+  return envelope.data;
+}
+
+export async function updateProductImage(
+  token: string,
+  productId: number,
+  imageId: number,
+  payload: ProductImageUpdatePayload
+): Promise<ProductImage> {
+  const envelope = await request<ApiEnvelope<ProductImage>>(`/api/v1/products/${productId}/images/${imageId}`, {
+    method: "PATCH",
+    token,
+    body: { product_image: payload }
+  });
+  return envelope.data;
+}
+
+export async function deleteProductImage(token: string, productId: number, imageId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(`/api/v1/products/${productId}/images/${imageId}`, {
+    method: "DELETE",
+    token
+  });
 }
 
 export async function createEmployee(token: string, payload: EmployeePayload): Promise<Employee> {
