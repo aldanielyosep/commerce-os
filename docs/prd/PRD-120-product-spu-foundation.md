@@ -123,7 +123,44 @@ Transisi dilakukan via service layer agar side effect dapat dikontrol (audit/eve
 
 ---
 
-## 8. Future Compatibility
+## 8. Product Hierarchy Sample Data (Reference)
+
+Contoh berikut dipakai sebagai referensi minimum setup master hierarchy sebelum tim operasional membuat Product SPU.
+
+| Department Code | Department Name | Category | Sub Category | Product Type |
+|------|-------|-------|-------|-------|
+| BAG | Bags | Travel | Backpack | Laptop Backpack |
+| BAG | Bags | Travel | Backpack | Hiking Backpack |
+| BAG | Bags | Travel | Duffel | Gym Duffel |
+| BAG | Bags | Packaging | Paper Bag | Kraft Paper Bag |
+| BAG | Bags | Packaging | Paper Bag | Luxury Gift Paper Bag |
+
+### 8.1 Real Store Sample (Bungkusand Snapshot)
+
+Contoh ini diambil dari observasi listing toko Bungkusand pada screenshot storefront agar tim operasional punya referensi naming yang lebih real.
+
+| Department Code | Department Name | Category | Sub Category | Product Type | Product Name Example |
+|------|-------|-------|-------|-------|-------|
+| BAG | Bags | Packaging | Paper Bag | White Handle Paper Bag | PAPER BAG PUTIH LIST HITAM MODEL |
+| BAG | Bags | Packaging | Drawstring Plastic Bag | Shopping Drawstring Plastic Bag | KANTONG PLASTIK SERUT SHOPPING BAG |
+| BAG | Bags | Packaging | OPP Cookie Plastic | Cookie Wrap 7x7x3 cm | PLASTIK COOKIES 7x7x3CM |
+| BAG | Bags | Packaging | Drawstring Plastic Bag | Goodie Bag Drawstring Plastic Bag | PLASTIK SERUT GOODIE BAG ULANG TAHUN |
+| BAG | Bags | Packaging | Cupcake Box | Single Cupcake Box Window | BOX CUPCAKE SATUAN POLOS |
+| BAG | Bags | Packaging | OPP Bread Plastic | OPP Bread Bag 15x18 cm | PLASTIK OPP ROTI 15X18CM |
+| BAG | Bags | Packaging | Paper Box Souvenir | Dino Souvenir Paper Box | PAPER BOX BENTUK DINOSAURUS |
+| BAG | Bags | Packaging | Candy Box | Birthday Candy Box | KOTAK PERMEN ULANG TAHUN |
+| BAG | Bags | Packaging | Standing Pouch | Dry Food Standing Pouch | STANDING POUCH MAKANAN KERING |
+| BAG | Bags | Packaging | Character Plastic Bag | Rabbit Bunny Plastic Bag | PLASTIK RABBIT BUNNY |
+
+Catatan penggunaan:
+
+- Product Type dipilih setelah Department, Category, dan Sub Category ditentukan.
+- Contoh ini adalah baseline referensi. Tim dapat menambah node baru tanpa mengubah aturan hierarchy.
+- Khusus tabel real store sample, nama dapat dipakai sebagai referensi awal lalu dinormalisasi sesuai standar master data internal.
+
+---
+
+## 9. Future Compatibility
 
 - Struktur SPU harus kompatibel untuk penambahan Variant aggregate.
 - Integrasi Open API marketplace nanti memerlukan mapping key `item_id` dan `model_id` di level variant.
