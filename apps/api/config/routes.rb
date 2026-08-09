@@ -22,6 +22,17 @@ Rails.application.routes.draw do
                   controller: "company_marketplace_links",
                   only: %i[index create update destroy]
       end
+      resources :products do
+        member do
+          post :restore
+          post :activate
+          post :deactivate
+        end
+
+        resources :images,
+                  controller: "product_images",
+                  only: %i[index create update destroy]
+      end
       resources :departments
       resources :users do
         member do
