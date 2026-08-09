@@ -33,6 +33,7 @@ gem "phony_rails"
 gem "roo"
 gem "dotenv-rails"
 gem "rswag"
+gem "ruby-vips", "~> 2.0"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
