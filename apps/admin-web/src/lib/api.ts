@@ -28,14 +28,26 @@ import type {
   PositionHistory,
   Product,
   ProductCategory,
+  ProductCategoryOrderBy,
+  ProductCategoryPayload,
+  ProductCategoryUpdatePayload,
   ProductDepartment,
+  ProductDepartmentOrderBy,
+  ProductDepartmentPayload,
+  ProductDepartmentUpdatePayload,
   ProductImage,
   ProductImageUpdatePayload,
   ProductImageUploadPayload,
   ProductListFilters,
   ProductOrderBy,
   ProductSubCategory,
+  ProductSubCategoryOrderBy,
+  ProductSubCategoryPayload,
+  ProductSubCategoryUpdatePayload,
   ProductTaxonomyType,
+  ProductTaxonomyTypeOrderBy,
+  ProductTaxonomyTypePayload,
+  ProductTaxonomyTypeUpdatePayload,
   ProductPayload,
   ProductUpdatePayload,
   SalaryRecord,
@@ -299,7 +311,7 @@ export async function listProductDepartments(token: string): Promise<ProductDepa
 
 export async function listProductDepartmentsPage(
   token: string,
-  pagination: PaginationParams & { q?: string; order_by?: "code" | "name" | "created_at"; order_dir?: SortDirection } = {}
+  pagination: PaginationParams & { q?: string; order_by?: ProductDepartmentOrderBy; order_dir?: SortDirection } = {}
 ): Promise<PaginatedResult<ProductDepartment>> {
   const query = buildQueryString({
     page: pagination.page,
@@ -314,14 +326,14 @@ export async function listProductDepartmentsPage(
 
 export async function listCategories(
   token: string,
-  filters: PaginationParams & { department_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+  filters: PaginationParams & { department_id?: number; q?: string; order_by?: ProductCategoryOrderBy; order_dir?: SortDirection } = {}
 ): Promise<ProductCategory[]> {
   return collectAllPages((page) => listCategoriesPage(token, { ...filters, page }));
 }
 
 export async function listCategoriesPage(
   token: string,
-  filters: PaginationParams & { department_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+  filters: PaginationParams & { department_id?: number; q?: string; order_by?: ProductCategoryOrderBy; order_dir?: SortDirection } = {}
 ): Promise<PaginatedResult<ProductCategory>> {
   const query = buildQueryString({
     page: filters.page,
@@ -337,14 +349,14 @@ export async function listCategoriesPage(
 
 export async function listSubCategories(
   token: string,
-  filters: PaginationParams & { category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+  filters: PaginationParams & { category_id?: number; q?: string; order_by?: ProductSubCategoryOrderBy; order_dir?: SortDirection } = {}
 ): Promise<ProductSubCategory[]> {
   return collectAllPages((page) => listSubCategoriesPage(token, { ...filters, page }));
 }
 
 export async function listSubCategoriesPage(
   token: string,
-  filters: PaginationParams & { category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+  filters: PaginationParams & { category_id?: number; q?: string; order_by?: ProductSubCategoryOrderBy; order_dir?: SortDirection } = {}
 ): Promise<PaginatedResult<ProductSubCategory>> {
   const query = buildQueryString({
     page: filters.page,
@@ -360,14 +372,14 @@ export async function listSubCategoriesPage(
 
 export async function listProductTypes(
   token: string,
-  filters: PaginationParams & { sub_category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+  filters: PaginationParams & { sub_category_id?: number; q?: string; order_by?: ProductTaxonomyTypeOrderBy; order_dir?: SortDirection } = {}
 ): Promise<ProductTaxonomyType[]> {
   return collectAllPages((page) => listProductTypesPage(token, { ...filters, page }));
 }
 
 export async function listProductTypesPage(
   token: string,
-  filters: PaginationParams & { sub_category_id?: number; q?: string; order_by?: "name" | "created_at"; order_dir?: SortDirection } = {}
+  filters: PaginationParams & { sub_category_id?: number; q?: string; order_by?: ProductTaxonomyTypeOrderBy; order_dir?: SortDirection } = {}
 ): Promise<PaginatedResult<ProductTaxonomyType>> {
   const query = buildQueryString({
     page: filters.page,
@@ -379,6 +391,153 @@ export async function listProductTypesPage(
   });
   const envelope = await request<ApiEnvelope<ProductTaxonomyType[]>>(`/api/v1/product_types${query}`, { token });
   return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
+}
+
+export async function getProductDepartment(token: string, productDepartmentId: number): Promise<ProductDepartment> {
+  const envelope = await request<ApiEnvelope<ProductDepartment>>(`/api/v1/product_departments/${productDepartmentId}`, {
+    token
+  });
+  return envelope.data;
+}
+
+export async function createProductDepartment(
+  token: string,
+  payload: ProductDepartmentPayload
+): Promise<ProductDepartment> {
+  const envelope = await request<ApiEnvelope<ProductDepartment>>("/api/v1/product_departments", {
+    method: "POST",
+    token,
+    body: { product_department: payload }
+  });
+  return envelope.data;
+}
+
+export async function updateProductDepartment(
+  token: string,
+  productDepartmentId: number,
+  payload: ProductDepartmentUpdatePayload
+): Promise<ProductDepartment> {
+  const envelope = await request<ApiEnvelope<ProductDepartment>>(`/api/v1/product_departments/${productDepartmentId}`, {
+    method: "PATCH",
+    token,
+    body: { product_department: payload }
+  });
+  return envelope.data;
+}
+
+export async function deleteProductDepartment(token: string, productDepartmentId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(`/api/v1/product_departments/${productDepartmentId}`, {
+    method: "DELETE",
+    token
+  });
+}
+
+export async function getCategory(token: string, categoryId: number): Promise<ProductCategory> {
+  const envelope = await request<ApiEnvelope<ProductCategory>>(`/api/v1/categories/${categoryId}`, { token });
+  return envelope.data;
+}
+
+export async function createCategory(token: string, payload: ProductCategoryPayload): Promise<ProductCategory> {
+  const envelope = await request<ApiEnvelope<ProductCategory>>("/api/v1/categories", {
+    method: "POST",
+    token,
+    body: { category: payload }
+  });
+  return envelope.data;
+}
+
+export async function updateCategory(
+  token: string,
+  categoryId: number,
+  payload: ProductCategoryUpdatePayload
+): Promise<ProductCategory> {
+  const envelope = await request<ApiEnvelope<ProductCategory>>(`/api/v1/categories/${categoryId}`, {
+    method: "PATCH",
+    token,
+    body: { category: payload }
+  });
+  return envelope.data;
+}
+
+export async function deleteCategory(token: string, categoryId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(`/api/v1/categories/${categoryId}`, {
+    method: "DELETE",
+    token
+  });
+}
+
+export async function getSubCategory(token: string, subCategoryId: number): Promise<ProductSubCategory> {
+  const envelope = await request<ApiEnvelope<ProductSubCategory>>(`/api/v1/sub_categories/${subCategoryId}`, { token });
+  return envelope.data;
+}
+
+export async function createSubCategory(
+  token: string,
+  payload: ProductSubCategoryPayload
+): Promise<ProductSubCategory> {
+  const envelope = await request<ApiEnvelope<ProductSubCategory>>("/api/v1/sub_categories", {
+    method: "POST",
+    token,
+    body: { sub_category: payload }
+  });
+  return envelope.data;
+}
+
+export async function updateSubCategory(
+  token: string,
+  subCategoryId: number,
+  payload: ProductSubCategoryUpdatePayload
+): Promise<ProductSubCategory> {
+  const envelope = await request<ApiEnvelope<ProductSubCategory>>(`/api/v1/sub_categories/${subCategoryId}`, {
+    method: "PATCH",
+    token,
+    body: { sub_category: payload }
+  });
+  return envelope.data;
+}
+
+export async function deleteSubCategory(token: string, subCategoryId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(`/api/v1/sub_categories/${subCategoryId}`, {
+    method: "DELETE",
+    token
+  });
+}
+
+export async function getProductType(token: string, productTypeId: number): Promise<ProductTaxonomyType> {
+  const envelope = await request<ApiEnvelope<ProductTaxonomyType>>(`/api/v1/product_types/${productTypeId}`, { token });
+  return envelope.data;
+}
+
+export async function createProductType(
+  token: string,
+  payload: ProductTaxonomyTypePayload
+): Promise<ProductTaxonomyType> {
+  const envelope = await request<ApiEnvelope<ProductTaxonomyType>>("/api/v1/product_types", {
+    method: "POST",
+    token,
+    body: { product_type: payload }
+  });
+  return envelope.data;
+}
+
+export async function updateProductType(
+  token: string,
+  productTypeId: number,
+  payload: ProductTaxonomyTypeUpdatePayload
+): Promise<ProductTaxonomyType> {
+  const envelope = await request<ApiEnvelope<ProductTaxonomyType>>(`/api/v1/product_types/${productTypeId}`, {
+    method: "PATCH",
+    token,
+    body: { product_type: payload }
+  });
+  return envelope.data;
+}
+
+export async function deleteProductType(token: string, productTypeId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(`/api/v1/product_types/${productTypeId}`, {
+    method: "DELETE",
+    token
+  });
 }
 
 export async function listProductsPage(
