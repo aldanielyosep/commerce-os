@@ -326,6 +326,15 @@ export type ProductDepartment = {
   updated_at?: string;
 };
 
+export type ProductDepartmentOrderBy = "code" | "name" | "created_at";
+
+export type ProductDepartmentPayload = {
+  code: string;
+  name: string;
+};
+
+export type ProductDepartmentUpdatePayload = Partial<ProductDepartmentPayload>;
+
 export type ProductCategory = {
   id: number;
   department_id: number;
@@ -335,6 +344,15 @@ export type ProductCategory = {
   updated_at?: string;
 };
 
+export type ProductCategoryOrderBy = "name" | "created_at";
+
+export type ProductCategoryPayload = {
+  department_id: number;
+  name: string;
+};
+
+export type ProductCategoryUpdatePayload = Partial<ProductCategoryPayload>;
+
 export type ProductSubCategory = {
   id: number;
   category_id: number;
@@ -343,6 +361,15 @@ export type ProductSubCategory = {
   updated_at?: string;
 };
 
+export type ProductSubCategoryOrderBy = "name" | "created_at";
+
+export type ProductSubCategoryPayload = {
+  category_id: number;
+  name: string;
+};
+
+export type ProductSubCategoryUpdatePayload = Partial<ProductSubCategoryPayload>;
+
 export type ProductTaxonomyType = {
   id: number;
   sub_category_id: number;
@@ -350,6 +377,15 @@ export type ProductTaxonomyType = {
   created_at?: string;
   updated_at?: string;
 };
+
+export type ProductTaxonomyTypeOrderBy = "name" | "created_at";
+
+export type ProductTaxonomyTypePayload = {
+  sub_category_id: number;
+  name: string;
+};
+
+export type ProductTaxonomyTypeUpdatePayload = Partial<ProductTaxonomyTypePayload>;
 
 export type ProductListFilters = {
   q?: string;

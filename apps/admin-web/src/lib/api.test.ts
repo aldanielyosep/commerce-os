@@ -1,4 +1,8 @@
 import {
+  createCategory,
+  createProductDepartment,
+  createProductType,
+  createSubCategory,
   archiveDocument,
   assignEmployeeDepartment,
   ApiError,
@@ -13,6 +17,10 @@ import {
   deleteCompanyMarketplaceLink,
   deleteDepartment,
   deleteEmployee,
+  deleteCategory,
+  deleteProductDepartment,
+  deleteProductType,
+  deleteSubCategory,
   deleteUser,
   deleteUserCompanyAssignment,
   deleteProduct,
@@ -21,10 +29,14 @@ import {
   enableUser,
   getProduct,
   getCompany,
+  getCategory,
   getDepartment,
   getDocumentDownloadUrl,
   getEmployee,
+  getProductDepartment,
   getUser,
+  getProductType,
+  getSubCategory,
   listCompaniesPage,
   listCompanyMarketplaceLinks,
   listDepartmentsPage,
@@ -54,9 +66,13 @@ import {
   UNAUTHORIZED_EVENT
   ,
   updateCompany,
+  updateCategory,
   updateCompanyMarketplaceLink,
   updateDepartment,
   updateEmployee,
+  updateProductDepartment,
+  updateProductType,
+  updateSubCategory,
   updateProduct,
   updateProductImage,
   updateUser,
@@ -438,7 +454,23 @@ describe("api refresh retry flow", () => {
       .mockResolvedValueOnce(okResponse([{ id: 10, code: "BAG", name: "Bags" }], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }))
       .mockResolvedValueOnce(okResponse([{ id: 21, department_id: 10, product_department_id: 10, name: "Travel Bag" }], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }))
       .mockResolvedValueOnce(okResponse([{ id: 31, category_id: 21, name: "Backpack" }], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }))
-      .mockResolvedValueOnce(okResponse([{ id: 41, sub_category_id: 31, name: "Laptop Backpack" }], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }));
+      .mockResolvedValueOnce(okResponse([{ id: 41, sub_category_id: 31, name: "Laptop Backpack" }], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }))
+      .mockResolvedValueOnce(okResponse({ id: 10, code: "BAG", name: "Bags" }))
+      .mockResolvedValueOnce(okResponse({ id: 11, code: "ACC", name: "Accessories" }))
+      .mockResolvedValueOnce(okResponse({ id: 11, code: "AC2", name: "Accessories 2" }))
+      .mockResolvedValueOnce(okResponse({ id: 11, discarded: true }))
+      .mockResolvedValueOnce(okResponse({ id: 21, department_id: 10, product_department_id: 10, name: "Travel Bag" }))
+      .mockResolvedValueOnce(okResponse({ id: 22, department_id: 10, product_department_id: 10, name: "Duffel" }))
+      .mockResolvedValueOnce(okResponse({ id: 22, department_id: 10, product_department_id: 10, name: "Duffel Updated" }))
+      .mockResolvedValueOnce(okResponse({ id: 22, discarded: true }))
+      .mockResolvedValueOnce(okResponse({ id: 31, category_id: 21, name: "Backpack" }))
+      .mockResolvedValueOnce(okResponse({ id: 32, category_id: 21, name: "Sling" }))
+      .mockResolvedValueOnce(okResponse({ id: 32, category_id: 21, name: "Sling Updated" }))
+      .mockResolvedValueOnce(okResponse({ id: 32, discarded: true }))
+      .mockResolvedValueOnce(okResponse({ id: 41, sub_category_id: 31, name: "Laptop Backpack" }))
+      .mockResolvedValueOnce(okResponse({ id: 42, sub_category_id: 31, name: "Travel Backpack" }))
+      .mockResolvedValueOnce(okResponse({ id: 42, sub_category_id: 31, name: "Travel Backpack Updated" }))
+      .mockResolvedValueOnce(okResponse({ id: 42, discarded: true }));
 
     await expect(listProductDepartments("Bearer t")).resolves.toEqual([
       { id: 10, code: "BAG", name: "Bags" }
@@ -455,6 +487,26 @@ describe("api refresh retry flow", () => {
     await expect(listProductTypes("Bearer t", { sub_category_id: 31 })).resolves.toEqual([
       { id: 41, sub_category_id: 31, name: "Laptop Backpack" }
     ]);
+
+    await expect(getProductDepartment("Bearer t", 10)).resolves.toMatchObject({ id: 10 });
+    await expect(createProductDepartment("Bearer t", { code: "ACC", name: "Accessories" })).resolves.toMatchObject({ id: 11 });
+    await expect(updateProductDepartment("Bearer t", 11, { code: "AC2" })).resolves.toMatchObject({ id: 11 });
+    await expect(deleteProductDepartment("Bearer t", 11)).resolves.toBeUndefined();
+
+    await expect(getCategory("Bearer t", 21)).resolves.toMatchObject({ id: 21 });
+    await expect(createCategory("Bearer t", { department_id: 10, name: "Duffel" })).resolves.toMatchObject({ id: 22 });
+    await expect(updateCategory("Bearer t", 22, { name: "Duffel Updated" })).resolves.toMatchObject({ id: 22 });
+    await expect(deleteCategory("Bearer t", 22)).resolves.toBeUndefined();
+
+    await expect(getSubCategory("Bearer t", 31)).resolves.toMatchObject({ id: 31 });
+    await expect(createSubCategory("Bearer t", { category_id: 21, name: "Sling" })).resolves.toMatchObject({ id: 32 });
+    await expect(updateSubCategory("Bearer t", 32, { name: "Sling Updated" })).resolves.toMatchObject({ id: 32 });
+    await expect(deleteSubCategory("Bearer t", 32)).resolves.toBeUndefined();
+
+    await expect(getProductType("Bearer t", 41)).resolves.toMatchObject({ id: 41 });
+    await expect(createProductType("Bearer t", { sub_category_id: 31, name: "Travel Backpack" })).resolves.toMatchObject({ id: 42 });
+    await expect(updateProductType("Bearer t", 42, { name: "Travel Backpack Updated" })).resolves.toMatchObject({ id: 42 });
+    await expect(deleteProductType("Bearer t", 42)).resolves.toBeUndefined();
   });
 
   it("covers product and product image wrappers", async () => {

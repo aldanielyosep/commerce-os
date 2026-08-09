@@ -10,6 +10,10 @@ import { CompaniesPage } from "./pages/CompaniesPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { PasswordPage } from "./pages/PasswordPage";
+import { ProductCategoriesPage } from "./pages/ProductCategoriesPage";
+import { ProductDepartmentsPage } from "./pages/ProductDepartmentsPage";
+import { ProductSubCategoriesPage } from "./pages/ProductSubCategoriesPage";
+import { ProductTypesPage } from "./pages/ProductTypesPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { UsersPage } from "./pages/UsersPage";
 
@@ -38,6 +42,10 @@ export default function App() {
           <Route element={<RoleRoute allowed={["super_admin", "admin", "admin_company"]} />}>
             <Route path="/companies" element={<CompaniesPage />} />
             <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/departments" element={<ProductDepartmentsPage />} />
+            <Route path="/products/categories" element={<ProductCategoriesPage />} />
+            <Route path="/products/sub-categories" element={<ProductSubCategoriesPage />} />
+            <Route path="/products/types" element={<ProductTypesPage />} />
           </Route>
         </Route>
       </Route>
