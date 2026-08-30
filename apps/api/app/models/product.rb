@@ -15,6 +15,7 @@ class Product < ApplicationRecord
   belongs_to :sub_category
   belongs_to :product_type
   has_many :product_images, dependent: :destroy
+  has_many :product_variants, dependent: :destroy
 
   before_validation :assign_product_code, on: :create
   before_validation :assign_slug
