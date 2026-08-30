@@ -1,6 +1,6 @@
 require "swagger_helper"
 
-# rubocop:disable RSpec/MultipleMemoizedHelpers
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers
 RSpec.describe "Product Types" do
   path "/api/v1/product_types" do
     get "List product types" do
@@ -22,9 +22,8 @@ RSpec.describe "Product Types" do
         let!(:product_type_a) { create(:product_type, sub_category: sub_category_a, name: "Type Alpha") }
         let!(:product_type_b) { create(:product_type, sub_category: sub_category_b, name: "Type Beta") }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -45,9 +44,8 @@ RSpec.describe "Product Types" do
         let(:order_by) { "unknown" }
         let(:order_dir) { "desc" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -67,9 +65,8 @@ RSpec.describe "Product Types" do
           create(:product_type, sub_category: sub_category, name: "Ops Blocked")
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test!
       end
@@ -108,9 +105,8 @@ RSpec.describe "Product Types" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -135,9 +131,8 @@ RSpec.describe "Product Types" do
         let!(:record) { create(:product_type, name: "Visible Type") }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -181,9 +176,8 @@ RSpec.describe "Product Types" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -203,9 +197,8 @@ RSpec.describe "Product Types" do
         let!(:record) { create(:product_type) }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -216,4 +209,3 @@ RSpec.describe "Product Types" do
     end
   end
 end
-# rubocop:enable RSpec/MultipleMemoizedHelpers

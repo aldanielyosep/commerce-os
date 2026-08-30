@@ -1,6 +1,5 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
 require "swagger_helper"
-
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
 RSpec.describe "Company Marketplace Links" do
   path "/api/v1/companies/{company_id}/marketplace_links" do
     parameter name: :company_id, in: :path, type: :string
@@ -21,9 +20,8 @@ RSpec.describe "Company Marketplace Links" do
         let!(:link_one) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
         let!(:link_two) { create(:company_marketplace_link, company: company, marketplace: :tokopedia) }
         let(:company_id) { company.id }
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -36,9 +34,8 @@ RSpec.describe "Company Marketplace Links" do
         let!(:company) { create(:company, :pt) }
         let!(:link_one) { create(:company_marketplace_link, company: company, marketplace: :shopee) }
         let(:company_id) { company.id }
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -62,9 +59,8 @@ RSpec.describe "Company Marketplace Links" do
         let(:order_by) { "store_name" }
         let(:order_dir) { "desc" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           names = JSON.parse(response.body)["data"].pluck("store_name")
@@ -111,9 +107,8 @@ RSpec.describe "Company Marketplace Links" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -137,9 +132,8 @@ RSpec.describe "Company Marketplace Links" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -163,9 +157,8 @@ RSpec.describe "Company Marketplace Links" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -189,9 +182,8 @@ RSpec.describe "Company Marketplace Links" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -242,9 +234,8 @@ RSpec.describe "Company Marketplace Links" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -267,9 +258,8 @@ RSpec.describe "Company Marketplace Links" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -291,9 +281,8 @@ RSpec.describe "Company Marketplace Links" do
         let(:company_id) { company.id }
         let(:id) { marketplace_link.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -308,9 +297,8 @@ RSpec.describe "Company Marketplace Links" do
         let(:company_id) { company.id }
         let(:id) { marketplace_link.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -321,5 +309,3 @@ RSpec.describe "Company Marketplace Links" do
     end
   end
 end
-
-# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup

@@ -1,6 +1,6 @@
 require "swagger_helper"
 
-# rubocop:disable RSpec/MultipleMemoizedHelpers
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers
 RSpec.describe "Authentication" do
   path "/api/v1/users/sign_in" do
     post "Sign in user" do
@@ -131,12 +131,11 @@ RSpec.describe "Authentication" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:refresh_token) { RefreshToken.issue_for(user) }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) do
           token, = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil)
           "Bearer #{token}"
         end
-        # rubocop:enable RSpec/VariableName
 
         run_test! do
           expect(RefreshToken.active.find_active_by_token(refresh_token.last)).to be_nil
@@ -145,4 +144,3 @@ RSpec.describe "Authentication" do
     end
   end
 end
-# rubocop:enable RSpec/MultipleMemoizedHelpers

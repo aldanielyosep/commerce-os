@@ -1,6 +1,6 @@
 require "swagger_helper"
 
-# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
 RSpec.describe "Products" do
   let(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
   let(:company) { create(:company) }
@@ -34,9 +34,8 @@ RSpec.describe "Products" do
         let(:q) { "Alpha" }
         let(:status) { "draft" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -47,9 +46,8 @@ RSpec.describe "Products" do
       end
 
       response "401", "unauthorized" do
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { nil }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           expect(response).to have_http_status(:unauthorized)
@@ -107,9 +105,8 @@ RSpec.describe "Products" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -140,9 +137,8 @@ RSpec.describe "Products" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -165,9 +161,8 @@ RSpec.describe "Products" do
         let!(:record) { create(:product, company: company) }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -180,9 +175,8 @@ RSpec.describe "Products" do
         let!(:record) { create(:product, company: other_company) }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           expect(response).to have_http_status(:forbidden)
@@ -223,9 +217,8 @@ RSpec.describe "Products" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           expect(response).to have_http_status(:ok)
@@ -243,9 +236,8 @@ RSpec.describe "Products" do
         let!(:record) { create(:product, company: company) }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do
           expect(record.reload).to be_discarded
@@ -271,9 +263,8 @@ RSpec.describe "Products" do
         end
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do
           expect(record.reload).not_to be_discarded
@@ -295,9 +286,8 @@ RSpec.describe "Products" do
         let!(:record) { create(:product, company: company, status: :draft) }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           expect(response).to have_http_status(:unprocessable_content)
@@ -309,9 +299,8 @@ RSpec.describe "Products" do
         let!(:cover) { create(:product_image, product: record, is_cover: true) }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do
           expect(record.reload.active?).to be(true)
@@ -332,9 +321,8 @@ RSpec.describe "Products" do
         let!(:record) { create(:product, company: company, status: :active) }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do
           expect(record.reload.inactive?).to be(true)
@@ -343,4 +331,3 @@ RSpec.describe "Products" do
     end
   end
 end
-# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup

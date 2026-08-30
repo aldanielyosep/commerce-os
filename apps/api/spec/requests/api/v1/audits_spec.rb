@@ -1,6 +1,5 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers
 require "swagger_helper"
-
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers
 RSpec.describe "Audits" do
   path "/api/v1/audits" do
     get "List audits" do
@@ -42,9 +41,8 @@ RSpec.describe "Audits" do
           )
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -80,9 +78,8 @@ RSpec.describe "Audits" do
         let(:auditable_type) { "Employee" }
         let(:auditable_id) { employee.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -120,9 +117,8 @@ RSpec.describe "Audits" do
         end
         let(:user_id) { super_admin.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -136,9 +132,8 @@ RSpec.describe "Audits" do
       response "403", "forbidden for admin" do
         let!(:admin_user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(admin_user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test!
       end
@@ -173,9 +168,8 @@ RSpec.describe "Audits" do
         let(:order_by) { "action" }
         let(:order_dir) { "asc" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -211,9 +205,8 @@ RSpec.describe "Audits" do
         end
         let(:id) { audit_record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -223,5 +216,3 @@ RSpec.describe "Audits" do
     end
   end
 end
-
-# rubocop:enable RSpec/MultipleMemoizedHelpers

@@ -1,6 +1,6 @@
 require "swagger_helper"
 
-# rubocop:disable RSpec/MultipleMemoizedHelpers
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers
 RSpec.describe "Product Departments" do
   path "/api/v1/product_departments" do
     get "List product departments" do
@@ -19,9 +19,8 @@ RSpec.describe "Product Departments" do
         let!(:product_department_one) { create(:product_department, code: "BAG", name: "Bags") }
         let!(:product_department_two) { create(:product_department, code: "SHO", name: "Shoes") }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -38,9 +37,8 @@ RSpec.describe "Product Departments" do
         let(:order_by) { "unknown" }
         let(:order_dir) { "desc" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -55,9 +53,8 @@ RSpec.describe "Product Departments" do
           create(:user, :admin_storefront_ops, password: "Password123!", password_confirmation: "Password123!")
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test!
       end
@@ -95,9 +92,8 @@ RSpec.describe "Product Departments" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -121,9 +117,8 @@ RSpec.describe "Product Departments" do
         let!(:record) { create(:product_department, code: "SHOW", name: "Showcase") }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -165,9 +160,8 @@ RSpec.describe "Product Departments" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -186,9 +180,8 @@ RSpec.describe "Product Departments" do
         let!(:record) { create(:product_department, code: "DEL", name: "Delete Me") }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -199,4 +192,3 @@ RSpec.describe "Product Departments" do
     end
   end
 end
-# rubocop:enable RSpec/MultipleMemoizedHelpers
