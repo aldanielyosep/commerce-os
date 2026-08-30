@@ -2,7 +2,15 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DataState } from "../components/DataState";
 import { useAuth } from "../contexts/AuthContext";
-import { createProductVariant, getProduct, listProductVariants } from "../lib/api";
+import {
+  createProductVariant,
+  deleteProductVariant,
+  getProduct,
+  listProductVariants,
+  updateProductVariant,
+  updateProductVariantPrice,
+  updateProductVariantStock
+} from "../lib/api";
 import type { Product, ProductVariant, ProductVariantPayload, ProductVariantStatus } from "../lib/types";
 
 type VariantFormState = {
@@ -14,6 +22,20 @@ type VariantFormState = {
   attributes: string;
 };
 
+type PriceFormState = {
+  value: string;
+  effective_from: string;
+  reason: string;
+};
+
+type StockFormState = {
+  delta: string;
+  event_type: string;
+  reason: string;
+};
+
+type DrawerState = { mode: "none" } | { mode: "create" } | { mode: "edit"; variantId: number };
+
 const EMPTY_FORM: VariantFormState = {
   sku: "",
   barcode: "",
@@ -21,6 +43,18 @@ const EMPTY_FORM: VariantFormState = {
   current_price: "",
   current_stock: "",
   attributes: "ukuran:M;warna:Putih"
+};
+
+const EMPTY_PRICE_FORM: PriceFormState = {
+  value: "",
+  effective_from: new Date().toISOString().slice(0, 16),
+  reason: ""
+};
+
+const EMPTY_STOCK_FORM: StockFormState = {
+  delta: "",
+  event_type: "restock",
+  reason: ""
 };
 
 function parseAttributes(raw: string) {
@@ -36,6 +70,10 @@ function parseAttributes(raw: string) {
       return { name: name?.trim() ?? "", value: value || "" };
     })
     .filter((item) => item.name && item.value);
+}
+
+function attributesToString(attributes: { name: string; value: string }[] = []) {
+  return attributes.map((attribute) => `${attribute.name}:${attribute.value}`).join(";");
 }
 
 function toPayload(form: VariantFormState): ProductVariantPayload {
@@ -59,10 +97,45 @@ export function ProductVariantsPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [drawer, setDrawer] = useState<DrawerState>({ mode: "none" });
   const [form, setForm] = useState<VariantFormState>(EMPTY_FORM);
+  const [priceForm, setPriceForm] = useState<PriceFormState>(EMPTY_PRICE_FORM);
+  const [stockForm, setStockForm] = useState<StockFormState>(EMPTY_STOCK_FORM);
 
   function setApiError(err: unknown, fallback: string) {
     setError(err instanceof Error ? err.message : fallback);
+  }
+
+  function resetDrawer() {
+    setDrawer({ mode: "none" });
+    setForm(EMPTY_FORM);
+  }
+
+  function openCreate() {
+    setDrawer({ mode: "create" });
+    setForm(EMPTY_FORM);
+  }
+
+  function openEdit(variant: ProductVariant) {
+    setDrawer({ mode: "edit", variantId: variant.id });
+    setForm({
+      sku: variant.sku,
+      barcode: variant.barcode,
+      status: variant.status,
+      current_price: String(variant.current_price),
+      current_stock: String(variant.current_stock),
+      attributes: attributesToString(variant.attributes)
+    });
+    setPriceForm({
+      value: String(variant.current_price),
+      effective_from: new Date().toISOString().slice(0, 16),
+      reason: ""
+    });
+    setStockForm({
+      delta: "",
+      event_type: "restock",
+      reason: ""
+    });
   }
 
   async function refreshVariants() {
@@ -99,11 +172,94 @@ export function ProductVariantsPage() {
     setError(null);
 
     try {
-      await createProductVariant(token, productIdNumber, toPayload(form));
+      if (drawer.mode === "create") {
+        await createProductVariant(token, productIdNumber, toPayload(form));
+      }
+
+      if (drawer.mode === "edit") {
+        await updateProductVariant(token, productIdNumber, drawer.variantId, {
+          sku: form.sku.trim(),
+          barcode: form.barcode.trim(),
+          status: form.status,
+          current_price: Number(form.current_price || 0),
+          current_stock: Number(form.current_stock || 0),
+          attributes: parseAttributes(form.attributes)
+        });
+      }
+
       setForm(EMPTY_FORM);
+      setDrawer({ mode: "none" });
       await refreshVariants();
     } catch (err) {
-      setApiError(err, "Unable to create variant.");
+      setApiError(err, drawer.mode === "create" ? "Unable to create variant." : "Unable to update variant.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onDelete(variantId: number) {
+    if (!token || !Number.isFinite(productIdNumber)) return;
+    if (!window.confirm("Delete this variant?")) return;
+
+    setBusy(true);
+    setError(null);
+
+    try {
+      await deleteProductVariant(token, productIdNumber, variantId);
+      await refreshVariants();
+    } catch (err) {
+      setApiError(err, "Unable to delete variant.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onSubmitPrice(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!token || !Number.isFinite(productIdNumber) || drawer.mode !== "edit") return;
+
+    setBusy(true);
+    setError(null);
+
+    try {
+      await updateProductVariantPrice(token, productIdNumber, drawer.variantId, {
+        value: Number(priceForm.value || 0),
+        effective_from: priceForm.effective_from ? new Date(priceForm.effective_from).toISOString() : new Date().toISOString(),
+        reason: priceForm.reason.trim() || undefined
+      });
+      await refreshVariants();
+      const currentVariant = rows.find((item) => item.id === drawer.variantId) ?? null;
+      if (currentVariant) {
+        setPriceForm({
+          value: String(currentVariant.current_price),
+          effective_from: new Date().toISOString().slice(0, 16),
+          reason: ""
+        });
+      }
+    } catch (err) {
+      setApiError(err, "Unable to update price.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onSubmitStock(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!token || !Number.isFinite(productIdNumber) || drawer.mode !== "edit") return;
+
+    setBusy(true);
+    setError(null);
+
+    try {
+      await updateProductVariantStock(token, productIdNumber, drawer.variantId, {
+        delta: Number(stockForm.delta || 0),
+        event_type: stockForm.event_type,
+        reason: stockForm.reason.trim() || undefined
+      });
+      await refreshVariants();
+      setStockForm({ delta: "", event_type: "restock", reason: "" });
+    } catch (err) {
+      setApiError(err, "Unable to update stock.");
     } finally {
       setBusy(false);
     }
@@ -116,65 +272,137 @@ export function ProductVariantsPage() {
           <h2>Product Variants</h2>
           {product ? <p>{product.product_name}</p> : null}
         </div>
+        <button type="button" className="primary" onClick={openCreate}>
+          Add Variant
+        </button>
       </div>
 
-      <DataState loading={loading} error={error} empty={rows.length === 0 && !loading && !error} emptyLabel="No variants found for this product.">
+      {error ? <p className="state error">{error}</p> : null}
+
+      <DataState
+        loading={loading}
+        error={error}
+        empty={rows.length === 0 && !loading && !error}
+        emptyLabel="No variants found for this product."
+      >
         <div style={{ display: "grid", gap: 24 }}>
-          <form onSubmit={onSubmit} style={{ display: "grid", gap: 12, maxWidth: 560 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-              <label>
-                <span>SKU</span>
-                <input value={form.sku} onChange={(event) => setForm((current) => ({ ...current, sku: event.target.value }))} />
-              </label>
-              <label>
-                <span>Barcode</span>
-                <input value={form.barcode} onChange={(event) => setForm((current) => ({ ...current, barcode: event.target.value }))} />
-              </label>
-            </div>
+          {drawer.mode !== "none" ? (
+            <form onSubmit={onSubmit} style={{ display: "grid", gap: 12, maxWidth: 560 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <strong>{drawer.mode === "create" ? "Create Variant" : "Edit Variant"}</strong>
+                <button type="button" className="ghost" onClick={resetDrawer}>
+                  Close
+                </button>
+              </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+                <label>
+                  <span>SKU</span>
+                  <input value={form.sku} onChange={(event) => setForm((current) => ({ ...current, sku: event.target.value }))} />
+                </label>
+                <label>
+                  <span>Barcode</span>
+                  <input value={form.barcode} onChange={(event) => setForm((current) => ({ ...current, barcode: event.target.value }))} />
+                </label>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
+                <label>
+                  <span>Status</span>
+                  <select
+                    value={form.status}
+                    onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as ProductVariantStatus }))}
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Price</span>
+                  <input
+                    type="number"
+                    value={form.current_price}
+                    onChange={(event) => setForm((current) => ({ ...current, current_price: event.target.value }))}
+                  />
+                </label>
+                <label>
+                  <span>Stock</span>
+                  <input
+                    type="number"
+                    value={form.current_stock}
+                    onChange={(event) => setForm((current) => ({ ...current, current_stock: event.target.value }))}
+                  />
+                </label>
+              </div>
+
               <label>
-                <span>Status</span>
+                <span>Attributes</span>
+                <input
+                  value={form.attributes}
+                  onChange={(event) => setForm((current) => ({ ...current, attributes: event.target.value }))}
+                />
+              </label>
+
+              <button type="submit" disabled={busy}>
+                {busy ? "Saving..." : drawer.mode === "create" ? "Create Variant" : "Save Changes"}
+              </button>
+            </form>
+          ) : null}
+
+          {drawer.mode === "edit" ? (
+            <div style={{ display: "grid", gap: 12, maxWidth: 560 }}>
+              <form onSubmit={onSubmitPrice} style={{ display: "grid", gap: 8 }}>
+                <strong>Price History</strong>
+                <input
+                  type="number"
+                  value={priceForm.value}
+                  onChange={(event) => setPriceForm((current) => ({ ...current, value: event.target.value }))}
+                  placeholder="Price"
+                />
+                <input
+                  type="datetime-local"
+                  value={priceForm.effective_from}
+                  onChange={(event) => setPriceForm((current) => ({ ...current, effective_from: event.target.value }))}
+                />
+                <input
+                  value={priceForm.reason}
+                  onChange={(event) => setPriceForm((current) => ({ ...current, reason: event.target.value }))}
+                  placeholder="Reason"
+                />
+                <button type="submit" className="primary" disabled={busy}>
+                  Update Price
+                </button>
+              </form>
+
+              <form onSubmit={onSubmitStock} style={{ display: "grid", gap: 8 }}>
+                <strong>Stock Ledger</strong>
+                <input
+                  type="number"
+                  value={stockForm.delta}
+                  onChange={(event) => setStockForm((current) => ({ ...current, delta: event.target.value }))}
+                  placeholder="Delta"
+                />
                 <select
-                  value={form.status}
-                  onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as ProductVariantStatus }))}
+                  value={stockForm.event_type}
+                  onChange={(event) => setStockForm((current) => ({ ...current, event_type: event.target.value }))}
                 >
-                  <option value="draft">Draft</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="archived">Archived</option>
+                  <option value="restock">Restock</option>
+                  <option value="sale">Sale</option>
+                  <option value="adjustment">Adjustment</option>
                 </select>
-              </label>
-              <label>
-                <span>Price</span>
                 <input
-                  type="number"
-                  value={form.current_price}
-                  onChange={(event) => setForm((current) => ({ ...current, current_price: event.target.value }))}
+                  value={stockForm.reason}
+                  onChange={(event) => setStockForm((current) => ({ ...current, reason: event.target.value }))}
+                  placeholder="Reason"
                 />
-              </label>
-              <label>
-                <span>Stock</span>
-                <input
-                  type="number"
-                  value={form.current_stock}
-                  onChange={(event) => setForm((current) => ({ ...current, current_stock: event.target.value }))}
-                />
-              </label>
+                <button type="submit" className="primary" disabled={busy}>
+                  Update Stock
+                </button>
+              </form>
             </div>
-
-            <label>
-              <span>Attributes</span>
-              <input
-                value={form.attributes}
-                onChange={(event) => setForm((current) => ({ ...current, attributes: event.target.value }))}
-              />
-            </label>
-
-            <button type="submit" disabled={busy}>
-              {busy ? "Saving..." : "Create Variant"}
-            </button>
-          </form>
+          ) : null}
 
           <table>
             <thead>
@@ -185,6 +413,7 @@ export function ProductVariantsPage() {
                 <th>Price</th>
                 <th>Stock</th>
                 <th>Attributes</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -196,6 +425,14 @@ export function ProductVariantsPage() {
                   <td>{variant.current_price}</td>
                   <td>{variant.current_stock}</td>
                   <td>{variant.attributes.map((attribute) => `${attribute.name}:${attribute.value}`).join("; ")}</td>
+                  <td className="actions">
+                    <button type="button" className="ghost" onClick={() => openEdit(variant)}>
+                      Edit
+                    </button>
+                    <button type="button" className="danger" onClick={() => void onDelete(variant.id)}>
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
