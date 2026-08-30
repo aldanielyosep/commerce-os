@@ -11,6 +11,7 @@ import {
   updateProductVariantPrice,
   updateProductVariantStock
 } from "../lib/api";
+import { formatDecimal, formatInteger, parseFormattedNumber } from "../lib/numberFormat";
 import type { Product, ProductVariant, ProductVariantPayload, ProductVariantStatus } from "../lib/types";
 
 type VariantFormState = {
@@ -81,8 +82,8 @@ function toPayload(form: VariantFormState): ProductVariantPayload {
     sku: form.sku.trim(),
     barcode: form.barcode.trim(),
     status: form.status,
-    current_price: Number(form.current_price || 0),
-    current_stock: Number(form.current_stock || 0),
+    current_price: parseFormattedNumber(form.current_price),
+    current_stock: Math.trunc(parseFormattedNumber(form.current_stock)),
     attributes: parseAttributes(form.attributes)
   };
 }
@@ -122,12 +123,12 @@ export function ProductVariantsPage() {
       sku: variant.sku,
       barcode: variant.barcode,
       status: variant.status,
-      current_price: String(variant.current_price),
-      current_stock: String(variant.current_stock),
+      current_price: formatDecimal(variant.current_price),
+      current_stock: formatInteger(variant.current_stock),
       attributes: attributesToString(variant.attributes)
     });
     setPriceForm({
-      value: String(variant.current_price),
+      value: formatDecimal(variant.current_price),
       effective_from: new Date().toISOString().slice(0, 16),
       reason: ""
     });
@@ -181,8 +182,8 @@ export function ProductVariantsPage() {
           sku: form.sku.trim(),
           barcode: form.barcode.trim(),
           status: form.status,
-          current_price: Number(form.current_price || 0),
-          current_stock: Number(form.current_stock || 0),
+          current_price: parseFormattedNumber(form.current_price),
+          current_stock: Math.trunc(parseFormattedNumber(form.current_stock)),
           attributes: parseAttributes(form.attributes)
         });
       }
@@ -223,7 +224,7 @@ export function ProductVariantsPage() {
 
     try {
       await updateProductVariantPrice(token, productIdNumber, drawer.variantId, {
-        value: Number(priceForm.value || 0),
+        value: parseFormattedNumber(priceForm.value),
         effective_from: priceForm.effective_from ? new Date(priceForm.effective_from).toISOString() : new Date().toISOString(),
         reason: priceForm.reason.trim() || undefined
       });
@@ -231,7 +232,7 @@ export function ProductVariantsPage() {
       const currentVariant = rows.find((item) => item.id === drawer.variantId) ?? null;
       if (currentVariant) {
         setPriceForm({
-          value: String(currentVariant.current_price),
+          value: formatDecimal(currentVariant.current_price),
           effective_from: new Date().toISOString().slice(0, 16),
           reason: ""
         });
@@ -252,7 +253,7 @@ export function ProductVariantsPage() {
 
     try {
       await updateProductVariantStock(token, productIdNumber, drawer.variantId, {
-        delta: Number(stockForm.delta || 0),
+        delta: Math.trunc(parseFormattedNumber(stockForm.delta)),
         event_type: stockForm.event_type,
         reason: stockForm.reason.trim() || undefined
       });
@@ -272,7 +273,7 @@ export function ProductVariantsPage() {
           <h2>Product Variants</h2>
           {product ? <p>{product.product_name}</p> : null}
         </div>
-        <button type="button" className="primary" onClick={openCreate}>
+        <button type="button" className="primary" onClick={openCreate} disabled={busy || loading}>
           Add Variant
         </button>
       </div>
@@ -286,15 +287,53 @@ export function ProductVariantsPage() {
         emptyLabel="No variants found for this product."
       >
         <div style={{ display: "grid", gap: 24 }}>
-          {drawer.mode !== "none" ? (
-            <form onSubmit={onSubmit} style={{ display: "grid", gap: 12, maxWidth: 560 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <strong>{drawer.mode === "create" ? "Create Variant" : "Edit Variant"}</strong>
-                <button type="button" className="ghost" onClick={resetDrawer}>
-                  Close
-                </button>
-              </div>
+          <table>
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Barcode</th>
+                <th>Status</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Attributes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((variant) => (
+                <tr key={variant.id}>
+                  <td>{variant.sku}</td>
+                  <td>{variant.barcode}</td>
+                  <td>{variant.status}</td>
+                  <td>{formatDecimal(variant.current_price)}</td>
+                  <td>{formatInteger(variant.current_stock)}</td>
+                  <td>{variant.attributes.map((attribute) => `${attribute.name}:${attribute.value}`).join("; ")}</td>
+                  <td className="actions">
+                    <button type="button" className="ghost" onClick={() => openEdit(variant)}>
+                      Edit
+                    </button>
+                    <button type="button" className="danger" onClick={() => void onDelete(variant.id)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </DataState>
 
+      {drawer.mode !== "none" ? (
+        <div className="overlay" onClick={resetDrawer}>
+          <div className="modal" onClick={(event) => event.stopPropagation()}>
+            <div className="page-head">
+              <h3>{drawer.mode === "create" ? "Create Variant" : "Edit Variant"}</h3>
+              <button type="button" className="ghost" onClick={resetDrawer} disabled={busy}>
+                Close
+              </button>
+            </div>
+
+            <form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
                 <label>
                   <span>SKU</span>
@@ -322,7 +361,7 @@ export function ProductVariantsPage() {
                 <label>
                   <span>Price</span>
                   <input
-                    type="number"
+                    inputMode="decimal"
                     value={form.current_price}
                     onChange={(event) => setForm((current) => ({ ...current, current_price: event.target.value }))}
                   />
@@ -330,7 +369,7 @@ export function ProductVariantsPage() {
                 <label>
                   <span>Stock</span>
                   <input
-                    type="number"
+                    inputMode="numeric"
                     value={form.current_stock}
                     onChange={(event) => setForm((current) => ({ ...current, current_stock: event.target.value }))}
                   />
@@ -345,100 +384,66 @@ export function ProductVariantsPage() {
                 />
               </label>
 
-              <button type="submit" disabled={busy}>
+              <button type="submit" className="primary" disabled={busy}>
                 {busy ? "Saving..." : drawer.mode === "create" ? "Create Variant" : "Save Changes"}
               </button>
             </form>
-          ) : null}
 
-          {drawer.mode === "edit" ? (
-            <div style={{ display: "grid", gap: 12, maxWidth: 560 }}>
-              <form onSubmit={onSubmitPrice} style={{ display: "grid", gap: 8 }}>
-                <strong>Price History</strong>
-                <input
-                  type="number"
-                  value={priceForm.value}
-                  onChange={(event) => setPriceForm((current) => ({ ...current, value: event.target.value }))}
-                  placeholder="Price"
-                />
-                <input
-                  type="datetime-local"
-                  value={priceForm.effective_from}
-                  onChange={(event) => setPriceForm((current) => ({ ...current, effective_from: event.target.value }))}
-                />
-                <input
-                  value={priceForm.reason}
-                  onChange={(event) => setPriceForm((current) => ({ ...current, reason: event.target.value }))}
-                  placeholder="Reason"
-                />
-                <button type="submit" className="primary" disabled={busy}>
-                  Update Price
-                </button>
-              </form>
+            {drawer.mode === "edit" ? (
+              <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
+                <form onSubmit={onSubmitPrice} style={{ display: "grid", gap: 8 }}>
+                  <strong>Price History</strong>
+                  <input
+                    inputMode="decimal"
+                    value={priceForm.value}
+                    onChange={(event) => setPriceForm((current) => ({ ...current, value: event.target.value }))}
+                    placeholder="Price"
+                  />
+                  <input
+                    type="datetime-local"
+                    value={priceForm.effective_from}
+                    onChange={(event) => setPriceForm((current) => ({ ...current, effective_from: event.target.value }))}
+                  />
+                  <input
+                    value={priceForm.reason}
+                    onChange={(event) => setPriceForm((current) => ({ ...current, reason: event.target.value }))}
+                    placeholder="Reason"
+                  />
+                  <button type="submit" className="primary" disabled={busy}>
+                    Update Price
+                  </button>
+                </form>
 
-              <form onSubmit={onSubmitStock} style={{ display: "grid", gap: 8 }}>
-                <strong>Stock Ledger</strong>
-                <input
-                  type="number"
-                  value={stockForm.delta}
-                  onChange={(event) => setStockForm((current) => ({ ...current, delta: event.target.value }))}
-                  placeholder="Delta"
-                />
-                <select
-                  value={stockForm.event_type}
-                  onChange={(event) => setStockForm((current) => ({ ...current, event_type: event.target.value }))}
-                >
-                  <option value="restock">Restock</option>
-                  <option value="sale">Sale</option>
-                  <option value="adjustment">Adjustment</option>
-                </select>
-                <input
-                  value={stockForm.reason}
-                  onChange={(event) => setStockForm((current) => ({ ...current, reason: event.target.value }))}
-                  placeholder="Reason"
-                />
-                <button type="submit" className="primary" disabled={busy}>
-                  Update Stock
-                </button>
-              </form>
-            </div>
-          ) : null}
-
-          <table>
-            <thead>
-              <tr>
-                <th>SKU</th>
-                <th>Barcode</th>
-                <th>Status</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Attributes</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((variant) => (
-                <tr key={variant.id}>
-                  <td>{variant.sku}</td>
-                  <td>{variant.barcode}</td>
-                  <td>{variant.status}</td>
-                  <td>{variant.current_price}</td>
-                  <td>{variant.current_stock}</td>
-                  <td>{variant.attributes.map((attribute) => `${attribute.name}:${attribute.value}`).join("; ")}</td>
-                  <td className="actions">
-                    <button type="button" className="ghost" onClick={() => openEdit(variant)}>
-                      Edit
-                    </button>
-                    <button type="button" className="danger" onClick={() => void onDelete(variant.id)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                <form onSubmit={onSubmitStock} style={{ display: "grid", gap: 8 }}>
+                  <strong>Stock Ledger</strong>
+                  <input
+                    inputMode="numeric"
+                    value={stockForm.delta}
+                    onChange={(event) => setStockForm((current) => ({ ...current, delta: event.target.value }))}
+                    placeholder="Delta"
+                  />
+                  <select
+                    value={stockForm.event_type}
+                    onChange={(event) => setStockForm((current) => ({ ...current, event_type: event.target.value }))}
+                  >
+                    <option value="restock">Restock</option>
+                    <option value="sale">Sale</option>
+                    <option value="adjustment">Adjustment</option>
+                  </select>
+                  <input
+                    value={stockForm.reason}
+                    onChange={(event) => setStockForm((current) => ({ ...current, reason: event.target.value }))}
+                    placeholder="Reason"
+                  />
+                  <button type="submit" className="primary" disabled={busy}>
+                    Update Stock
+                  </button>
+                </form>
+              </div>
+            ) : null}
+          </div>
         </div>
-      </DataState>
+      ) : null}
     </div>
   );
 }
