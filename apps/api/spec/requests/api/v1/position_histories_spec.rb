@@ -1,6 +1,5 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
 require "swagger_helper"
-
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
 RSpec.describe "Position Histories" do
   path "/api/v1/employees/{employee_id}/position_histories" do
     parameter name: :employee_id, in: :path, type: :string
@@ -29,9 +28,8 @@ RSpec.describe "Position Histories" do
         end
         let(:employee_id) { employee.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -49,9 +47,8 @@ RSpec.describe "Position Histories" do
         let!(:history) { create(:position_history, employee: employee, department: department, position: "Lead") }
         let(:employee_id) { employee.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test!
       end
@@ -68,9 +65,8 @@ RSpec.describe "Position Histories" do
         let(:order_by) { "position" }
         let(:order_dir) { "asc" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           ids = JSON.parse(response.body)["data"].pluck("id")
@@ -118,9 +114,8 @@ RSpec.describe "Position Histories" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -173,9 +168,8 @@ RSpec.describe "Position Histories" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -185,5 +179,3 @@ RSpec.describe "Position Histories" do
     end
   end
 end
-
-# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup

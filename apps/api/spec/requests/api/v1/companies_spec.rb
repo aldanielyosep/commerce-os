@@ -1,6 +1,5 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
 require "swagger_helper"
-
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
 RSpec.describe "Companies" do
   path "/api/v1/companies" do
     get "List companies" do
@@ -28,9 +27,8 @@ RSpec.describe "Companies" do
           )
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -55,9 +53,8 @@ RSpec.describe "Companies" do
         let!(:company_two) { create(:company, name: "Beta Store") }
         let!(:company_assignment) { create(:company_assignment, user: user, company: company_one) }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -76,9 +73,8 @@ RSpec.describe "Companies" do
         let(:order_by) { "code" }
         let(:order_dir) { "desc" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -93,9 +89,8 @@ RSpec.describe "Companies" do
         let!(:company_two) { create(:company, code: "BETA", name: "Beta Store", owner_name: "Daniel Beta") }
         let(:q) { "Alpha" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           names = JSON.parse(response.body)["data"].pluck("name")
@@ -151,9 +146,8 @@ RSpec.describe "Companies" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -179,9 +173,8 @@ RSpec.describe "Companies" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -207,9 +200,8 @@ RSpec.describe "Companies" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -234,9 +226,8 @@ RSpec.describe "Companies" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -268,9 +259,8 @@ RSpec.describe "Companies" do
           )
         end
         let(:id) { company_record.id }
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -284,9 +274,8 @@ RSpec.describe "Companies" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company, name: "Alpha Store") }
         let(:id) { company_record.id }
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -331,9 +320,8 @@ RSpec.describe "Companies" do
             }
           }
         end
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -353,9 +341,8 @@ RSpec.describe "Companies" do
             }
           }
         end
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -375,9 +362,8 @@ RSpec.describe "Companies" do
             }
           }
         end
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -396,9 +382,8 @@ RSpec.describe "Companies" do
         let!(:user) { create(:user, :super_admin, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company) }
         let(:id) { company_record.id }
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -410,9 +395,8 @@ RSpec.describe "Companies" do
         let!(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
         let!(:company_record) { create(:company) }
         let(:id) { company_record.id }
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -423,5 +407,3 @@ RSpec.describe "Companies" do
     end
   end
 end
-
-# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup

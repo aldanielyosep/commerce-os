@@ -1,6 +1,6 @@
 require "rails_helper"
 
-# rubocop:disable RSpec/MultipleMemoizedHelpers
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers
 RSpec.describe ProductPolicy, type: :policy do
   subject(:policy) { described_class.new(user, product) }
 
@@ -12,7 +12,7 @@ RSpec.describe ProductPolicy, type: :policy do
     context "when user is super admin" do
       let(:user) { create(:user, :super_admin) }
 
-      # rubocop:disable RSpec/MultipleExpectations
+      # rubocop:disable-next RSpec/MultipleExpectations
       it "allows all actions" do
         expect(policy.index?).to be(true)
         expect(policy.show?).to be(true)
@@ -23,7 +23,6 @@ RSpec.describe ProductPolicy, type: :policy do
         expect(policy.activate?).to be(true)
         expect(policy.deactivate?).to be(true)
       end
-      # rubocop:enable RSpec/MultipleExpectations
     end
 
     context "when user is assigned to company" do
@@ -95,4 +94,3 @@ RSpec.describe ProductPolicy, type: :policy do
     end
   end
 end
-# rubocop:enable RSpec/MultipleMemoizedHelpers

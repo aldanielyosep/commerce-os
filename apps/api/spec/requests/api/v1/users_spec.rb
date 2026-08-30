@@ -1,15 +1,13 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers
 require "swagger_helper"
-
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers
 RSpec.describe "Users" do
   let(:force_update_failure) { false }
 
   before do
     next unless force_update_failure
 
-    # rubocop:disable RSpec/AnyInstance
+    # rubocop:disable-next RSpec/AnyInstance
     allow_any_instance_of(User).to receive(:update).and_return(false)
-    # rubocop:enable RSpec/AnyInstance
   end
 
   path "/api/v1/users" do
@@ -30,9 +28,8 @@ RSpec.describe "Users" do
         end
         let!(:admin_user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -57,9 +54,8 @@ RSpec.describe "Users" do
         let(:order_by) { "email" }
         let(:order_dir) { "desc" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -84,9 +80,8 @@ RSpec.describe "Users" do
         end
         let(:q) { "alpha" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           emails = JSON.parse(response.body)["data"].pluck("email")
@@ -97,9 +92,8 @@ RSpec.describe "Users" do
       response "403", "forbidden for admin" do
         let!(:admin_user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(admin_user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test!
       end
@@ -147,9 +141,8 @@ RSpec.describe "Users" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -174,9 +167,8 @@ RSpec.describe "Users" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -202,9 +194,8 @@ RSpec.describe "Users" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -230,9 +221,8 @@ RSpec.describe "Users" do
         let!(:target_user) { create(:user, email: "target.user@example.com") }
         let(:id) { target_user.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -268,9 +258,8 @@ RSpec.describe "Users" do
         let(:id) { target_user.id }
         let(:user) { { user: { username: "after_update" } } }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -287,9 +276,8 @@ RSpec.describe "Users" do
         let(:id) { target_user.id }
         let(:user) { { user: { username: existing_user.username } } }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -311,9 +299,8 @@ RSpec.describe "Users" do
         let!(:target_user) { create(:user, email: "delete.user@example.com") }
         let(:id) { target_user.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -327,9 +314,8 @@ RSpec.describe "Users" do
         end
         let(:id) { super_admin.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -355,9 +341,8 @@ RSpec.describe "Users" do
         let!(:target_user) { create(:user, status: :active) }
         let(:id) { target_user.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -371,9 +356,8 @@ RSpec.describe "Users" do
         end
         let(:id) { super_admin.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -391,9 +375,8 @@ RSpec.describe "Users" do
         let(:id) { target_user.id }
         let(:force_update_failure) { true }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -420,9 +403,8 @@ RSpec.describe "Users" do
         let!(:target_user) { create(:user, status: :disabled) }
         let(:id) { target_user.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -438,9 +420,8 @@ RSpec.describe "Users" do
         let(:id) { target_user.id }
         let(:force_update_failure) { true }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -482,9 +463,8 @@ RSpec.describe "Users" do
         let(:id) { target_user.id }
         let(:user) { { user: { role: "admin" } } }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -500,9 +480,8 @@ RSpec.describe "Users" do
         let(:id) { target_user.id }
         let(:user) { { user: { role: "super_admin" } } }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -527,9 +506,8 @@ RSpec.describe "Users" do
         let!(:target_user) { create(:user, email: "reset.user@example.com") }
         let(:id) { target_user.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(super_admin) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -539,5 +517,3 @@ RSpec.describe "Users" do
     end
   end
 end
-
-# rubocop:enable RSpec/MultipleMemoizedHelpers

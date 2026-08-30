@@ -1,6 +1,5 @@
-# rubocop:disable RSpec/MultipleMemoizedHelpers
 require "swagger_helper"
-
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers
 RSpec.describe "Employee Departments" do
   path "/api/v1/employees/{employee_id}/employee_departments" do
     parameter name: :employee_id, in: :path, type: :string
@@ -38,9 +37,8 @@ RSpec.describe "Employee Departments" do
         end
         let(:employee_id) { employee.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -58,9 +56,8 @@ RSpec.describe "Employee Departments" do
         let!(:assignment) { create(:employee_department, employee: employee, department: department) }
         let(:employee_id) { employee.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test!
       end
@@ -87,9 +84,8 @@ RSpec.describe "Employee Departments" do
         let(:order_by) { "assigned_date" }
         let(:order_dir) { "asc" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           ids = JSON.parse(response.body)["data"].pluck("id")
@@ -133,9 +129,8 @@ RSpec.describe "Employee Departments" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -162,9 +157,8 @@ RSpec.describe "Employee Departments" do
         let(:employee_id) { employee.id }
         let(:id) { assignment.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -174,5 +168,3 @@ RSpec.describe "Employee Departments" do
     end
   end
 end
-
-# rubocop:enable RSpec/MultipleMemoizedHelpers

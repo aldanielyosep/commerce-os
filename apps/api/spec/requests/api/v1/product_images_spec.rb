@@ -1,7 +1,7 @@
 require "swagger_helper"
 require "stringio"
 
-# rubocop:disable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers, RSpec/LetSetup
 RSpec.describe "Product Images" do
   let(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
   let(:company) { create(:company) }
@@ -23,9 +23,8 @@ RSpec.describe "Product Images" do
         let(:product_id) { product.id }
         let!(:image) { create(:product_image, product: product, is_cover: true) }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -56,9 +55,8 @@ RSpec.describe "Product Images" do
           )
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           expect(response).to have_http_status(:created)
@@ -76,9 +74,8 @@ RSpec.describe "Product Images" do
           )
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           expect(response).to have_http_status(:unprocessable_content)
@@ -126,9 +123,8 @@ RSpec.describe "Product Images" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -148,9 +144,8 @@ RSpec.describe "Product Images" do
         let(:product_id) { product.id }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do
           expect(record.reload).to be_discarded
@@ -159,4 +154,3 @@ RSpec.describe "Product Images" do
     end
   end
 end
-# rubocop:enable RSpec/MultipleMemoizedHelpers, RSpec/LetSetup

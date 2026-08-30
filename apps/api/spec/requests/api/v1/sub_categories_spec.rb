@@ -1,6 +1,6 @@
 require "swagger_helper"
 
-# rubocop:disable RSpec/MultipleMemoizedHelpers
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers
 RSpec.describe "Sub Categories" do
   path "/api/v1/sub_categories" do
     get "List sub categories" do
@@ -24,9 +24,8 @@ RSpec.describe "Sub Categories" do
         let!(:sub_category_a) { create(:sub_category, category: category_a, name: "Alpha Sub") }
         let!(:sub_category_b) { create(:sub_category, category: category_b, name: "Beta Sub") }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -49,9 +48,8 @@ RSpec.describe "Sub Categories" do
         let(:order_by) { "unknown" }
         let(:order_dir) { "desc" }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -72,9 +70,8 @@ RSpec.describe "Sub Categories" do
           create(:sub_category, category: category, name: "Ops Blocked")
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test!
       end
@@ -113,9 +110,8 @@ RSpec.describe "Sub Categories" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -140,9 +136,8 @@ RSpec.describe "Sub Categories" do
         let!(:record) { create(:sub_category, name: "Visible Sub Category") }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -186,9 +181,8 @@ RSpec.describe "Sub Categories" do
           }
         end
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -208,9 +202,8 @@ RSpec.describe "Sub Categories" do
         let!(:record) { create(:sub_category) }
         let(:id) { record.id }
 
-        # rubocop:disable RSpec/VariableName
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        # rubocop:enable RSpec/VariableName
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -221,4 +214,3 @@ RSpec.describe "Sub Categories" do
     end
   end
 end
-# rubocop:enable RSpec/MultipleMemoizedHelpers
