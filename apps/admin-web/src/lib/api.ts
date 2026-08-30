@@ -50,6 +50,11 @@ import type {
   ProductTaxonomyTypeUpdatePayload,
   ProductPayload,
   ProductUpdatePayload,
+  ProductVariant,
+  ProductVariantPayload,
+  ProductVariantPricePayload,
+  ProductVariantStockPayload,
+  ProductVariantUpdatePayload,
   SalaryRecord,
   SortDirection,
   UserOrderBy,
@@ -653,6 +658,95 @@ export async function deleteProductImage(token: string, productId: number, image
     method: "DELETE",
     token
   });
+}
+
+export async function listProductVariants(
+  token: string,
+  productId: number,
+  filters: PaginationParams & { q?: string; order_by?: string; order_dir?: SortDirection } = {}
+): Promise<PaginatedResult<ProductVariant>> {
+  const query = buildQueryString({
+    q: filters.q,
+    page: filters.page,
+    per_page: filters.per_page,
+    order_by: filters.order_by,
+    order_dir: filters.order_dir
+  });
+
+  const envelope = await request<ApiEnvelope<ProductVariant[]>>(`/api/v1/products/${productId}/variants${query}`, {
+    token
+  });
+
+  return { items: envelope.data, meta: normalizePaginationMeta(envelope.meta) };
+}
+
+export async function getProductVariant(token: string, productId: number, variantId: number): Promise<ProductVariant> {
+  const envelope = await request<ApiEnvelope<ProductVariant>>(`/api/v1/products/${productId}/variants/${variantId}`, {
+    token
+  });
+  return envelope.data;
+}
+
+export async function createProductVariant(
+  token: string,
+  productId: number,
+  payload: ProductVariantPayload
+): Promise<ProductVariant> {
+  const envelope = await request<ApiEnvelope<ProductVariant>>(`/api/v1/products/${productId}/variants`, {
+    method: "POST",
+    token,
+    body: { variant: payload }
+  });
+  return envelope.data;
+}
+
+export async function updateProductVariant(
+  token: string,
+  productId: number,
+  variantId: number,
+  payload: ProductVariantUpdatePayload
+): Promise<ProductVariant> {
+  const envelope = await request<ApiEnvelope<ProductVariant>>(`/api/v1/products/${productId}/variants/${variantId}`, {
+    method: "PATCH",
+    token,
+    body: { variant: payload }
+  });
+  return envelope.data;
+}
+
+export async function deleteProductVariant(token: string, productId: number, variantId: number): Promise<void> {
+  await request<ApiEnvelope<{ id: number; discarded: boolean }>>(`/api/v1/products/${productId}/variants/${variantId}`, {
+    method: "DELETE",
+    token
+  });
+}
+
+export async function updateProductVariantPrice(
+  token: string,
+  productId: number,
+  variantId: number,
+  payload: ProductVariantPricePayload
+): Promise<ProductVariant> {
+  const envelope = await request<ApiEnvelope<ProductVariant>>(`/api/v1/products/${productId}/variants/${variantId}/price`, {
+    method: "PATCH",
+    token,
+    body: { price: payload }
+  });
+  return envelope.data;
+}
+
+export async function updateProductVariantStock(
+  token: string,
+  productId: number,
+  variantId: number,
+  payload: ProductVariantStockPayload
+): Promise<ProductVariant> {
+  const envelope = await request<ApiEnvelope<ProductVariant>>(`/api/v1/products/${productId}/variants/${variantId}/stock`, {
+    method: "PATCH",
+    token,
+    body: { stock: payload }
+  });
+  return envelope.data;
 }
 
 export async function createEmployee(token: string, payload: EmployeePayload): Promise<Employee> {

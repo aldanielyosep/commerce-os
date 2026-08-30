@@ -14,6 +14,7 @@ import { ProductCategoriesPage } from "./pages/ProductCategoriesPage";
 import { ProductDepartmentsPage } from "./pages/ProductDepartmentsPage";
 import { ProductSubCategoriesPage } from "./pages/ProductSubCategoriesPage";
 import { ProductTypesPage } from "./pages/ProductTypesPage";
+import { ProductVariantsPage } from "./pages/ProductVariantsPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { UsersPage } from "./pages/UsersPage";
 
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="/products/categories" element={<ProductCategoriesPage />} />
             <Route path="/products/sub-categories" element={<ProductSubCategoriesPage />} />
             <Route path="/products/types" element={<ProductTypesPage />} />
+            <Route path="/products/:productId/variants" element={<ProductVariantsPage />} />
           </Route>
         </Route>
       </Route>

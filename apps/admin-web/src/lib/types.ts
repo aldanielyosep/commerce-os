@@ -415,3 +415,52 @@ export type ProductImageUpdatePayload = {
   is_cover?: boolean;
   position?: number;
 };
+
+export type ProductVariantAttribute = {
+  name: string;
+  value: string;
+};
+
+export type ProductVariantStatus = "draft" | "active" | "inactive" | "archived";
+
+export type ProductVariant = {
+  id: number;
+  product_id: number;
+  company_id: number;
+  sku: string;
+  barcode: string;
+  status: ProductVariantStatus;
+  current_price: string | number;
+  current_stock: number;
+  attributes: ProductVariantAttribute[];
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProductVariantPayload = {
+  sku: string;
+  barcode: string;
+  status: ProductVariantStatus;
+  current_price: number;
+  current_stock: number;
+  attributes: ProductVariantAttribute[];
+};
+
+export type ProductVariantUpdatePayload = Partial<
+  Omit<ProductVariantPayload, "current_price" | "current_stock"> & {
+    current_price?: number;
+    current_stock?: number;
+  }
+>;
+
+export type ProductVariantPricePayload = {
+  value: number;
+  effective_from: string;
+  reason?: string;
+};
+
+export type ProductVariantStockPayload = {
+  delta: number;
+  event_type: string;
+  reason?: string;
+};

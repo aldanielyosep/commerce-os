@@ -78,7 +78,14 @@ import {
   updateUser,
   activateProduct,
   createProduct,
+  createProductVariant,
   deactivateProduct,
+  deleteProductVariant,
+  getProductVariant,
+  listProductVariants,
+  updateProductVariant,
+  updateProductVariantPrice,
+  updateProductVariantStock,
   uploadProductImage,
   uploadEmployeeDocument
 } from "./api";
@@ -590,6 +597,59 @@ describe("api refresh retry flow", () => {
     })).resolves.toMatchObject({ id: 991 });
     await expect(updateProductImage("Bearer t", 77, 991, { alt_text: "updated" })).resolves.toMatchObject({ id: 991 });
     await expect(deleteProductImage("Bearer t", 77, 991)).resolves.toBeUndefined();
+  });
+
+  it("covers product variant wrappers", async () => {
+    const variant = {
+      id: 11,
+      product_id: 77,
+      company_id: 9,
+      sku: "SKU-001",
+      barcode: "BC-001",
+      status: "active",
+      current_price: "990.00",
+      current_stock: 50,
+      attributes: [{ name: "ukuran", value: "M" }, { name: "warna", value: "Putih" }],
+      created_at: "2026-01-01T00:00:00Z",
+      updated_at: "2026-01-01T00:00:00Z"
+    };
+
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(okResponse([variant], { page: 1, per_page: 20, total_count: 1, total_pages: 1 }))
+      .mockResolvedValueOnce(okResponse(variant))
+      .mockResolvedValueOnce(okResponse(variant))
+      .mockResolvedValueOnce(okResponse(variant))
+      .mockResolvedValueOnce(okResponse({ id: 11, discarded: true }))
+      .mockResolvedValueOnce(okResponse(variant))
+      .mockResolvedValueOnce(okResponse(variant));
+
+    const page = await listProductVariants("Bearer t", 77, { page: 1, per_page: 20 });
+    expect(page.items).toHaveLength(1);
+
+    await expect(getProductVariant("Bearer t", 77, 11)).resolves.toMatchObject({ id: 11, sku: "SKU-001" });
+    await expect(createProductVariant("Bearer t", 77, {
+      sku: "SKU-001",
+      barcode: "BC-001",
+      status: "active",
+      current_price: 990,
+      current_stock: 50,
+      attributes: [{ name: "ukuran", value: "M" }]
+    })).resolves.toMatchObject({ id: 11 });
+    await expect(updateProductVariant("Bearer t", 77, 11, {
+      sku: "SKU-002",
+      status: "inactive"
+    })).resolves.toMatchObject({ id: 11 });
+    await expect(deleteProductVariant("Bearer t", 77, 11)).resolves.toBeUndefined();
+    await expect(updateProductVariantPrice("Bearer t", 77, 11, {
+      value: 1200,
+      effective_from: "2026-01-02T00:00:00Z",
+      reason: "price adjustment"
+    })).resolves.toMatchObject({ id: 11 });
+    await expect(updateProductVariantStock("Bearer t", 77, 11, {
+      delta: 10,
+      event_type: "restock",
+      reason: "purchase"
+    })).resolves.toMatchObject({ id: 11 });
   });
 
   it("covers document and timeline wrappers", async () => {
