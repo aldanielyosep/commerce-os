@@ -22,7 +22,9 @@ module Api
         authorize variant
 
         duplicate_error = duplicate_combination_error(variant, params.dig(:variant, :attributes))
-        return render_error("Validation failed", errors: [duplicate_error], status: :unprocessable_content) if duplicate_error
+        if duplicate_error
+          return render_error("Validation failed", errors: [duplicate_error], status: :unprocessable_content)
+        end
 
         if variant.save
           upsert_attributes!(variant)
@@ -36,7 +38,9 @@ module Api
         authorize @variant
 
         duplicate_error = duplicate_combination_error(@variant, params.dig(:variant, :attributes), allow_self: true)
-        return render_error("Validation failed", errors: [duplicate_error], status: :unprocessable_content) if duplicate_error
+        if duplicate_error
+          return render_error("Validation failed", errors: [duplicate_error], status: :unprocessable_content)
+        end
 
         if @variant.update(variant_params.except(:company_id, :product_id, :sku, :barcode))
           upsert_attributes!(@variant)
@@ -121,7 +125,11 @@ module Api
         query = "%#{query_term.strip}%"
         scope.left_joins(:product_variant_attributes)
              .where(
-               "product_variants.sku ILIKE :query OR product_variants.barcode ILIKE :query OR product_variant_attributes.value ILIKE :query",
+               [
+                 "product_variants.sku ILIKE :query",
+                 "product_variants.barcode ILIKE :query",
+                 "product_variant_attributes.value ILIKE :query"
+               ].join(" OR "),
                query: query
              )
              .distinct
@@ -135,7 +143,7 @@ module Api
       end
 
       def upsert_attributes!(variant)
-        return unless params.dig(:variant, :attributes).present?
+        return if params.dig(:variant, :attributes).blank?
 
         variant.product_variant_attributes.delete_all
 
@@ -149,30 +157,29 @@ module Api
       end
 
       def duplicate_combination_error(variant, attributes, allow_self: false)
-        return nil if attributes.blank?
+        candidate = normalized_attribute_pairs(attributes)
+        return nil if candidate.empty?
 
-        candidate = attributes.filter_map do |attribute_payload|
+        duplicate = comparable_variants(variant, allow_self: allow_self).any? do |existing_variant|
+          candidate == normalized_attribute_pairs(existing_variant.product_variant_attributes)
+        end
+
+        duplicate ? "variant combination already exists for this product" : nil
+      end
+
+      def normalized_attribute_pairs(attributes)
+        attributes.filter_map do |attribute_payload|
           name = attribute_payload[:name].to_s.strip
           value = attribute_payload[:value].to_s.strip
           next if name.blank? || value.blank?
 
           [ name.downcase, value.downcase ]
         end.sort
+      end
 
-        return nil if candidate.empty?
-
+      def comparable_variants(variant, allow_self:)
         scope = variant.product.product_variants
-        scope = scope.where.not(id: variant.id) unless allow_self
-
-        scope.each do |existing_variant|
-          existing_values = existing_variant.product_variant_attributes.map do |attribute|
-            [ attribute.name.downcase, attribute.value.downcase ]
-          end.sort
-
-          return "variant combination already exists for this product" if candidate == existing_values
-        end
-
-        nil
+        allow_self ? scope : scope.where.not(id: variant.id)
       end
 
       def variant_params
@@ -183,7 +190,7 @@ module Api
                         :current_price,
                         :current_stock,
                         :company_id,
-                        { attributes: [ :name, :value ] }
+                        { attributes: %i[ name value ] }
                       ])
       end
     end

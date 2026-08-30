@@ -15,8 +15,6 @@ class ProductVariant < ApplicationRecord
   has_many :variant_price_histories, dependent: :destroy
   has_many :variant_stock_ledgers, dependent: :destroy
 
-  validates :company, presence: true
-  validates :product, presence: true
   validates :sku, presence: true, uniqueness: { scope: :company_id }
   validates :barcode, presence: true, uniqueness: { scope: :company_id }
   validates :current_price, numericality: { greater_than_or_equal_to: 0 }

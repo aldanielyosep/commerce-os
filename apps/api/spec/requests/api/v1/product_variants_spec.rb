@@ -1,5 +1,5 @@
 require "swagger_helper"
-
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers
 RSpec.describe "Product Variants" do
   let(:user) { create(:user, password: "Password123!", password_confirmation: "Password123!") }
   let(:company) { create(:company) }
@@ -19,10 +19,18 @@ RSpec.describe "Product Variants" do
       security [ { bearerAuth: [] } ]
 
       response "200", "variants listed" do
-        let!(:variant_one) { create(:product_variant, product: product, sku: "SKU-001", barcode: "BC-001") }
-        let!(:variant_two) { create(:product_variant, product: product, sku: "SKU-002", barcode: "BC-002") }
+        let(:variants) do
+          [
+            create(:product_variant, product: product, sku: "SKU-001", barcode: "BC-001"),
+            create(:product_variant, product: product, sku: "SKU-002", barcode: "BC-002")
+          ]
+        end
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
-        let(:product_id) { product.id }
+        let(:product_id) do
+          variants
+          product.id
+        end
 
         run_test! do |response|
           body = JSON.parse(response.body)
@@ -61,6 +69,7 @@ RSpec.describe "Product Variants" do
       }
 
       response "201", "variant created" do
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
         let(:product_id) { product.id }
         let(:variant) do
@@ -88,19 +97,21 @@ RSpec.describe "Product Variants" do
       end
 
       response "422", "rejects duplicate attribute combination" do
-        let!(:existing_variant) do
+        let(:existing_variant) do
           create(:product_variant, product: product, sku: "SKU-EXIST", barcode: "BC-EXIST")
         end
-        let!(:existing_attr) do
-          create(:product_variant_attribute, product_variant: existing_variant, name: "ukuran", value: "M")
+        let(:existing_variant_attributes) do
+          [
+            create(:product_variant_attribute, product_variant: existing_variant, name: "ukuran", value: "M"),
+            create(:product_variant_attribute, product_variant: existing_variant, name: "warna", value: "Putih")
+          ]
         end
-        let!(:existing_attr_2) do
-          create(:product_variant_attribute, product_variant: existing_variant, name: "warna", value: "Putih")
-        end
-
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
         let(:product_id) { product.id }
         let(:variant) do
+          existing_variant_attributes
+
           {
             variant: {
               sku: "SKU-NEW",
@@ -154,6 +165,7 @@ RSpec.describe "Product Variants" do
         let!(:record) { create(:product_variant, product: product, current_price: 900) }
         let(:product_id) { product.id }
         let(:id) { record.id }
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
         let(:price) do
           {
@@ -203,6 +215,7 @@ RSpec.describe "Product Variants" do
         let!(:record) { create(:product_variant, product: product, current_stock: 40) }
         let(:product_id) { product.id }
         let(:id) { record.id }
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
         let(:stock) do
           {
@@ -236,6 +249,7 @@ RSpec.describe "Product Variants" do
         let!(:record) { create(:product_variant, product: product, sku: "SKU-DETAIL", barcode: "BC-DETAIL") }
         let(:product_id) { product.id }
         let(:id) { record.id }
+        # rubocop:disable-next RSpec/VariableName
         let(:Authorization) { bearer_token_for(user) }
 
         run_test! do |response|
