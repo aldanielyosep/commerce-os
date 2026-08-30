@@ -25,6 +25,14 @@ class ProductVariantPolicy < ApplicationPolicy
     super_admin? || company_in_scope?
   end
 
+  def price?
+    update?
+  end
+
+  def stock?
+    update?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       return scope.none unless user

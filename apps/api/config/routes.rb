@@ -34,7 +34,12 @@ Rails.application.routes.draw do
                   only: %i[index create update destroy]
         resources :variants,
                   controller: "product_variants",
-                  only: %i[index show create update destroy]
+                  only: %i[index show create update destroy] do
+          member do
+            patch :price
+            patch :stock
+          end
+        end
       end
       resources :product_departments
       resources :departments

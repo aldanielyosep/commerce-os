@@ -125,6 +125,104 @@ RSpec.describe "Product Variants" do
     end
   end
 
+  path "/api/v1/products/{product_id}/variants/{id}/price" do
+    parameter name: :product_id, in: :path, type: :string
+    parameter name: :id, in: :path, type: :string
+
+    patch "Update variant price" do
+      tags "Product Variants"
+      consumes "application/json"
+      produces "application/json"
+      security [ { bearerAuth: [] } ]
+
+      parameter name: :price, in: :body, schema: {
+        type: :object,
+        properties: {
+          price: {
+            type: :object,
+            properties: {
+              value: { type: :number },
+              effective_from: { type: :string, format: :date_time },
+              reason: { type: :string }
+            },
+            required: %w[value effective_from]
+          }
+        }
+      }
+
+      response "200", "price updated" do
+        let!(:record) { create(:product_variant, product: product, current_price: 900) }
+        let(:product_id) { product.id }
+        let(:id) { record.id }
+        let(:Authorization) { bearer_token_for(user) }
+        let(:price) do
+          {
+            price: {
+              value: 1200,
+              effective_from: "2026-08-30T00:00:00Z",
+              reason: "sale adjustment"
+            }
+          }
+        end
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response).to have_http_status(:ok)
+          expect(body.dig("data", "current_price").to_f).to eq(1200.0)
+        end
+      end
+    end
+  end
+
+  path "/api/v1/products/{product_id}/variants/{id}/stock" do
+    parameter name: :product_id, in: :path, type: :string
+    parameter name: :id, in: :path, type: :string
+
+    patch "Update variant stock" do
+      tags "Product Variants"
+      consumes "application/json"
+      produces "application/json"
+      security [ { bearerAuth: [] } ]
+
+      parameter name: :stock, in: :body, schema: {
+        type: :object,
+        properties: {
+          stock: {
+            type: :object,
+            properties: {
+              delta: { type: :integer },
+              event_type: { type: :string },
+              reason: { type: :string }
+            },
+            required: %w[delta event_type]
+          }
+        }
+      }
+
+      response "200", "stock updated" do
+        let!(:record) { create(:product_variant, product: product, current_stock: 40) }
+        let(:product_id) { product.id }
+        let(:id) { record.id }
+        let(:Authorization) { bearer_token_for(user) }
+        let(:stock) do
+          {
+            stock: {
+              delta: -15,
+              event_type: "adjustment_out",
+              reason: "manual correction"
+            }
+          }
+        end
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response).to have_http_status(:ok)
+          expect(body.dig("data", "current_stock")).to eq(25)
+        end
+      end
+    end
+  end
+
   path "/api/v1/products/{product_id}/variants/{id}" do
     parameter name: :product_id, in: :path, type: :string
     parameter name: :id, in: :path, type: :string

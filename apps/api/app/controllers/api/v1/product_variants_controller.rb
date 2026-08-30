@@ -2,7 +2,7 @@ module Api
   module V1
     class ProductVariantsController < BaseController
       before_action :set_product
-      before_action :set_variant, only: %i[show update destroy]
+      before_action :set_variant, only: %i[show update destroy price stock]
 
       def index
         authorize ProductVariant
@@ -55,6 +55,47 @@ module Api
         end
 
         render_success({ id: @variant.id, discarded: true })
+      end
+
+      def price
+        authorize @variant
+
+        payload = params.require(:price)
+        new_price = payload[:value].to_d
+
+        @variant.transaction do
+          @variant.update!(current_price: new_price)
+          @variant.variant_price_histories.create!(
+            price: new_price,
+            effective_from: payload[:effective_from].to_time,
+            reason: payload[:reason].presence,
+            changed_by_id: current_user&.id
+          )
+        end
+
+        render_success(ProductVariantBlueprint.render_as_hash(@variant))
+      end
+
+      def stock
+        authorize @variant
+
+        payload = params.require(:stock)
+        delta = payload[:delta].to_i
+        previous_stock = @variant.current_stock.to_i
+        new_stock = previous_stock + delta
+
+        @variant.transaction do
+          @variant.update!(current_stock: new_stock)
+          @variant.variant_stock_ledgers.create!(
+            delta: delta,
+            event_type: payload[:event_type].to_s,
+            reason: payload[:reason].presence,
+            previous_stock: previous_stock,
+            new_stock: new_stock
+          )
+        end
+
+        render_success(ProductVariantBlueprint.render_as_hash(@variant))
       end
 
       private
