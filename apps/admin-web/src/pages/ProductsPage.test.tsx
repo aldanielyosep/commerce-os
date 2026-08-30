@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { ProductsPage } from "./ProductsPage";
 
 const {
@@ -64,6 +65,14 @@ vi.mock("../lib/api", () => ({
 vi.mock("../contexts/AuthContext", () => ({
   useAuth: () => ({ token: "Bearer test-token" })
 }));
+
+function renderProductsPage() {
+  return render(
+    <MemoryRouter>
+      <ProductsPage />
+    </MemoryRouter>
+  );
+}
 
 describe("ProductsPage taxonomy form", () => {
   const sampleProduct = {
@@ -160,9 +169,7 @@ describe("ProductsPage taxonomy form", () => {
   });
 
   it("loads cascading taxonomy options and submits create payload", async () => {
-    const user = userEvent.setup();
-
-    render(<ProductsPage />);
+    renderProductsPage();
 
     await screen.findByRole("heading", { name: "Products" });
 
@@ -174,23 +181,30 @@ describe("ProductsPage taxonomy form", () => {
       expect(listCategoriesMock).toHaveBeenCalledWith("Bearer test-token", { department_id: 10 });
     });
 
-    await user.click(screen.getByRole("button", { name: "Add Product" }));
+    await waitFor(() => {
+      expect(listSubCategoriesMock).toHaveBeenCalledWith("Bearer test-token", { category_id: 21 });
+    });
+
+    await waitFor(() => {
+      expect(listProductTypesMock).toHaveBeenCalledWith("Bearer test-token", { sub_category_id: 31 });
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Add Product" }));
 
     expect(await screen.findByLabelText("Product Department")).toBeInTheDocument();
     expect(await screen.findByRole("option", { name: "BAG - Bags" })).toBeInTheDocument();
     expect(await screen.findByRole("option", { name: "Travel Bag" })).toBeInTheDocument();
     expect(await screen.findByRole("option", { name: "Backpack" })).toBeInTheDocument();
     expect(await screen.findByRole("option", { name: "Laptop Backpack" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Product Department")).toHaveValue("10");
+    expect(screen.getByLabelText("Category")).toHaveValue("21");
+    expect(screen.getByLabelText("Sub Category")).toHaveValue("31");
+    expect(screen.getByLabelText("Product Type")).toHaveValue("41");
 
-    await user.selectOptions(screen.getByLabelText("Product Department"), "10");
-    await user.selectOptions(screen.getByLabelText("Category"), "21");
-    await user.selectOptions(screen.getByLabelText("Sub Category"), "31");
-    await user.selectOptions(screen.getByLabelText("Product Type"), "41");
-
-    await user.type(screen.getByLabelText("Product Name"), "New Product");
-    await user.type(screen.getByLabelText("Short Description"), "A short desc");
-    await user.type(screen.getByLabelText("Description (text)"), "Longer description");
-    await user.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.change(screen.getByLabelText("Product Name"), { target: { value: "New Product" } });
+    fireEvent.change(screen.getByLabelText("Short Description"), { target: { value: "A short desc" } });
+    fireEvent.change(screen.getByLabelText("Description (text)"), { target: { value: "Longer description" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
       expect(createProductMock).toHaveBeenCalledWith("Bearer test-token", {
@@ -223,7 +237,7 @@ describe("ProductsPage taxonomy form", () => {
   it("applies filters and sorting query to list request", async () => {
     const user = userEvent.setup();
 
-    render(<ProductsPage />);
+    renderProductsPage();
 
     await screen.findByRole("heading", { name: "Products" });
     await user.clear(screen.getByLabelText("Search"));
@@ -249,7 +263,7 @@ describe("ProductsPage taxonomy form", () => {
     getProductMock.mockResolvedValue(sampleProduct);
     updateProductMock.mockResolvedValue({ ...sampleProduct, product_name: "City Backpack Updated" });
 
-    render(<ProductsPage />);
+    renderProductsPage();
 
     await screen.findByText("P0000101");
     await user.click(screen.getByRole("button", { name: "Edit" }));
@@ -297,7 +311,7 @@ describe("ProductsPage taxonomy form", () => {
       image_url: "https://example.com/image-2.png"
     });
 
-    render(<ProductsPage />);
+    renderProductsPage();
 
     await screen.findByText("P0000101");
 
@@ -340,7 +354,7 @@ describe("ProductsPage taxonomy form", () => {
       meta: { page: 1, per_page: 20, total_count: 1, total_pages: 1 }
     });
 
-    render(<ProductsPage />);
+    renderProductsPage();
 
     await screen.findByText("P0000101");
     await user.click(screen.getByRole("button", { name: "Deactivate" }));
@@ -370,7 +384,7 @@ describe("ProductsPage taxonomy form", () => {
     const user = userEvent.setup();
     getProductMock.mockRejectedValue(new Error("Unable to load product details"));
 
-    render(<ProductsPage />);
+    renderProductsPage();
 
     await screen.findByText("P0000101");
     await user.click(screen.getByRole("button", { name: "Edit" }));
