@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { DataState } from "../components/DataState";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -151,6 +152,7 @@ function productToForm(product: Product): ProductFormState {
 
 export function ProductsPage() {
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [rows, setRows] = useState<Product[]>([]);
@@ -674,6 +676,9 @@ export function ProductsPage() {
                   </button>
                   <button className="ghost" type="button" onClick={() => void openEdit(row.id)} disabled={busy || loading}>
                     Edit
+                  </button>
+                  <button className="ghost" type="button" onClick={() => navigate(`/products/${row.id}/variants`)} disabled={busy || loading}>
+                    Variants
                   </button>
                   {row.status !== "active" ? (
                     <button className="primary" type="button" onClick={() => void onActivateProduct(row.id)} disabled={busy || loading}>

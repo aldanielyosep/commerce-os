@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { DataState } from "../components/DataState";
 import { useAuth } from "../contexts/AuthContext";
 import { listEmployees, listPositionTimeline, listSalaryTimeline } from "../lib/api";
+import { formatDecimal } from "../lib/numberFormat";
 import type { Employee, PositionHistory, SalaryRecord } from "../lib/types";
 
 export function CareerPage() {
@@ -101,7 +102,7 @@ export function CareerPage() {
               <ul className="list">
                 {salaries.map((row) => (
                   <li key={row.id}>
-                    <strong>IDR {(row.basic_salary_cents / 100).toLocaleString()}</strong>
+                    <strong>IDR {formatDecimal(row.basic_salary_cents / 100)}</strong>
                     <span>
                       {row.effective_date} {row.end_date ? `to ${row.end_date}` : "to present"}
                     </span>

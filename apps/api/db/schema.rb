@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_09_101003) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_30_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -392,6 +392,49 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_101003) do
     t.index ["updated_by_id"], name: "index_product_types_on_updated_by_id"
   end
 
+  create_table "product_variant_attributes", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "product_variant_id", null: false
+    t.datetime "updated_at", null: false
+    t.string "value", null: false
+    t.index ["name"], name: "index_product_variant_attributes_on_name"
+    t.index ["product_variant_id", "name", "value"], name: "idx_on_product_variant_id_name_value_5661a3588b", unique: true
+    t.index ["product_variant_id"], name: "index_product_variant_attributes_on_product_variant_id"
+  end
+
+  create_table "product_variant_images", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "discarded_at"
+    t.string "image_url", null: false
+    t.boolean "is_cover", default: false, null: false
+    t.integer "position", default: 0, null: false
+    t.bigint "product_variant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_product_variant_images_on_discarded_at"
+    t.index ["position"], name: "index_product_variant_images_on_position"
+    t.index ["product_variant_id"], name: "index_product_variant_images_on_product_variant_id"
+  end
+
+  create_table "product_variants", force: :cascade do |t|
+    t.string "barcode", null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.decimal "current_price", precision: 12, scale: 2, default: "0.0", null: false
+    t.integer "current_stock", default: 0, null: false
+    t.datetime "discarded_at"
+    t.bigint "product_id", null: false
+    t.string "sku", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "barcode"], name: "index_product_variants_on_company_id_and_barcode", unique: true
+    t.index ["company_id", "sku"], name: "index_product_variants_on_company_id_and_sku", unique: true
+    t.index ["company_id"], name: "index_product_variants_on_company_id"
+    t.index ["discarded_at"], name: "index_product_variants_on_discarded_at"
+    t.index ["product_id"], name: "index_product_variants_on_product_id"
+    t.index ["status"], name: "index_product_variants_on_status"
+  end
+
   create_table "products", force: :cascade do |t|
     t.bigint "category_id", null: false
     t.bigint "company_id", null: false
@@ -493,6 +536,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_101003) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  create_table "variant_price_histories", force: :cascade do |t|
+    t.bigint "changed_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "effective_from", null: false
+    t.datetime "effective_to"
+    t.decimal "price", precision: 12, scale: 2, null: false
+    t.bigint "product_variant_id", null: false
+    t.string "reason"
+    t.datetime "updated_at", null: false
+    t.index ["changed_by_id"], name: "index_variant_price_histories_on_changed_by_id"
+    t.index ["product_variant_id", "effective_from"], name: "idx_on_product_variant_id_effective_from_64fbac9aea", unique: true
+    t.index ["product_variant_id"], name: "index_variant_price_histories_on_product_variant_id"
+  end
+
+  create_table "variant_stock_ledgers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "delta", null: false
+    t.string "event_type", null: false
+    t.integer "new_stock", null: false
+    t.integer "previous_stock", null: false
+    t.bigint "product_variant_id", null: false
+    t.string "reason"
+    t.datetime "updated_at", null: false
+    t.index ["product_variant_id", "created_at"], name: "idx_on_product_variant_id_created_at_6d13535f64"
+    t.index ["product_variant_id"], name: "index_variant_stock_ledgers_on_product_variant_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "categories", "product_departments"
@@ -531,6 +601,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_101003) do
   add_foreign_key "product_types", "sub_categories"
   add_foreign_key "product_types", "users", column: "created_by_id"
   add_foreign_key "product_types", "users", column: "updated_by_id"
+  add_foreign_key "product_variant_attributes", "product_variants"
+  add_foreign_key "product_variant_images", "product_variants"
+  add_foreign_key "product_variants", "companies"
+  add_foreign_key "product_variants", "products"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "companies"
   add_foreign_key "products", "product_departments", column: "department_id"
@@ -546,4 +620,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_101003) do
   add_foreign_key "sub_categories", "users", column: "created_by_id"
   add_foreign_key "sub_categories", "users", column: "updated_by_id"
   add_foreign_key "users", "employees"
+  add_foreign_key "variant_price_histories", "product_variants"
+  add_foreign_key "variant_price_histories", "users", column: "changed_by_id"
+  add_foreign_key "variant_stock_ledgers", "product_variants"
 end
