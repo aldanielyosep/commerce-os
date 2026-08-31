@@ -18,6 +18,10 @@ RSpec.describe "Product Variants" do
       produces "application/json"
       security [ { bearerAuth: [] } ]
 
+      parameter name: :q, in: :query, type: :string, required: false
+      parameter name: :order_by, in: :query, type: :string, required: false
+      parameter name: :order_dir, in: :query, type: :string, required: false
+
       response "200", "variants listed" do
         let(:variants) do
           [
@@ -37,6 +41,66 @@ RSpec.describe "Product Variants" do
           expect(response).to have_http_status(:ok)
           expect(body["success"]).to be(true)
           expect(body["data"].size).to eq(2)
+        end
+      end
+
+      response "200", "filters variants by query term" do
+        let!(:matching) { create(:product_variant, product: product, sku: "SKU-MATCH", barcode: "BC-MATCH") }
+        let!(:other) { create(:product_variant, product: product, sku: "SKU-OTHER", barcode: "BC-OTHER") }
+        let(:q) { "MATCH" }
+        # rubocop:disable-next RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        let(:product_id) do
+          matching
+          other
+          product.id
+        end
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response).to have_http_status(:ok)
+          expect(body["data"].size).to eq(1)
+          expect(body.dig("data", 0, "sku")).to eq("SKU-MATCH")
+        end
+      end
+
+      response "200", "falls back to default ordering for a non-whitelisted order_by value" do
+        let!(:first_variant) { create(:product_variant, product: product, sku: "SKU-001", barcode: "BC-001") }
+        let!(:second_variant) { create(:product_variant, product: product, sku: "SKU-002", barcode: "BC-002") }
+        let(:order_by) { "id; DROP TABLE users;--" }
+        let(:order_dir) { "asc" }
+        # rubocop:disable-next RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        let(:product_id) do
+          first_variant
+          second_variant
+          product.id
+        end
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response).to have_http_status(:ok)
+          expect(body["data"].size).to eq(2)
+        end
+      end
+
+      response "200", "orders variants by an allowed field" do
+        let!(:first_variant) { create(:product_variant, product: product, sku: "SKU-002", barcode: "BC-002") }
+        let!(:second_variant) { create(:product_variant, product: product, sku: "SKU-001", barcode: "BC-001") }
+        let(:order_by) { "sku" }
+        let(:order_dir) { "asc" }
+        # rubocop:disable-next RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        let(:product_id) do
+          first_variant
+          second_variant
+          product.id
+        end
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response).to have_http_status(:ok)
+          expect(body.dig("data", 0, "sku")).to eq("SKU-001")
         end
       end
     end
@@ -131,6 +195,164 @@ RSpec.describe "Product Variants" do
           body = JSON.parse(response.body)
           expect(response).to have_http_status(:unprocessable_content)
           expect(body["errors"]).to include(a_string_including("combination"))
+        end
+      end
+
+      response "422", "rejects invalid variant attributes" do
+        # rubocop:disable-next RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        let(:product_id) { product.id }
+        let(:variant) do
+          {
+            variant: {
+              sku: "",
+              barcode: "",
+              status: "active",
+              current_price: 950,
+              current_stock: 45,
+              attributes: []
+            }
+          }
+        end
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(body["success"]).to be(false)
+        end
+      end
+    end
+  end
+
+  path "/api/v1/products/{product_id}/variants/{id}" do
+    parameter name: :product_id, in: :path, type: :string
+    parameter name: :id, in: :path, type: :string
+
+    patch "Update product variant" do
+      tags "Product Variants"
+      consumes "application/json"
+      produces "application/json"
+      security [ { bearerAuth: [] } ]
+
+      parameter name: :variant, in: :body, schema: {
+        type: :object,
+        properties: {
+          variant: {
+            type: :object,
+            properties: {
+              status: { type: :string },
+              current_price: { type: :integer },
+              current_stock: { type: :integer },
+              attributes: {
+                type: :array,
+                items: { type: :object }
+              }
+            }
+          }
+        }
+      }
+
+      response "200", "variant updated" do
+        let!(:record) { create(:product_variant, product: product, sku: "SKU-UPD", barcode: "BC-UPD") }
+        let(:product_id) { product.id }
+        let(:id) { record.id }
+        # rubocop:disable-next RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        let(:variant) do
+          {
+            variant: {
+              status: "inactive",
+              current_price: 1500,
+              current_stock: 30,
+              attributes: [
+                { name: "ukuran", value: "L" }
+              ]
+            }
+          }
+        end
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response).to have_http_status(:ok)
+          expect(body["success"]).to be(true)
+          expect(body.dig("data", "status")).to eq("inactive")
+        end
+      end
+
+      response "422", "rejects duplicate attribute combination on update" do
+        let!(:record) { create(:product_variant, product: product, sku: "SKU-UPD-2", barcode: "BC-UPD-2") }
+        let(:existing_variant) do
+          create(:product_variant, product: product, sku: "SKU-EXIST-2", barcode: "BC-EXIST-2")
+        end
+        let(:existing_variant_attributes) do
+          [
+            create(:product_variant_attribute, product_variant: existing_variant, name: "ukuran", value: "M")
+          ]
+        end
+        let(:product_id) { product.id }
+        let(:id) { record.id }
+        # rubocop:disable-next RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        let(:variant) do
+          existing_variant_attributes
+
+          {
+            variant: {
+              attributes: [
+                { name: "ukuran", value: "M" }
+              ]
+            }
+          }
+        end
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(body["errors"]).to include(a_string_including("combination"))
+        end
+      end
+
+      response "422", "rejects invalid update payload" do
+        let!(:record) { create(:product_variant, product: product, sku: "SKU-UPD-3", barcode: "BC-UPD-3") }
+        let(:product_id) { product.id }
+        let(:id) { record.id }
+        # rubocop:disable-next RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+        let(:variant) do
+          {
+            variant: {
+              current_price: -1,
+              current_stock: 30,
+              attributes: []
+            }
+          }
+        end
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(body["success"]).to be(false)
+        end
+      end
+    end
+
+    delete "Destroy product variant" do
+      tags "Product Variants"
+      produces "application/json"
+      security [ { bearerAuth: [] } ]
+
+      response "200", "variant discarded" do
+        let!(:record) { create(:product_variant, product: product, sku: "SKU-DEL", barcode: "BC-DEL") }
+        let(:product_id) { product.id }
+        let(:id) { record.id }
+        # rubocop:disable-next RSpec/VariableName
+        let(:Authorization) { bearer_token_for(user) }
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(response).to have_http_status(:ok)
+          expect(body["success"]).to be(true)
+          expect(body.dig("data", "discarded")).to be(true)
         end
       end
     end

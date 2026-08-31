@@ -1,6 +1,15 @@
 module Api
   module V1
     class ProductVariantsController < BaseController
+      ORDERABLE_FIELDS = {
+        "created_at" => :created_at,
+        "sku" => :sku,
+        "barcode" => :barcode,
+        "current_price" => :current_price,
+        "current_stock" => :current_stock,
+        "status" => :status
+      }.freeze
+
       before_action :set_product
       before_action :set_variant, only: %i[show update destroy price stock]
 
@@ -136,10 +145,13 @@ module Api
       end
 
       def apply_order(scope)
-        order_by = params.fetch(:order_by, "created_at")
-        order_dir = normalized_order_direction(params[:order_dir])
+        order_column = ORDERABLE_FIELDS.fetch(
+          params.fetch(:order_by, "created_at"),
+          ORDERABLE_FIELDS.fetch("created_at")
+        )
+        order_direction = normalized_order_direction(params[:order_dir])
 
-        scope.order(Arel.sql("#{order_by} #{order_dir}"))
+        scope.order(order_column => order_direction, id: :asc)
       end
 
       def upsert_attributes!(variant)
@@ -178,7 +190,7 @@ module Api
       end
 
       def comparable_variants(variant, allow_self:)
-        scope = variant.product.product_variants
+        scope = variant.product.product_variants.includes(:product_variant_attributes)
         allow_self ? scope : scope.where.not(id: variant.id)
       end
 
